@@ -13,19 +13,20 @@ public class GbifConnection {
 	private Connection con;
 	private DatabaseMetaData dmd;
 	
-	public GbifConnection() {
+	public GbifConnection(String user, String password) {
 		try {
 			ds = new MysqlDataSource();
 			ds.setServerName("localhost");
 			ds.setDatabaseName("ts-gbif");
+			open(user, password);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void open() {
+	public void open(String user, String password) {
 		try {
-			con = ds.getConnection("root", "");
+			con = ds.getConnection(user, password);
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
 		} catch (Exception e) {
@@ -51,7 +52,7 @@ public class GbifConnection {
 		
 		try {
 			stmt = con.createStatement();
-			if(param.equals("") || param.equals(null)) {
+			if(param == null || param.equals("")) {
 				rs = stmt.executeQuery("select " + col + " from " + table + ";");
 			}
 			else {
