@@ -68,23 +68,4 @@ public class Converter {
 			e.printStackTrace();
 		}
 	}
-	
-	public static void main(String[] args) {
-		GbifConnection gc = new GbifConnection(args[0], args[1]);
-		Gson gson = new GsonBuilder().serializeNulls().create();
-		Converter cv = new Converter();
-		
-		cv.makeTaxon(gc);
-		gc.close();
-		
-		try {
-			Writer wr = new FileWriter("gbif-test-out.json");
-			wr.write(gson.toJson(cv.getgbifMaster()));
-			wr.close();
-		} catch (IOException ioe) {
-			ioe.getMessage();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 }

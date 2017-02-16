@@ -13,11 +13,15 @@ public class GbifConnection {
 	private Connection con;
 	private DatabaseMetaData dmd;
 	
-	public GbifConnection(String user, String password) {
+	public GbifConnection(String dbName, String user, String password) {
+		this("localhost", dbName, user, password);
+	}
+	
+	public GbifConnection(String servername, String dbName, String user, String password) {
 		try {
 			ds = new MysqlDataSource();
-			ds.setServerName("localhost");
-			ds.setDatabaseName("ts-gbif");
+			ds.setServerName(servername);
+			ds.setDatabaseName(dbName);
 			open(user, password);
 		} catch (Exception e) {
 			e.printStackTrace();
