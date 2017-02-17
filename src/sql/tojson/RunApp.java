@@ -15,7 +15,7 @@ import org.apache.commons.cli.ParseException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import sql.queries.GbifConnection;
+import sql.queries.DbConnection;
 
 public class RunApp {
 
@@ -40,15 +40,17 @@ public class RunApp {
 	
 	public static void main(String[] args) {
 		Options opt = new Options();
-		opt.addOption("db", "-databasename", true, "MySQL database name to connect to");
-		opt.addOption("sn", "-servername", true, "The server to connect to. If this option is left blank, defaults to localhost");
-		opt.addOption("us", "-username", true, "MySQL username to connect to.");
-		opt.addOption("pw", "-password", true, "MySQL password linked tot he username");
+		opt.addOption("db", "databasename", true, "MySQL database name to connect to");
+		opt.addOption("sn", "servername", true, "The server to connect to. If this option is left blank, defaults to localhost");
+		opt.addOption("us", "username", true, "MySQL username to connect to.");
+		opt.addOption("pw", "password", true, "MySQL password linked tot he username");
+		opt.addOption("ba", "batchsize", true, "Batch size");
 		
 		opt.getOption("db").setRequired(true);
 		opt.getOption("sn").setRequired(false);
 		opt.getOption("us").setRequired(true);
 		opt.getOption("pw").setRequired(true);
+		opt.getOption("ba").setRequired(false);
 		
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -64,13 +66,14 @@ public class RunApp {
 			return;
 		}
 		
-		System.out.println(cmd.getOptionValue("sn") + cmd.getOptionValue("db") + cmd.getOptionValue("us") + cmd.getOptionValue("pw"));
-		
-		GbifConnection gc = new GbifConnection(cmd.getOptionValue("sn"), cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
-		Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
+		DbConnection gc = new DbConnection((cmd.getOptionValue("sn").equals("") || cmd.getOptionValue("sn") == null) ? "localhost" : cmd.getOptionValue("sn"),
+												cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
+		Gson gson = new GsonBuilder().serializeNulls().create();
 		Converter cv = new Converter();
+		
+		String lim = (cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba");
 
-		cv.makeTaxon(gc);
+		cv.makeTaxon(gc, lim);
 		gc.close();
 
 		try {

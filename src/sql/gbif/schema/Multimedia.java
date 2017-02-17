@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import sql.queries.GbifConnection;
+import sql.queries.DbConnection;
 
 public class Multimedia implements Schemable {
 	private JsonArray arr;
@@ -18,10 +18,11 @@ public class Multimedia implements Schemable {
 	}
 
 	@Override
-	public JsonArray retRes(GbifConnection gc, String coreID) {
+	public JsonArray retRes(DbConnection gc, String coreID) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.select("gm.references,gm.description,gm.title,gm.contributor,gm.source,gm.created,gm.license,gm.identifier,gm.creator,gm.publisher,gm.rightsHolder", "gbif_taxon gt inner join gbif_multimedia gm on gt.coreID=gm.coreID", "gm.coreID=".concat(coreID));
+			ResultSet rs = gc.select("gm.references,gm.description,gm.title,gm.contributor,gm.source,gm.created,gm.license,gm.identifier,gm.creator,gm.publisher,gm.rightsHolder", 
+					"gbif_taxon gt inner join gbif_multimedia gm on gt.coreID=gm.coreID", "gm.coreID=".concat(coreID));
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

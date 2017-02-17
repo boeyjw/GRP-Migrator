@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import sql.queries.GbifConnection;
+import sql.queries.DbConnection;
 
 public class VernacularName implements Schemable {
 	private JsonArray arr;
@@ -17,10 +17,11 @@ public class VernacularName implements Schemable {
 	}
 
 	@Override
-	public JsonArray retRes(GbifConnection gc, String coreID) {
+	public JsonArray retRes(DbConnection gc, String coreID) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.select("gv.vernacularName,gv.source,gv.sex,gv.lifeStage,gv.language,gv.countryCode,gv.country", "gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID", "gv.coreID=".concat(coreID));
+			ResultSet rs = gc.select("gv.vernacularName,gv.source,gv.sex,gv.lifeStage,gv.language,gv.countryCode,gv.country", 
+					"gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID", "gv.coreID=".concat(coreID));
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

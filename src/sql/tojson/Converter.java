@@ -17,7 +17,7 @@ import sql.gbif.schema.Multimedia;
 import sql.gbif.schema.Reference;
 import sql.gbif.schema.Schemable;
 import sql.gbif.schema.VernacularName;
-import sql.queries.GbifConnection;
+import sql.queries.DbConnection;
 
 public class Converter {
 	private JsonArray gbif_master;
@@ -31,26 +31,27 @@ public class Converter {
 		return gbif_master;
 	}
 	
-	public void makeTaxon(GbifConnection gc) {
+	public void makeTaxon(DbConnection gc, String lim) {
 		try {
 			JsonObject gm_obj;
-			ResultSet rs = gc.select("*", "gbif_taxon", null);
+			ResultSet rs = gc.select("*", "gbif_taxon order by gbif_taxon.coreID");
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {
 				gm_obj = new JsonObject();
 				int i = 1;
 				int coreID = rs.getInt(1);
+				
 				gm_obj.addProperty(rsmeta.getColumnName(i++), coreID);
 				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++));
 				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i++));
 				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++));
 				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++));
-				
+
 				for( ; i <= rsmeta.getColumnCount(); i++) {
 					gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i));
 				}
-				
+
 				subquery = new Distribution();
 				gm_obj.add("distribution", subquery.retRes(gc, Integer.toString(coreID)));
 				subquery = new Multimedia();
@@ -59,8 +60,10 @@ public class Converter {
 				gm_obj.add("references", subquery.retRes(gc, Integer.toString(coreID)));
 				subquery = new VernacularName();
 				gm_obj.add("vernacularname", subquery.retRes(gc, Integer.toString(coreID)));
-				
+
 				gbif_master.add(gm_obj);
+				
+				System.out.print(Integer.toString(coreID).concat("\r"));
 			}
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();

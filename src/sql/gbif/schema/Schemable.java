@@ -2,8 +2,8 @@ package sql.gbif.schema;
 
 import com.google.gson.JsonArray;
 
-import sql.queries.GbifConnection;
+import sql.queries.DbConnection;
 
 public interface Schemable {
-	public JsonArray retRes(GbifConnection gc, String coreID);
+	public JsonArray retRes(DbConnection gc, String coreID);
 }
