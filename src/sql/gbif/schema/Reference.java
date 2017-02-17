@@ -31,6 +31,7 @@ public class Reference implements Schemable {
 				}
 				arr.add(jobj);
 			}
+			rs.close();
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
 		} catch (Exception e) {

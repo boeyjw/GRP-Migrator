@@ -4,10 +4,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -56,26 +52,29 @@ public class RunApp {
 		String lim = (cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba");
 		Gson gson = new GsonBuilder().serializeNulls().create();
 		Converter cv = new Converter();
-		
-		Iterator<JsonArray> iter;
-		
-		iter = cv.makeTaxon(gc, lim);
-		gc.close();
 
 		try {
 			Writer wr = null;
 			int i = 1;
+			long offset = 0;
 			
-			while(iter.hasNext() && i <= 5) {
+			while(true) {
+				JsonArray output = cv.makeTaxon(gc, lim, offset);
+				if(output.size() < 1) {
+					break;
+				}
 				wr = new FileWriter("gbif-test-out" + Integer.toString(i++) + ".json");
-				wr.write(gson.toJson(iter.next()));
+				wr.write(gson.toJson(output));
 				System.out.println(wr.toString());
 				wr.close();
+				offset += Integer.parseInt(lim);
 			}
 		} catch (IOException ioe) {
 			ioe.getMessage();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			gc.close();
 		}
 	}
 }
