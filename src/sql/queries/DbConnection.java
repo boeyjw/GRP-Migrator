@@ -10,6 +10,7 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 public class DbConnection {
 	private MysqlDataSource ds;
 	private Connection con;
+	private Statement stmt;
 	
 	public DbConnection(String servername, String dbName, String user, String password) {
 		try {
@@ -44,83 +45,93 @@ public class DbConnection {
 		}
 	}
 	
-	public ResultSet select(String col, String table) {
-		ResultSet rs = null;
-		Statement stmt = null;
+	public ResultSet select(String query) {
+		stmt = null;
 		
 		try {
 			stmt = con.createStatement();
-			rs = stmt.executeQuery("select " + col + " from " + table + ";");
+			return stmt.executeQuery(query);
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return rs;
+		return null;
+	}
+	
+	public ResultSet select(String col, String table) {
+		stmt = null;
+		
+		try {
+			stmt = con.createStatement();
+			return stmt.executeQuery("select " + col + " from " + table + ";");
+		} catch (SQLException sqle) {
+			sqle.getErrorCode();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 	
 	public ResultSet select(String col, String table, String param) {
-		ResultSet rs = null;
-		Statement stmt = null;
+		stmt = null;
 		
 		try {
 			stmt = con.createStatement();
-			rs = stmt.executeQuery("select " + col + " from " + table + " where " + param + ";");
+			return stmt.executeQuery("select " + col + " from " + table + " where " + param + ";");
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return rs;
+		return null;
 	}
 	
 	public ResultSet select(String col, String table, String orderby, String param) {
-		ResultSet rs = null;
-		Statement stmt = null;
+		stmt = null;
 		
 		try {
 			stmt = con.createStatement();
-			rs = stmt.executeQuery("select " + col + " from " + table + " order by " + orderby + " where " + param + ";");
+			return stmt.executeQuery("select " + col + " from " + table + " order by " + orderby + " where " + param + ";");
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return rs;
+		return null;
 	}
 	
 	public ResultSet select(String col, String table, String orderby, String param, String limit) {
-		ResultSet rs = null;
-		Statement stmt = null;
+		stmt = null;
 		
 		try {
 			stmt = con.createStatement();
-			rs = stmt.executeQuery("select " + col + " from " + table + " order by " + orderby + " where " + param + " limit " + limit + ";");
+			return stmt.executeQuery("select " + col + " from " + table + " order by " + orderby + " where " + param + " limit " + limit + ";");
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return rs;
+		return null;
 	}
 	
 	public ResultSet select(String col, String table, String orderby, String param, String limit, String offset) {
-		ResultSet rs = null;
-		Statement stmt = null;
+		stmt = null;
 		
 		try {
 			stmt = con.createStatement();
-			rs = stmt.executeQuery("select " + col + " from " + table + " order by " + orderby + " where " + param + " limit " + limit + " offset " + offset + ";");
+			return stmt.executeQuery("select " + col + " from " + table + " order by " + orderby + " where " + param + " limit " + limit + " offset " + offset + ";");
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return rs;
+		return null;
 	}
 }

@@ -3,40 +3,25 @@ package sql.tojson;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 
 import sql.queries.DbConnection;
 
 public class RunApp {
-
-	/*public static void main(String[] args) {
-		GbifConnection gc = new GbifConnection(args[0], args[1]);
-		Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
-		Converter cv = new Converter();
-
-		cv.makeTaxon(gc);
-		gc.close();
-
-		try {
-			Writer wr = new FileWriter("gbif-test-out.json");
-			wr.write(gson.toJson(cv.getgbifMaster()));
-			wr.close();
-		} catch (IOException ioe) {
-			ioe.getMessage();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}*/
 	
 	public static void main(String[] args) {
 		Options opt = new Options();
@@ -68,18 +53,25 @@ public class RunApp {
 		
 		DbConnection gc = new DbConnection((cmd.getOptionValue("sn").equals("") || cmd.getOptionValue("sn") == null) ? "localhost" : cmd.getOptionValue("sn"),
 												cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
+		String lim = (cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba");
 		Gson gson = new GsonBuilder().serializeNulls().create();
 		Converter cv = new Converter();
 		
-		String lim = (cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba");
-
-		cv.makeTaxon(gc, lim);
+		Iterator<JsonArray> iter;
+		
+		iter = cv.makeTaxon(gc, lim);
 		gc.close();
 
 		try {
-			Writer wr = new FileWriter("gbif-test-out.json");
-			wr.write(gson.toJson(cv.getgbifMaster()));
-			wr.close();
+			Writer wr = null;
+			int i = 1;
+			
+			while(iter.hasNext() && i <= 5) {
+				wr = new FileWriter("gbif-test-out" + Integer.toString(i++) + ".json");
+				wr.write(gson.toJson(iter.next()));
+				System.out.println(wr.toString());
+				wr.close();
+			}
 		} catch (IOException ioe) {
 			ioe.getMessage();
 		} catch (Exception e) {
