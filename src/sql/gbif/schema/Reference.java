@@ -20,7 +20,7 @@ public class Reference implements Schemable {
 	public JsonArray retRes(DbConnection gc, int coreID) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.selStmt("ref", 1, coreID, -1);
+			ResultSet rs = gc.selStmt("ref", new int[] {coreID});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

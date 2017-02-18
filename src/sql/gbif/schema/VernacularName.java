@@ -20,7 +20,7 @@ public class VernacularName implements Schemable {
 	public JsonArray retRes(DbConnection gc, int coreID) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.selStmt("vern", 1, coreID, -1);
+			ResultSet rs = gc.selStmt("vern", new int[] {coreID});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

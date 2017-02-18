@@ -58,13 +58,10 @@ public class DbConnection {
 		return false;
 	}
 	
-	public ResultSet selStmt(String purpose, int colIndex, int param, int lim) {
+	public ResultSet selStmt(String purpose, int[] param) {
 		try {
-			if(colIndex > 0 && param > -1) {
-				stmt.get(purpose).setInt(colIndex, param);
-			}
-			if(lim > 0) {
-				stmt.get(purpose).setFetchSize(lim);
+			for(int i = 1; i < param.length + 1; i++) {
+				stmt.get(purpose).setInt(i, param[i - 1]);
 			}
 			
 			return stmt.get(purpose).executeQuery();

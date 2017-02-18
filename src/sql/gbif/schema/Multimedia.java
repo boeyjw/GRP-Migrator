@@ -21,7 +21,7 @@ public class Multimedia implements Schemable {
 	public JsonArray retRes(DbConnection gc, int coreID) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.selStmt("mult", 1, coreID, -1);
+			ResultSet rs = gc.selStmt("mult", new int[] {coreID});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

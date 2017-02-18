@@ -50,7 +50,7 @@ public class RunApp {
 												cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
 		String lim = (cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba");
 		Gson gson = new GsonBuilder().serializeNulls().create();
-		Converter cv = new Converter();
+		Converter cv = new Converter(gc);
 
 		try {
 			Writer wr = null;

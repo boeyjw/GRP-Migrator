@@ -17,7 +17,17 @@ import sql.queries.ProgressBar;
 public class Converter {
 	private Schemable subquery;
 
-	public Converter() {}
+	public Converter(DbConnection gc) {
+		gc.addPrepStmt("taxon", "select * from gbif_taxon gt order by gt.coreID limit ? offset ?;");
+		gc.addPrepStmt("dist", "select gd.source,gd.threatStatus,gd.locality,gd.lifeStage,gd.occuranceStatus,gd.locationID,gd.locationRemarks,gd.establishmentMeans,gd.countryCode,gd.country "
+				+ "from gbif_taxon gt inner join gbif_distribution gd on gt.coreID=gd.coreID where gd.coreID=?");
+		gc.addPrepStmt("mult", "select gm.references,gm.description,gm.title,gm.contributor,gm.source,gm.created,gm.license,gm.identifier,gm.creator,gm.publisher,gm.rightsHolder "
+				+ "from gbif_taxon gt inner join gbif_multimedia gm on gt.coreID=gm.coreID where gm.coreID=?");
+		gc.addPrepStmt("ref", "select gr.bibliographicCitation,gr.references,gr.source,gr.identifier "
+				+ "from gbif_taxon gt inner join gbif_reference gr on gt.coreID=gr.coreID where gr.coreID=?");
+		gc.addPrepStmt("vern", "select gv.vernacularName,gv.source,gv.sex,gv.lifeStage,gv.language,gv.countryCode,gv.country "
+				+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID where gv.coreID=?;");
+	}
 
 	public JsonArray makeTaxon(DbConnection gc, int lim, int offset) {
 		try {
@@ -25,17 +35,7 @@ public class Converter {
 			ResultSet rs;
 			ProgressBar bar = new ProgressBar();
 			
-			gc.addPrepStmt("taxon", "select * from gbif_taxon gt order by gt.coreID limit " + lim + " offset ?;");
-			gc.addPrepStmt("dist", "select gd.source,gd.threatStatus,gd.locality,gd.lifeStage,gd.occuranceStatus,gd.locationID,gd.locationRemarks,gd.establishmentMeans,gd.countryCode,gd.country "
-					+ "from gbif_taxon gt inner join gbif_distribution gd on gt.coreID=gd.coreID where gd.coreID=?");
-			gc.addPrepStmt("mult", "select gm.references,gm.description,gm.title,gm.contributor,gm.source,gm.created,gm.license,gm.identifier,gm.creator,gm.publisher,gm.rightsHolder "
-					+ "from gbif_taxon gt inner join gbif_multimedia gm on gt.coreID=gm.coreID where gm.coreID=?");
-			gc.addPrepStmt("ref", "select gr.bibliographicCitation,gr.references,gr.source,gr.identifier "
-					+ "from gbif_taxon gt inner join gbif_reference gr on gt.coreID=gr.coreID where gr.coreID=?");
-			gc.addPrepStmt("vern", "select gv.vernacularName,gv.source,gv.sex,gv.lifeStage,gv.language,gv.countryCode,gv.country "
-					+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID where gv.coreID=?;");
-			
-			rs = gc.selStmt("taxon", 1, offset, lim);
+			rs = gc.selStmt("taxon", new int[] {lim, offset});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			JsonArray tmp = new JsonArray();
 			
