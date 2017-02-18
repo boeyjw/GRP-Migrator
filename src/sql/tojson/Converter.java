@@ -25,21 +25,21 @@ public class Converter {
 			ResultSet rs;
 			ProgressBar bar = new ProgressBar();
 			
-			assert gc.addPrepStmt("taxon", "select * from gbif_taxon gt order by gt.coreID limit " + lim + " offset ?;");
-			assert gc.addPrepStmt("dist", "select gd.source,gd.threatStatus,gd.locality,gd.lifeStage,gd.occuranceStatus,gd.locationID,gd.locationRemarks,gd.establishmentMeans,gd.countryCode,gd.country "
+			gc.addPrepStmt("taxon", "select * from gbif_taxon gt order by gt.coreID limit " + lim + " offset ?;");
+			gc.addPrepStmt("dist", "select gd.source,gd.threatStatus,gd.locality,gd.lifeStage,gd.occuranceStatus,gd.locationID,gd.locationRemarks,gd.establishmentMeans,gd.countryCode,gd.country "
 					+ "from gbif_taxon gt inner join gbif_distribution gd on gt.coreID=gd.coreID where gd.coreID=?");
-			assert gc.addPrepStmt("mult", "select gm.references,gm.description,gm.title,gm.contributor,gm.source,gm.created,gm.license,gm.identifier,gm.creator,gm.publisher,gm.rightsHolder "
+			gc.addPrepStmt("mult", "select gm.references,gm.description,gm.title,gm.contributor,gm.source,gm.created,gm.license,gm.identifier,gm.creator,gm.publisher,gm.rightsHolder "
 					+ "from gbif_taxon gt inner join gbif_multimedia gm on gt.coreID=gm.coreID where gm.coreID=?");
-			assert gc.addPrepStmt("ref", "select gr.bibliographicCitation,gr.references,gr.source,gr.identifier "
+			gc.addPrepStmt("ref", "select gr.bibliographicCitation,gr.references,gr.source,gr.identifier "
 					+ "from gbif_taxon gt inner join gbif_reference gr on gt.coreID=gr.coreID where gr.coreID=?");
-			assert gc.addPrepStmt("vern", "select gv.vernacularName,gv.source,gv.sex,gv.lifeStage,gv.language,gv.countryCode,gv.country "
+			gc.addPrepStmt("vern", "select gv.vernacularName,gv.source,gv.sex,gv.lifeStage,gv.language,gv.countryCode,gv.country "
 					+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID where gv.coreID=?;");
-			gc.test();
+			
 			rs = gc.selStmt("taxon", 1, offset, lim);
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			JsonArray tmp = new JsonArray();
 			
-			//bar.update(0, lim);
+			bar.update(0, lim);
 			while(rs.next()) {
 				gm_obj = new JsonObject();
 				int i = 1;
@@ -65,10 +65,10 @@ public class Converter {
 				gm_obj.add("vernacularname", subquery.retRes(gc, coreID));
 
 				tmp.add(gm_obj);
-				//bar.update(rs.getRow(), lim);
+				bar.update(rs.getRow(), lim);
 			}
 			rs.close();
-			System.out.println("offset: " + offset);
+			//System.out.println("offset: " + offset);
 
 			return tmp;
 		} catch (SQLException sqle) {

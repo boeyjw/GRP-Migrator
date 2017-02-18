@@ -14,8 +14,8 @@ public class DbConnection {
 	private HashMap<String, PreparedStatement> stmt;
 	
 	public DbConnection(String servername, String dbName, String user, String password) {
-		stmt = new HashMap<String, PreparedStatement>();
 		try {
+			stmt = new HashMap<String, PreparedStatement>(5);
 			ds = new MysqlDataSource();
 			ds.setServerName(servername);
 			ds.setDatabaseName(dbName);
@@ -50,10 +50,7 @@ public class DbConnection {
 	public boolean addPrepStmt(String purpose, String query) {
 		try {
 			stmt.put(purpose, con.prepareStatement(query));
-			if(stmt.containsKey(purpose)) {
-				return false;
-			}
-			return false;
+			return true;
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
 		}
@@ -61,23 +58,13 @@ public class DbConnection {
 		return false;
 	}
 	
-	public void test() {
-		System.out.println(stmt.containsKey("taxon"));
-		System.out.println(stmt.containsKey("dist"));
-		System.out.println(stmt.containsKey("mult"));
-		System.out.println(stmt.containsKey("vern"));
-		System.out.println(stmt.containsKey("ref"));
-	}
-	
 	public ResultSet selStmt(String purpose, int colIndex, int param, int lim) {
 		try {
 			if(colIndex > 0 && param > -1) {
 				stmt.get(purpose).setInt(colIndex, param);
-				System.out.println(purpose);
 			}
 			if(lim > 0) {
 				stmt.get(purpose).setFetchSize(lim);
-				System.out.println(purpose);
 			}
 			
 			return stmt.get(purpose).executeQuery();
