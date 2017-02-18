@@ -17,11 +17,10 @@ public class VernacularName implements Schemable {
 	}
 
 	@Override
-	public JsonArray retRes(DbConnection gc, String coreID) {
+	public JsonArray retRes(DbConnection gc, int coreID) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.select("gv.vernacularName,gv.source,gv.sex,gv.lifeStage,gv.language,gv.countryCode,gv.country", 
-					"gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID", "gv.coreID=".concat(coreID));
+			ResultSet rs = gc.selStmt("vern", 1, coreID, -1);
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

@@ -3,7 +3,6 @@ package sql.tojson;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Iterator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -56,16 +55,16 @@ public class RunApp {
 		try {
 			Writer wr = null;
 			int i = 1;
-			long offset = 0;
+			int offset = 0;
 			
 			while(true) {
-				JsonArray output = cv.makeTaxon(gc, lim, offset);
+				JsonArray output = cv.makeTaxon(gc, Integer.parseInt(lim), offset);
 				if(output.size() < 1) {
 					break;
 				}
 				wr = new FileWriter("gbif-test-out" + Integer.toString(i++) + ".json");
 				wr.write(gson.toJson(output));
-				System.out.println(wr.toString());
+				//System.out.println(wr.toString());
 				wr.close();
 				offset += Integer.parseInt(lim);
 			}

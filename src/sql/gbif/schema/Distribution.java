@@ -17,11 +17,10 @@ public class Distribution implements Schemable {
 	}
 
 	@Override
-	public JsonArray retRes(DbConnection gc, String coreID) {
+	public JsonArray retRes(DbConnection gc, int coreID) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.select("gd.source,gd.threatStatus,gd.locality,gd.lifeStage,gd.occuranceStatus,gd.locationID,gd.locationRemarks,gd.establishmentMeans,gd.countryCode,gd.country", 
-									"gbif_taxon gt inner join gbif_distribution gd on gt.coreID=gd.coreID", "gd.coreID=".concat(coreID));
+			ResultSet rs = gc.selStmt("dist", 1, coreID, -1);
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

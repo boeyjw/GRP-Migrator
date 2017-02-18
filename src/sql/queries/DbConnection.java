@@ -1,18 +1,20 @@
 package sql.queries;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.HashMap;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 public class DbConnection {
 	private MysqlDataSource ds;
 	private Connection con;
-	private Statement stmt;
+	private HashMap<String, PreparedStatement> stmt;
 	
 	public DbConnection(String servername, String dbName, String user, String password) {
+		stmt = new HashMap<String, PreparedStatement>();
 		try {
 			ds = new MysqlDataSource();
 			ds.setServerName(servername);
@@ -45,91 +47,42 @@ public class DbConnection {
 		}
 	}
 	
-	public ResultSet select(String query) {
-		stmt = null;
-		
+	public boolean addPrepStmt(String purpose, String query) {
 		try {
-			stmt = con.createStatement();
-			return stmt.executeQuery(query);
+			stmt.put(purpose, con.prepareStatement(query));
+			if(stmt.containsKey(purpose)) {
+				return false;
+			}
+			return false;
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		
-		return null;
+		return false;
 	}
 	
-	public ResultSet select(String col, String table) {
-		stmt = null;
-		
-		try {
-			stmt = con.createStatement();
-			return stmt.executeQuery("select " + col + " from " + table + ";");
-		} catch (SQLException sqle) {
-			sqle.getErrorCode();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
+	public void test() {
+		System.out.println(stmt.containsKey("taxon"));
+		System.out.println(stmt.containsKey("dist"));
+		System.out.println(stmt.containsKey("mult"));
+		System.out.println(stmt.containsKey("vern"));
+		System.out.println(stmt.containsKey("ref"));
 	}
 	
-	public ResultSet select(String col, String table, String param) {
-		stmt = null;
-		
+	public ResultSet selStmt(String purpose, int colIndex, int param, int lim) {
 		try {
-			stmt = con.createStatement();
-			return stmt.executeQuery("select " + col + " from " + table + " where " + param + ";");
+			if(colIndex > 0 && param > -1) {
+				stmt.get(purpose).setInt(colIndex, param);
+				System.out.println(purpose);
+			}
+			if(lim > 0) {
+				stmt.get(purpose).setFetchSize(lim);
+				System.out.println(purpose);
+			}
+			
+			return stmt.get(purpose).executeQuery();
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-	
-	public ResultSet select(String col, String table, String orderby, String param) {
-		stmt = null;
-		
-		try {
-			stmt = con.createStatement();
-			return stmt.executeQuery("select " + col + " from " + table + " order by " + orderby + " where " + param + ";");
-		} catch (SQLException sqle) {
-			sqle.getErrorCode();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-	
-	public ResultSet select(String col, String table, String orderby, String param, String limit) {
-		stmt = null;
-		
-		try {
-			stmt = con.createStatement();
-			return stmt.executeQuery("select " + col + " from " + table + " order by " + orderby + " where " + param + " limit " + limit + ";");
-		} catch (SQLException sqle) {
-			sqle.getErrorCode();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
-	
-	public ResultSet select(String col, String table, String orderby, String param, String limit, String offset) {
-		stmt = null;
-		
-		try {
-			stmt = con.createStatement();
-			return stmt.executeQuery("select " + col + " from " + table + " order by " + orderby + " where " + param + " limit " + limit + " offset " + offset + ";");
-		} catch (SQLException sqle) {
-			sqle.getErrorCode();
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		
 		return null;

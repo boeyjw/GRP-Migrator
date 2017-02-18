@@ -17,11 +17,10 @@ public class Reference implements Schemable {
 	}
 
 	@Override
-	public JsonArray retRes(DbConnection gc, String coreID) {
+	public JsonArray retRes(DbConnection gc, int coreID) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.select("gr.bibliographicCitation,gr.references,gr.source,gr.identifier", 
-					"gbif_taxon gt inner join gbif_reference gr on gt.coreID=gr.coreID", "gr.coreID=".concat(coreID));
+			ResultSet rs = gc.selStmt("ref", 1, coreID, -1);
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {
