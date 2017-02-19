@@ -9,7 +9,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
 import sql.queries.DbConnection;
-import sql.queries.ProgressBar;
 import sql.schema.Schemable;
 import sql.schema.gbif.Distribution;
 import sql.schema.gbif.Multimedia;

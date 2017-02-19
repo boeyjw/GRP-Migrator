@@ -1,4 +1,4 @@
-package sql.queries;
+package sql.tojson;
 
 /**
  * Ascii progress meter. On completion this will reset itself,
