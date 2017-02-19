@@ -1,10 +1,16 @@
 package sql.tojson;
 
+import java.io.FileWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 
 import sql.gbif.schema.Distribution;
 import sql.gbif.schema.Multimedia;
@@ -29,15 +35,19 @@ public class Converter {
 				+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID where gv.coreID=?;");
 	}
 
-	public JsonArray makeTaxon(DbConnection gc, int lim, int offset) {
+	public boolean makeTaxon(DbConnection gc, String filename, Gson gson, int lim, int offset) {
 		try {
 			JsonObject gm_obj;
 			ResultSet rs;
 			ProgressBar bar = new ProgressBar();
 			
 			rs = gc.selStmt("taxon", new int[] {lim, offset});
+			if(!rs.isBeforeFirst()) {
+				return false;
+			}
 			ResultSetMetaData rsmeta = rs.getMetaData();
-			JsonArray tmp = new JsonArray();
+			JsonWriter arrWriter = new JsonWriter(new FileWriter(filename));
+			arrWriter.beginArray();
 			
 			bar.update(0, lim);
 			while(rs.next()) {
@@ -64,19 +74,19 @@ public class Converter {
 				subquery = new VernacularName();
 				gm_obj.add("vernacularname", subquery.retRes(gc, coreID));
 
-				tmp.add(gm_obj);
 				bar.update(rs.getRow(), lim);
+				gson.toJson(gm_obj, arrWriter);
 			}
+			arrWriter.endArray();
+			arrWriter.close();
 			rs.close();
 			//System.out.println("offset: " + offset);
-
-			return tmp;
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return null;
+		return true;
 	}
 }

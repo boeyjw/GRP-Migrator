@@ -53,23 +53,15 @@ public class RunApp {
 		Converter cv = new Converter(gc);
 
 		try {
-			Writer wr = null;
 			int i = 1;
 			int offset = 0;
 			
 			while(true) {
-				JsonArray output = cv.makeTaxon(gc, Integer.parseInt(lim), offset);
-				if(output.size() < 1) {
+				if(!cv.makeTaxon(gc, "gbif-out-" + i++ + ".json", gson, Integer.parseInt(lim), offset)) {
 					break;
 				}
-				wr = new FileWriter("gbif-test-out" + Integer.toString(i++) + ".json");
-				wr.write(gson.toJson(output));
-				//System.out.println(wr.toString());
-				wr.close();
 				offset += Integer.parseInt(lim);
 			}
-		} catch (IOException ioe) {
-			ioe.getMessage();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
