@@ -1,14 +1,11 @@
 package sql.tojson;
 
 import java.io.FileWriter;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 

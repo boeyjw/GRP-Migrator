@@ -1,8 +1,5 @@
 package sql.tojson;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -12,8 +9,6 @@ import org.apache.commons.cli.ParseException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-
 import sql.queries.DbConnection;
 
 public class RunApp {
