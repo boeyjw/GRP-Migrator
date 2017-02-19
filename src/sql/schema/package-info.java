@@ -5,4 +5,4 @@
  * @author Secreto De Xynex
  *
  */
-package sql.gbif.schema;
+package sql.schema;

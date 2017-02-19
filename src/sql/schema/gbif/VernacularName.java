@@ -1,4 +1,4 @@
-package sql.gbif.schema;
+package sql.schema.gbif;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -8,6 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import sql.queries.DbConnection;
+import sql.schema.Schemable;
 
 public class VernacularName implements Schemable {
 	private JsonArray arr;

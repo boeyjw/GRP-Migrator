@@ -8,16 +8,19 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
-import sql.gbif.schema.Distribution;
-import sql.gbif.schema.Multimedia;
-import sql.gbif.schema.Reference;
-import sql.gbif.schema.Schemable;
-import sql.gbif.schema.VernacularName;
 import sql.queries.DbConnection;
 import sql.queries.ProgressBar;
+import sql.schema.Schemable;
+import sql.schema.gbif.Distribution;
+import sql.schema.gbif.Multimedia;
+import sql.schema.gbif.Reference;
+import sql.schema.gbif.VernacularName;
 
 public class Converter {
 	private Schemable subquery;
+	private ProgressBar bar;
+	private JsonObject gm_obj;
+	private ResultSet rs;
 
 	public Converter(DbConnection gc) {
 		gc.addPrepStmt("taxon", "select * from gbif_taxon gt order by gt.coreID limit ? offset ?;");
@@ -29,14 +32,12 @@ public class Converter {
 				+ "from gbif_taxon gt inner join gbif_reference gr on gt.coreID=gr.coreID where gr.coreID=?");
 		gc.addPrepStmt("vern", "select gv.vernacularName,gv.source,gv.sex,gv.lifeStage,gv.language,gv.countryCode,gv.country "
 				+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID where gv.coreID=?;");
+		
+		bar = new ProgressBar();
 	}
 
 	public boolean makeTaxon(DbConnection gc, JsonWriter arrWriter, Gson gson, int lim, int offset) {
 		try {
-			JsonObject gm_obj;
-			ResultSet rs;
-			ProgressBar bar = new ProgressBar();
-			
 			rs = gc.selStmt("taxon", new int[] {lim, offset});
 			if(!rs.isBeforeFirst()) {
 				return false;

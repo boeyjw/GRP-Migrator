@@ -1,4 +1,4 @@
-package sql.gbif.schema;
+package sql.schema.gbif;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -8,12 +8,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import sql.queries.DbConnection;
+import sql.schema.Schemable;
 
-public class Multimedia implements Schemable {
+public class Reference implements Schemable {
 	private JsonArray arr;
 	
-	
-	public Multimedia() {
+	public Reference() {
 		arr = new JsonArray();
 	}
 
@@ -21,7 +21,7 @@ public class Multimedia implements Schemable {
 	public JsonArray retRes(DbConnection gc, int coreID) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.selStmt("mult", new int[] {coreID});
+			ResultSet rs = gc.selStmt("ref", new int[] {coreID});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

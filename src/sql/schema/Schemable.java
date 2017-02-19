@@ -1,4 +1,4 @@
-package sql.gbif.schema;
+package sql.schema;
 
 import com.google.gson.JsonArray;
 
