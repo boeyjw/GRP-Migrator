@@ -23,9 +23,9 @@ public class ProgressBar {
 	 * @param done an int representing the work done so far
 	 * @param total an int representing the total work
 	 */
-	public void update(int done, int total) {
+	public void update(int done, int total, int actualTotal) {
 		char[] workchars = {'|', '/', '-', '\\'};
-		String format = "\r%3d%% %s %c\t%s";
+		String format = "\r%3d%% %s %c";
 
 		int percent = (++done * 100) / total;
 		int extrachars = (percent / 2) - this.progress.length();
@@ -38,6 +38,7 @@ public class ProgressBar {
 				workchars[done % workchars.length]);
 
 		if (done == total) {
+			System.out.print(actualTotal);
 			System.out.flush();
 			System.out.println();
 			init();

@@ -1,6 +1,5 @@
 package sql.tojson;
 
-import java.io.FileWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -32,7 +31,7 @@ public class Converter {
 				+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID where gv.coreID=?;");
 	}
 
-	public boolean makeTaxon(DbConnection gc, String filename, Gson gson, int lim, int offset) {
+	public boolean makeTaxon(DbConnection gc, JsonWriter arrWriter, Gson gson, int lim, int offset) {
 		try {
 			JsonObject gm_obj;
 			ResultSet rs;
@@ -43,10 +42,8 @@ public class Converter {
 				return false;
 			}
 			ResultSetMetaData rsmeta = rs.getMetaData();
-			JsonWriter arrWriter = new JsonWriter(new FileWriter(filename));
-			arrWriter.beginArray();
 			
-			bar.update(0, lim);
+			bar.update(0, lim, Integer.MIN_VALUE);
 			while(rs.next()) {
 				gm_obj = new JsonObject();
 				int i = 1;
@@ -71,11 +68,9 @@ public class Converter {
 				subquery = new VernacularName();
 				gm_obj.add("vernacularname", subquery.retRes(gc, coreID));
 
-				bar.update(rs.getRow(), lim);
+				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
 				gson.toJson(gm_obj, arrWriter);
 			}
-			arrWriter.endArray();
-			arrWriter.close();
 			rs.close();
 			//System.out.println("offset: " + offset);
 		} catch (SQLException sqle) {
