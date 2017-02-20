@@ -55,20 +55,31 @@ public class RunApp {
 		String lim = (cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba");
 		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? cmd.getOptionValue("db").concat("-out.json") : cmd.getOptionValue("fn");
 		Gson gson = new GsonBuilder().serializeNulls().create();
-		Converter cv = new Converter(gc, cmd.getOptionValue("dt"));
-
+		Taxonable cv = null;
+		
+		if(cmd.getOptionValue("dt").equalsIgnoreCase("gbif")) {
+			cv = new Gbif(gc, gson, Integer.parseInt(lim));
+		}
+		else if(cmd.getOptionValue("dt").equalsIgnoreCase("ncbi")){
+			cv = new Ncbi(gc, gson, Integer.parseInt(lim));
+		}
+		else {
+			System.err.println("Invalid switch for -dt");
+			System.exit(1);
+		}
+		
 		try {
 			int offset = 0;
 			JsonWriter arrWriter = new JsonWriter(new FileWriter(fn));
+			cv.setJsonWriter(arrWriter);
 			
 			arrWriter.beginArray();
-			/*while(true) {
-				if(!cv.makeTaxon(gc, arrWriter, gson, Integer.parseInt(lim), offset, cmd.getOptionValue("dt"))) {
+			while(true) {
+				if(!cv.taxonToJson(gc, offset)) {
 					break;
 				}
 				offset += Integer.parseInt(lim);
-			}*/
-			cv.makeTaxon(gc, arrWriter, gson, Integer.parseInt(lim), offset, cmd.getOptionValue("dt"));
+			}
 			arrWriter.endArray();
 			arrWriter.close();
 		} catch (IOException ioe){
