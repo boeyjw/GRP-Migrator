@@ -22,8 +22,10 @@ public class Gencode implements SchemableOO {
 			ResultSet rs = gc.selStmt("gen", new int[] {id});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 
-			for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
-				obj.addProperty(rsmeta.getColumnName(i), rs.getString(i));
+			if(rs.next()) {
+				for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
+					obj.addProperty(rsmeta.getColumnName(i), rs.getString(i));
+				}
 			}
 			rs.close();
 		} catch (SQLException sqle) {

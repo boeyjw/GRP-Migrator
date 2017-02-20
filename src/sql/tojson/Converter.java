@@ -44,13 +44,12 @@ public class Converter {
 					+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID where gv.coreID=?;");
 		}
 		else if(dt.equalsIgnoreCase("ncbi")) {
-			gc.addPrepStmt("nodes", "select nn.tax_id, nn.parent_tax_id, nn.rank, nn.embl_code, nn.inherited_div_flag, nn.inherited_GC_flag, "
-					+ "nn.inherited_MGC_flag, nn.GenBank_hidden_flag, nn.hidden_subtree_root_flag, nn.comments from ncbi_nodes nn order by nn.tax_id limit ? offset ?;");
+			gc.addPrepStmt("nodes", "select * from ncbi_nodes nn order by nn.tax_id limit ? offset ?;");
 			gc.addPrepStmt("names", "select nnm.name_txt, nnm.unique_name, nnm.name_class "
 					+ "from ncbi_nodes nn inner join ncbi_names nnm on nn.tax_id=nnm.tax_id where nnm.tax_id=?;");
 			gc.addPrepStmt("div", "select d.cde, d.name, d.comments "
 					+ "from ncbi_nodes nn inner join ncbi_division d on nn.division_id=d.division_id where d.division_id=?;");
-			gc.addPrepStmt("gen", "select g.abbreviation, g.name, g.name, g.cde, g.starts "
+			gc.addPrepStmt("gen", "select g.abbreviation, g.name, g.cde, g.starts "
 					+ "from ncbi_nodes nn inner join ncbi_gencode g on nn.genetic_code_id=g.genetic_code_id where g.genetic_code_id=?;");
 		}
 		
@@ -93,11 +92,14 @@ public class Converter {
 				int i = 1;
 				int tax_id = rs.getInt(1);
 
-				gm_obj.addProperty(rsmeta.getColumnName(i++), tax_id);
-				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++));
-				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i++));
-				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i++));
-
+				gm_obj.addProperty(rsmeta.getColumnName(i++), tax_id); //tax_id
+				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++)); //parent_tax_id
+				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i++)); //rank
+				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i++)); //embl_code
+				int div_id = rs.getInt(i++); //division_id
+				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++)); //inherited_div_flag
+				int gen_id = rs.getInt(i++); //genetic_code_id
+				
 				for( ; i <= rsmeta.getColumnCount() - 1; i++) {
 					gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i));
 				}
@@ -107,11 +109,11 @@ public class Converter {
 				this.subquery = new Names();
 				gm_obj.add("names", this.subquery.retRes(gc, tax_id));
 				subquery = new Division();
-				gm_obj.add("div", subquery.retRes(gc, tax_id));
+				gm_obj.add("division", subquery.retRes(gc, div_id));
 				subquery = new Gencode();
-				gm_obj.add("gen", subquery.retRes(gc, tax_id));
+				gm_obj.add("gencode", subquery.retRes(gc, gen_id));
 				/*this.subquery = new NuclProt();
-				gm_obj.add("vern", this.subquery.retRes(gc, tax_id));*/
+				gm_obj.add("", this.subquery.retRes(gc, tax_id));*/
 
 				//bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
 				gson.toJson(gm_obj, arrWriter);
