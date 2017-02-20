@@ -8,9 +8,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import sql.queries.DbConnection;
-import sql.schema.Schemable;
+import sql.schema.SchemableOM;
 
-public class Multimedia implements Schemable {
+public class Multimedia implements SchemableOM {
 	private JsonArray arr;
 	
 	
@@ -19,10 +19,10 @@ public class Multimedia implements Schemable {
 	}
 
 	@Override
-	public JsonArray retRes(DbConnection gc, int coreID) {
+	public JsonArray retRes(DbConnection gc, int id) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.selStmt("mult", new int[] {coreID});
+			ResultSet rs = gc.selStmt("mult", new int[] {id});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

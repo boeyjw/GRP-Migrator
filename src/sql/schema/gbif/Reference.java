@@ -8,9 +8,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import sql.queries.DbConnection;
-import sql.schema.Schemable;
+import sql.schema.SchemableOM;
 
-public class Reference implements Schemable {
+public class Reference implements SchemableOM {
 	private JsonArray arr;
 	
 	public Reference() {
@@ -18,10 +18,10 @@ public class Reference implements Schemable {
 	}
 
 	@Override
-	public JsonArray retRes(DbConnection gc, int coreID) {
+	public JsonArray retRes(DbConnection gc, int id) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.selStmt("ref", new int[] {coreID});
+			ResultSet rs = gc.selStmt("ref", new int[] {id});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

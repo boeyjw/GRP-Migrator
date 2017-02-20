@@ -26,6 +26,7 @@ public class RunApp {
 		opt.addOption("pw", "password", true, "MySQL password linked tot he username");
 		opt.addOption("ba", "batchsize", true, "Batch size");
 		opt.addOption("fn", "filename", true, "Output file name");
+		opt.addOption("dt", "databasetype", true, "gbif for GBIF db and ncbi for NCBI db");
 		
 		opt.getOption("db").setRequired(true);
 		opt.getOption("sn").setRequired(false);
@@ -33,6 +34,7 @@ public class RunApp {
 		opt.getOption("pw").setRequired(true);
 		opt.getOption("ba").setRequired(false);
 		opt.getOption("fn").setRequired(false);
+		opt.getOption("dt").setRequired(true);
 		
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -51,21 +53,22 @@ public class RunApp {
 		DbConnection gc = new DbConnection((cmd.getOptionValue("sn").equals("") || cmd.getOptionValue("sn") == null) ? "localhost" : cmd.getOptionValue("sn"),
 												cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
 		String lim = (cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba");
-		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? cmd.getOptionValue("db").concat("out.json") : cmd.getOptionValue("fn");
+		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? cmd.getOptionValue("db").concat("-out.json") : cmd.getOptionValue("fn");
 		Gson gson = new GsonBuilder().serializeNulls().create();
-		Converter cv = new Converter(gc);
+		Converter cv = new Converter(gc, cmd.getOptionValue("dt"));
 
 		try {
 			int offset = 0;
 			JsonWriter arrWriter = new JsonWriter(new FileWriter(fn));
 			
 			arrWriter.beginArray();
-			while(true) {
-				if(!cv.makeTaxon(gc, arrWriter, gson, Integer.parseInt(lim), offset)) {
+			/*while(true) {
+				if(!cv.makeTaxon(gc, arrWriter, gson, Integer.parseInt(lim), offset, cmd.getOptionValue("dt"))) {
 					break;
 				}
 				offset += Integer.parseInt(lim);
-			}
+			}*/
+			cv.makeTaxon(gc, arrWriter, gson, Integer.parseInt(lim), offset, cmd.getOptionValue("dt"));
 			arrWriter.endArray();
 			arrWriter.close();
 		} catch (IOException ioe){

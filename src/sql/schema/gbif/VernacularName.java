@@ -8,9 +8,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import sql.queries.DbConnection;
-import sql.schema.Schemable;
+import sql.schema.SchemableOM;
 
-public class VernacularName implements Schemable {
+public class VernacularName implements SchemableOM {
 	private JsonArray arr;
 	
 	public VernacularName() {
@@ -18,10 +18,10 @@ public class VernacularName implements Schemable {
 	}
 
 	@Override
-	public JsonArray retRes(DbConnection gc, int coreID) {
+	public JsonArray retRes(DbConnection gc, int id) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.selStmt("vern", new int[] {coreID});
+			ResultSet rs = gc.selStmt("vern", new int[] {id});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {

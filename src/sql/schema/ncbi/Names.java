@@ -1,4 +1,4 @@
-package sql.schema.gbif;
+package sql.schema.ncbi;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -10,10 +10,10 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 
-public class Distribution implements SchemableOM {
+public class Names implements SchemableOM {
 	private JsonArray arr;
 	
-	public Distribution() {
+	public Names() {
 		arr = new JsonArray();
 	}
 
@@ -21,7 +21,7 @@ public class Distribution implements SchemableOM {
 	public JsonArray retRes(DbConnection gc, int id) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.selStmt("dist", new int[] {id});
+			ResultSet rs = gc.selStmt("names", new int[] {id});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {
