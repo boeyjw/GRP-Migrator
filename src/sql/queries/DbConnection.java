@@ -19,9 +19,6 @@ public class DbConnection {
 	private Connection con;
 	private HashMap<String, PreparedStatement> stmt;
 	
-	//Dirty trick to switch ncbi_nucl_* & ncbi_prot
-	private String np;
-	
 	/**
 	 * Initialise database credentials then open a connection
 	 * @param servername The server in which its at
@@ -106,21 +103,5 @@ public class DbConnection {
 		}
 		
 		return null;
-	}
-	
-	/**
-	 * Sets the switch for ncbi_nucl_* or nucl_prot relations
-	 * @param np The switch relation string
-	 */
-	public void setNp(String np) {
-		this.np = np;
-	}
-	
-	/**
-	 * Gets the ncbi_nucl_* or ncbi_prot switch
-	 * @return
-	 */
-	public String getNp() {
-		return np;
 	}
 }

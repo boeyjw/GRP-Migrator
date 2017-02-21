@@ -18,7 +18,7 @@ public class Gbif extends Taxonable {
 	
 	public Gbif(DbConnection gc, Gson gson, int lim) {
 		super(gc, gson, lim);
-		gc.addPrepStmt("taxon", "select * from gbif_taxon gt order by gt.coreID limit ? offset ?;");
+		gc.addPrepStmt("taxon", "select * from gbif_taxon gt where phylum like 'plantae' order by gt.coreID limit ? offset ?;");
 		gc.addPrepStmt("dist", "select gd.source,gd.threatStatus,gd.locality,gd.lifeStage,gd.occuranceStatus,gd.locationID,gd.locationRemarks,gd.establishmentMeans,gd.countryCode,gd.country "
 				+ "from gbif_taxon gt inner join gbif_distribution gd on gt.coreID=gd.coreID where gd.coreID=?;");
 		gc.addPrepStmt("mult", "select gm.references,gm.description,gm.title,gm.contributor,gm.source,gm.created,gm.license,gm.identifier,gm.creator,gm.publisher,gm.rightsHolder "

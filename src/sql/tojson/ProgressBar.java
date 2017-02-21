@@ -38,7 +38,7 @@ public class ProgressBar {
 				workchars[done % workchars.length]);
 
 		if (done == total) {
-			System.out.print(actualTotal);
+			System.out.print("\t" + actualTotal);
 			System.out.flush();
 			System.out.println();
 			init();

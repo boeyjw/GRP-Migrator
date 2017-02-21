@@ -11,18 +11,19 @@ import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 
 public class NuclProt implements SchemableOM {
-	JsonArray arr;
-	String[] accVer;
+	private JsonArray arr;
+	public static String querySet;
 	
 	public NuclProt() {
 		arr = new JsonArray();
+		querySet = new String();
 	}
 
 	@Override
 	public JsonArray retRes(DbConnection gc, int id) {
 		try {
 			JsonObject jobj;
-			ResultSet rs = gc.selStmt(gc.getNp(), new int[] {id});
+			ResultSet rs = gc.selStmt(querySet, new int[] {id});
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {
@@ -41,5 +42,4 @@ public class NuclProt implements SchemableOM {
 		
 		return arr;
 	}
-
 }
