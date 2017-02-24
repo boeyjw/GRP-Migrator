@@ -47,7 +47,7 @@ public class DbConnection {
 		try {
 			con = ds.getConnection(user, password);
 		} catch (SQLException sqle) {
-			sqle.getErrorCode();
+			System.err.println(sqle.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -62,7 +62,7 @@ public class DbConnection {
 				con.close();
 			}
 		} catch (SQLException sqle) {
-			sqle.getErrorCode();
+			System.err.println(sqle.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -79,7 +79,7 @@ public class DbConnection {
 			stmt.put(purpose, con.prepareStatement(query));
 			return true;
 		} catch (SQLException sqle) {
-			sqle.getErrorCode();
+			System.err.println(sqle.getMessage());
 		}
 		
 		return false;
@@ -93,13 +93,15 @@ public class DbConnection {
 	 */
 	public ResultSet selStmt(String purpose, int[] param) {
 		try {
-			for(int i = 1; i <= param.length; i++) {
-				stmt.get(purpose).setInt(i, param[i - 1]);
+			if(param != null) {
+				for(int i = 1; i <= param.length; i++) {
+					stmt.get(purpose).setInt(i, param[i - 1]);
+				}
 			}
 			
 			return stmt.get(purpose).executeQuery();
 		} catch (SQLException sqle) {
-			sqle.getErrorCode();
+			System.err.println(sqle.getMessage());
 		}
 		
 		return null;

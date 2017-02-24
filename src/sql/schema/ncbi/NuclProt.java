@@ -29,7 +29,7 @@ public class NuclProt implements SchemableOM {
 			while(rs.next()) {
 				jobj = new JsonObject();
 				for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
-					jobj.addProperty(rsmeta.getColumnName(i), rs.getString(i));
+					jobj.addProperty(rsmeta.getColumnName(i).replace('.', '_'), rs.getString(i));
 				}
 				arr.add(jobj);
 			}

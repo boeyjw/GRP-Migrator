@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 import sql.schema.SchemableOO;
+import sql.schema.ncbi.Citations;
 import sql.schema.ncbi.Division;
 import sql.schema.ncbi.Gencode;
 import sql.schema.ncbi.Names;
@@ -28,6 +29,9 @@ public class Ncbi extends Taxonable {
 				+ "from ncbi_nodes nn inner join ncbi_division d on nn.division_id=d.division_id where d.division_id=?;");
 		gc.addPrepStmt("gen", "select g.abbreviation, g.name, g.cde, g.starts "
 				+ "from ncbi_nodes nn inner join ncbi_gencode g on nn.genetic_code_id=g.genetic_code_id where g.genetic_code_id=?;");
+		gc.addPrepStmt("cit", "select nc.cit_key, nc.pubmed_id, nc.medline_id, nc.url, nc.text "
+				+ "from ncbi_nodes nn left join ncbi_citations_junction ncj on nn.tax_id=ncj.tax_id left join ncbi_citations nc on ncj.cit_id=nc.cit_id "
+				+ "where nn.tax_id=?;");
 		
 		//ncbi_nucl_* && ncbi_prot
 		gc.addPrepStmt("est", "select nne.accession, nne.`accession.version`, nne.gi "
@@ -85,6 +89,8 @@ public class Ncbi extends Taxonable {
 				gm_obj.add("division", subqueryOO.retRes(gc, div_id));
 				subqueryOO = new Gencode();
 				gm_obj.add("gencode", subqueryOO.retRes(gc, gen_id));
+				subqueryOM = new Citations();
+				gm_obj.add("citations", subqueryOM.retRes(gc, tax_id));
 				subqueryOM = new NuclProt();
 				for(int j = 0; j < np_list.length; j++) {
 					NuclProt.querySet = np_list[j];
