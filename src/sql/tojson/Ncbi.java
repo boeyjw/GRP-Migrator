@@ -23,25 +23,33 @@ public class Ncbi extends Taxonable {
 	public Ncbi(DbConnection gc, Gson gson, int lim) {
 		super(gc, gson, lim);
 		gc.addPrepStmt("nodes", "select * from ncbi_nodes nn where nn.division_id=4 order by nn.tax_id limit ? offset ?;");
+		
 		gc.addPrepStmt("names", "select nnm.name_txt, nnm.unique_name, nnm.name_class "
 				+ "from ncbi_nodes nn inner join ncbi_names nnm on nn.tax_id=nnm.tax_id where nnm.tax_id=?;");
-		gc.addPrepStmt("div", "select d.cde, d.name, d.comments "
-				+ "from ncbi_nodes nn inner join ncbi_division d on nn.division_id=d.division_id where d.division_id=?;");
+		
+		gc.addPrepStmt("div", "select d.division_cde as cde, d.division_name as name, d.comments "
+				+ "from ncbi_division d where d.division_id=?;");
+		
 		gc.addPrepStmt("gen", "select g.abbreviation, g.name, g.cde, g.starts "
-				+ "from ncbi_nodes nn inner join ncbi_gencode g on nn.genetic_code_id=g.genetic_code_id where g.genetic_code_id=?;");
+				+ "from ncbi_gencode g where g.genetic_code_id=?;");
+		
 		gc.addPrepStmt("cit", "select nc.cit_key, nc.pubmed_id, nc.medline_id, nc.url, nc.text "
 				+ "from ncbi_nodes nn left join ncbi_citations_junction ncj on nn.tax_id=ncj.tax_id left join ncbi_citations nc on ncj.cit_id=nc.cit_id "
 				+ "where nn.tax_id=?;");
 		
 		//ncbi_nucl_* && ncbi_prot
-		gc.addPrepStmt("est", "select nne.accession, nne.`accession.version`, nne.gi "
+		/*gc.addPrepStmt("est", "select nne.accession, nne.`accession.version`, nne.gi "
 				+ "from ncbi_nodes nn inner join ncbi_nucl_est nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
+		
 		gc.addPrepStmt("wgs", "select nne.accession, nne.`accession.version`, nne.gi "
 				+ "from ncbi_nodes nn inner join ncbi_nucl_wgs nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
+		
 		gc.addPrepStmt("gss", "select nne.accession, nne.`accession.version`, nne.gi "
 				+ "from ncbi_nodes nn inner join ncbi_nucl_gss nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
+		
 		gc.addPrepStmt("gb", "select nne.accession, nne.`accession.version`, nne.gi "
 				+ "from ncbi_nodes nn inner join ncbi_nucl_gb nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
+		
 		gc.addPrepStmt("prot", "select nne.accession, nne.`accession.version`, nne.gi "
 				+ "from ncbi_nodes nn inner join ncbi_prot nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
 		
@@ -50,7 +58,7 @@ public class Ncbi extends Taxonable {
 		np_list[1] = "wgs";
 		np_list[2] = "gss";
 		np_list[3] = "gb";
-		np_list[4] = "prot";
+		np_list[4] = "prot";*/
 	}
 
 	@Override
@@ -91,11 +99,11 @@ public class Ncbi extends Taxonable {
 				gm_obj.add("gencode", subqueryOO.retRes(gc, gen_id));
 				subqueryOM = new Citations();
 				gm_obj.add("citations", subqueryOM.retRes(gc, tax_id));
-				subqueryOM = new NuclProt();
+				/*subqueryOM = new NuclProt();
 				for(int j = 0; j < np_list.length; j++) {
 					NuclProt.querySet = np_list[j];
 					gm_obj.add(np_list[j], subqueryOM.retRes(gc, tax_id));
-				}
+				}*/
 				
 
 				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);

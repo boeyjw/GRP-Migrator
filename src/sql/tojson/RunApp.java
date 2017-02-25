@@ -17,8 +17,9 @@ import com.google.gson.stream.JsonWriter;
 import sql.queries.DbConnection;
 
 public class RunApp {
-	
+
 	public static void main(String[] args) {
+		//CLI
 		Options opt = new Options();
 		opt.addOption("db", "databasename", true, "MySQL database name to connect to");
 		opt.addOption("sn", "servername", true, "The server to connect to. If this option is left blank, defaults to localhost");
@@ -27,7 +28,7 @@ public class RunApp {
 		opt.addOption("ba", "batchsize", true, "Batch size");
 		opt.addOption("fn", "filename", true, "Output file name");
 		opt.addOption("dt", "databasetype", true, "gbif for GBIF db and ncbi for NCBI db");
-		
+
 		opt.getOption("db").setRequired(true);
 		opt.getOption("sn").setRequired(false);
 		opt.getOption("us").setRequired(true);
@@ -35,28 +36,31 @@ public class RunApp {
 		opt.getOption("ba").setRequired(false);
 		opt.getOption("fn").setRequired(false);
 		opt.getOption("dt").setRequired(true);
-		
+
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
 		CommandLine cmd = null;
-		
+
 		try {
 			cmd = parser.parse(opt, args);
 		} catch (ParseException pee) {
 			System.out.println(pee.getMessage());
 			formatter.printHelp("Transform GBIF SQL rows into JSON", opt);
-			
+
 			System.exit(1);
 			return;
+		} catch (NullPointerException npe) {
+			System.err.println(npe.getMessage());
 		}
-		
+
+		//Init
 		DbConnection gc = new DbConnection((cmd.getOptionValue("sn").equals("") || cmd.getOptionValue("sn") == null) ? "localhost" : cmd.getOptionValue("sn"),
-												cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
+				cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
 		String lim = (cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba");
 		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? cmd.getOptionValue("db").concat("-out.json") : cmd.getOptionValue("fn");
 		Gson gson = new GsonBuilder().serializeNulls().create();
 		Taxonable cv = null;
-		
+
 		if(cmd.getOptionValue("dt").equalsIgnoreCase("gbif")) {
 			cv = new Gbif(gc, gson, Integer.parseInt(lim));
 		}
@@ -67,13 +71,15 @@ public class RunApp {
 			System.err.println("Invalid switch for -dt");
 			System.exit(1);
 		}
-		
+
+		//Working set
 		try {
 			int offset = 0;
 			JsonWriter arrWriter = new JsonWriter(new FileWriter(fn));
 			cv.setJsonWriter(arrWriter);
-			
+
 			arrWriter.beginArray();
+			//Loops until there are no more rows in db
 			while(true) {
 				if(!cv.taxonToJson(gc, offset)) {
 					break;

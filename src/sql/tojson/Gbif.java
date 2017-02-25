@@ -21,16 +21,16 @@ public class Gbif extends Taxonable {
 		gc.addPrepStmt("taxon", "select * from gbif_taxon gt where kingdom like 'plantae' order by gt.taxonID limit ? offset ?;");
 		
 		gc.addPrepStmt("dist", "select gd.threatStatus, gd.establishmentMeans, gd.lifeStage, gd.source, gd.country, gd.occuranceStatus, gd.countryCode, gd.locationID, gd.locality, gd.locationRemarks "
-				+ "from gbif_taxon gt inner join gbif_distribution gd on gt.coreID=gd.coreID where gd.taxonID=?;");
+				+ "from gbif_taxon gt inner join gbif_distribution gd on gt.taxonID=gd.taxonID where gd.taxonID=?;");
 		
 		gc.addPrepStmt("mult", "select gm.license, gm.rightsHolder, gm.creator, gm.references, gm.contributor, gm.source, gm.identifier, gm.created, gm.title, gm.publisher, gm.description "
-				+ "from gbif_taxon gt inner join gbif_multimedia gm on gt.coreID=gm.coreID where gm.taxonID=?;");
+				+ "from gbif_taxon gt inner join gbif_multimedia gm on gt.taxonID=gm.taxonID where gm.taxonID=?;");
 		
 		gc.addPrepStmt("ref", "select gr.bibliographicCitation,gr.references,gr.source,gr.identifier "
-				+ "from gbif_taxon gt inner join gbif_reference gr on gt.coreID=gr.coreID where gr.taxonID=?;");
+				+ "from gbif_taxon gt inner join gbif_reference gr on gt.taxonID=gr.taxonID where gr.taxonID=?;");
 		
 		gc.addPrepStmt("vern", "select gv.sex, gv.lifeStage, gv.source, gv.vernacularName, gv.language, gv.country, gv.countryCode "
-				+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.coreID=gv.coreID where gv.taxonID=?;");
+				+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.taxonID=gv.taxonID where gv.taxonID=?;");
 	}
 
 	@Override

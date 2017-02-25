@@ -24,7 +24,7 @@ public class Division implements SchemableOO {
 
 			if(rs.next()) {
 				for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
-					obj.addProperty(rsmeta.getColumnName(i), rs.getString(i));
+					obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i));
 				}
 			}
 			rs.close();
