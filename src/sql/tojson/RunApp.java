@@ -1,7 +1,11 @@
 package sql.tojson;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -57,15 +61,22 @@ public class RunApp {
 		DbConnection gc = new DbConnection((cmd.getOptionValue("sn").equals("") || cmd.getOptionValue("sn") == null) ? "localhost" : cmd.getOptionValue("sn"),
 				cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
 		String lim = (cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba");
-		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? cmd.getOptionValue("db").concat("-out.json") : cmd.getOptionValue("fn");
+		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? cmd.getOptionValue("db").concat("-out.json") : cmd.getOptionValue("fn").concat(".json");
 		Gson gson = new GsonBuilder().serializeNulls().create();
 		Taxonable cv = null;
+		boolean reqBatch = false;
 
 		if(cmd.getOptionValue("dt").equalsIgnoreCase("gbif")) {
 			cv = new Gbif(gc, gson, Integer.parseInt(lim));
+			reqBatch = false;
 		}
-		else if(cmd.getOptionValue("dt").equalsIgnoreCase("ncbi")){
+		else if(cmd.getOptionValue("dt").equalsIgnoreCase("ncbi")) {
 			cv = new Ncbi(gc, gson, Integer.parseInt(lim));
+			reqBatch = false;
+		}
+		else if(cmd.getOptionValue("dt").equalsIgnoreCase("acc")) {
+			cv = new Accession(gc, gson, Integer.parseInt(lim));
+			reqBatch = true;
 		}
 		else {
 			System.err.println("Invalid switch for -dt");
@@ -75,19 +86,41 @@ public class RunApp {
 		//Working set
 		try {
 			int offset = 0;
-			JsonWriter arrWriter = new JsonWriter(new FileWriter(fn));
-			cv.setJsonWriter(arrWriter);
-
-			arrWriter.beginArray();
-			//Loops until there are no more rows in db
-			while(true) {
-				if(!cv.taxonToJson(gc, offset)) {
-					break;
+			JsonWriter arrWriter;
+			if(reqBatch) {
+				int fcount = 1;
+				Path dir = Files.createDirectory(Paths.get("".concat(fn).replace('.', '-')));
+				File ff;
+				//Loops until there are no more rows in db
+				while(true) {
+					ff = new File(dir.toFile(), fcount++ + fn);
+					arrWriter = new JsonWriter(new FileWriter(ff));
+					cv.setJsonWriter(arrWriter);
+					arrWriter.beginArray();
+					if(!cv.taxonToJson(gc, offset)) {
+						arrWriter.endArray();
+						arrWriter.close();
+						break;
+					}
+					offset += Integer.parseInt(lim);
+					arrWriter.endArray();
+					arrWriter.close();
 				}
-				offset += Integer.parseInt(lim);
+			} else {
+				arrWriter = new JsonWriter(new FileWriter(fn));
+				cv.setJsonWriter(arrWriter);
+
+				arrWriter.beginArray();
+				//Loops until there are no more rows in db
+				while(true) {
+					if(!cv.taxonToJson(gc, offset)) {
+						break;
+					}
+					offset += Integer.parseInt(lim);
+				}
+				arrWriter.endArray();
+				arrWriter.close();
 			}
-			arrWriter.endArray();
-			arrWriter.close();
 		} catch (IOException ioe){
 			System.err.println(ioe.getMessage());
 		} catch (Exception e) {

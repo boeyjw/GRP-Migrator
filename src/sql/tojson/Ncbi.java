@@ -13,12 +13,11 @@ import sql.schema.ncbi.Citations;
 import sql.schema.ncbi.Division;
 import sql.schema.ncbi.Gencode;
 import sql.schema.ncbi.Names;
-import sql.schema.ncbi.NuclProt;
 
 public class Ncbi extends Taxonable {
 	private SchemableOO subqueryOO;
 	private SchemableOM subqueryOM;
-	private String[] np_list;
+	//private String[] np_list;
 	
 	public Ncbi(DbConnection gc, Gson gson, int lim) {
 		super(gc, gson, lim);
@@ -63,7 +62,6 @@ public class Ncbi extends Taxonable {
 
 	@Override
 	public boolean taxonToJson(DbConnection gc, int offset) {
-		
 		try {
 			rs = gc.selStmt("nodes", new int[] {lim, offset});
 			if(!rs.isBeforeFirst()) {
