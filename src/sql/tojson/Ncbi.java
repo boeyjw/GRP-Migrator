@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 import sql.schema.SchemableOO;
+import sql.schema.Taxonable;
 import sql.schema.ncbi.Citations;
 import sql.schema.ncbi.Division;
 import sql.schema.ncbi.Gencode;

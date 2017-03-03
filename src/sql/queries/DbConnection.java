@@ -31,7 +31,9 @@ public class DbConnection {
 			stmt = new HashMap<String, PreparedStatement>(5);
 			ds = new MysqlDataSource();
 			ds.setServerName(servername);
-			ds.setDatabaseName(dbName);
+			if(dbName != null) {
+				ds.setDatabaseName(dbName);
+			}
 			open(user, password);
 		} catch (Exception e) {
 			e.printStackTrace();

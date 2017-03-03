@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 
 import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
+import sql.schema.Taxonable;
 import sql.schema.ncbi.NuclProt;
 
 public class Accession extends Taxonable {
@@ -55,7 +56,6 @@ public class Accession extends Taxonable {
 				gm_obj = new JsonObject();
 				int i = 1;
 				int tax_id = rs.getInt(1);
-				if(tax_id == 3702) continue;
 				
 				gm_obj.addProperty(rsmeta.getColumnName(i++), tax_id); //tax_id
 				

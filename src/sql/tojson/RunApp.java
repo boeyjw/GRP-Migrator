@@ -18,7 +18,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 
+import sql.merger.SemiMerge;
 import sql.queries.DbConnection;
+import sql.schema.Taxonable;
 
 public class RunApp {
 
@@ -28,18 +30,20 @@ public class RunApp {
 		opt.addOption("db", "databasename", true, "MySQL database name to connect to");
 		opt.addOption("sn", "servername", true, "The server to connect to. If this option is left blank, defaults to localhost");
 		opt.addOption("us", "username", true, "MySQL username to connect to.");
-		opt.addOption("pw", "password", true, "MySQL password linked tot he username");
+		opt.addOption("pw", "password", true, "MySQL password linked to the username");
 		opt.addOption("ba", "batchsize", true, "Batch size");
 		opt.addOption("fn", "filename", true, "Output file name");
-		opt.addOption("dt", "databasetype", true, "gbif for GBIF db and ncbi for NCBI db");
+		opt.addOption("dt", "databasetype", true, "1) ncbi 2) gbif 3) acc 4) semimerge");
+		opt.addOption("sernull", "serializenull", true, "Switch between output with null or no null fields. Type 'true' to activate. Default: Serialize null.");
 
-		opt.getOption("db").setRequired(true);
+		opt.getOption("db").setRequired(false);
 		opt.getOption("sn").setRequired(false);
 		opt.getOption("us").setRequired(true);
 		opt.getOption("pw").setRequired(true);
 		opt.getOption("ba").setRequired(false);
 		opt.getOption("fn").setRequired(false);
 		opt.getOption("dt").setRequired(true);
+		opt.getOption("sernull").setRequired(false);
 
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -61,11 +65,20 @@ public class RunApp {
 		DbConnection gc = new DbConnection((cmd.getOptionValue("sn").equals("") || cmd.getOptionValue("sn") == null) ? "localhost" : cmd.getOptionValue("sn"),
 				cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
 		String lim = (cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba");
-		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? cmd.getOptionValue("db").concat("-out.json") : cmd.getOptionValue("fn").concat(".json");
-		Gson gson = new GsonBuilder().serializeNulls().create();
+		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? 
+				(cmd.getOptionValue("db") == null) ? cmd.getOptionValue("dt").concat("-out.json") : cmd.getOptionValue("db").concat("-out.json") 
+						: cmd.getOptionValue("fn").concat(".json");
+		Gson gson = null;
 		Taxonable cv = null;
 		boolean reqBatch = false;
-
+		
+		if(cmd.getOptionValue("sernull") == null) {
+			gson = new Gson();
+		}
+		else {
+			gson = new GsonBuilder().serializeNulls().create();
+		}
+		
 		if(cmd.getOptionValue("dt").equalsIgnoreCase("gbif")) {
 			cv = new Gbif(gc, gson, Integer.parseInt(lim));
 			reqBatch = false;
@@ -77,6 +90,9 @@ public class RunApp {
 		else if(cmd.getOptionValue("dt").equalsIgnoreCase("acc")) {
 			cv = new Accession(gc, gson, Integer.parseInt(lim));
 			reqBatch = true;
+		}
+		else if(cmd.getOptionValue("dt").equalsIgnoreCase("semimerge")) {
+			cv = new SemiMerge(gc, gson, Integer.parseInt(lim));
 		}
 		else {
 			System.err.println("Invalid switch for -dt");

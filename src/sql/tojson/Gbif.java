@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 
 import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
+import sql.schema.Taxonable;
 import sql.schema.gbif.Distribution;
 import sql.schema.gbif.Multimedia;
 import sql.schema.gbif.Reference;

@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
  * Generalises all schema method.
  * Provides polymorphism to reduce memory overhead from using too many objects.
  * This interface should only and must be implemented by classes which represents the schema of the reference relations with many-to-one relationship.
- * The main schema should be in {@link sql.tojson.Taxonable}.
+ * The main schema should be in {@link sql.schema.Taxonable}.
  *
  */
 public interface SchemableOO {
