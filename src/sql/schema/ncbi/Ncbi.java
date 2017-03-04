@@ -1,4 +1,4 @@
-package sql.tojson;
+package sql.schema.ncbi;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -10,10 +10,6 @@ import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 import sql.schema.SchemableOO;
 import sql.schema.Taxonable;
-import sql.schema.ncbi.Citations;
-import sql.schema.ncbi.Division;
-import sql.schema.ncbi.Gencode;
-import sql.schema.ncbi.Names;
 
 public class Ncbi extends Taxonable {
 	private SchemableOO subqueryOO;

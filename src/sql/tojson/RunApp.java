@@ -22,6 +22,9 @@ import sql.merger.Merger;
 import sql.merger.SemiMerge;
 import sql.queries.DbConnection;
 import sql.schema.Taxonable;
+import sql.schema.gbif.Gbif;
+import sql.schema.ncbi.Accession;
+import sql.schema.ncbi.Ncbi;
 
 public class RunApp {
 	

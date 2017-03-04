@@ -1,4 +1,4 @@
-package sql.tojson;
+package sql.schema.gbif;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -9,13 +9,9 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 import sql.schema.Taxonable;
-import sql.schema.gbif.Distribution;
-import sql.schema.gbif.Multimedia;
-import sql.schema.gbif.Reference;
-import sql.schema.gbif.VernacularName;
 
 public class Gbif extends Taxonable {
-	private SchemableOM subquery;
+	private SchemableOM subqueryOM;
 	
 	public Gbif(DbConnection gc, Gson gson, int lim) {
 		super(gc, gson, lim);
@@ -58,15 +54,15 @@ public class Gbif extends Taxonable {
 				for( ; i <= rsmeta.getColumnCount(); i++) {
 					gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i));
 				}
-
-				subquery = new Distribution();
-				gm_obj.add("distribution", subquery.retRes(gc, taxonID));
-				subquery = new Multimedia();
-				gm_obj.add("multimedia", subquery.retRes(gc, taxonID));
-				subquery = new Reference();
-				gm_obj.add("references", subquery.retRes(gc, taxonID));
-				subquery = new VernacularName();
-				gm_obj.add("vernacularname", subquery.retRes(gc, taxonID));
+				
+				subqueryOM = new Distribution();
+				gm_obj.add("distribution", subqueryOM.retRes(gc, taxonID));
+				subqueryOM = new Multimedia();
+				gm_obj.add("multimedia", subqueryOM.retRes(gc, taxonID));
+				subqueryOM = new Reference();
+				gm_obj.add("references", subqueryOM.retRes(gc, taxonID));
+				subqueryOM = new VernacularName();
+				gm_obj.add("vernacularname", subqueryOM.retRes(gc, taxonID));
 
 				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
 				gson.toJson(gm_obj, arrWriter);

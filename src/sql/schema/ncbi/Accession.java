@@ -1,4 +1,4 @@
-package sql.tojson;
+package sql.schema.ncbi;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -9,7 +9,6 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 import sql.schema.Taxonable;
-import sql.schema.ncbi.NuclProt;
 
 public class Accession extends Taxonable {
 	private SchemableOM subqueryOM;
