@@ -19,6 +19,12 @@ public class DbConnection {
 	private Connection con;
 	private HashMap<String, PreparedStatement> stmt;
 	
+	public DbConnection(String servername, String user, String password) {
+		stmt = new HashMap<String, PreparedStatement>(5);
+		ds = new MysqlDataSource();
+		ds.setServerName(servername);
+	}
+	
 	/**
 	 * Initialise database credentials then open a connection
 	 * @param servername The server in which its at
@@ -27,17 +33,15 @@ public class DbConnection {
 	 * @param password Password associated with the username of the server
 	 */
 	public DbConnection(String servername, String dbName, String user, String password) {
-		try {
-			stmt = new HashMap<String, PreparedStatement>(5);
-			ds = new MysqlDataSource();
-			ds.setServerName(servername);
-			if(dbName != null) {
-				ds.setDatabaseName(dbName);
-			}
-			open(user, password);
-		} catch (Exception e) {
-			e.printStackTrace();
+		this(servername, user, password);
+		if(dbName != null) {
+			ds.setDatabaseName(dbName);
 		}
+	}
+	
+	public DbConnection(String servername, int port, String dbName, String user, String password) {
+		this(servername, dbName, user, password);
+		ds.setPort(port);
 	}
 	
 	/**
