@@ -23,6 +23,8 @@ public class DbConnection {
 		stmt = new HashMap<String, PreparedStatement>(5);
 		ds = new MysqlDataSource();
 		ds.setServerName(servername);
+		ds.setUser(user);
+		ds.setPassword(password);
 	}
 	
 	/**
@@ -42,6 +44,16 @@ public class DbConnection {
 	public DbConnection(String servername, int port, String dbName, String user, String password) {
 		this(servername, dbName, user, password);
 		ds.setPort(port);
+	}
+	
+	public void open() {
+		try {
+			con = ds.getConnection();
+		} catch (SQLException sqle) {
+			System.err.println(sqle.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

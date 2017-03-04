@@ -25,6 +25,28 @@ import sql.schema.Taxonable;
 
 public class RunApp {
 	
+	private static void optionConfiguration(Options opt) {
+		opt.addOption("db", "databasename", true, "MySQL database name to connect to");
+		opt.addOption("sn", "servername", true, "The server to connect to. If this option is left blank, defaults to localhost");
+		opt.addOption("us", "username", true, "MySQL username to connect to.");
+		opt.addOption("pw", "password", true, "MySQL password linked to the username");
+		opt.addOption("ba", "batchsize", true, "Batch size");
+		opt.addOption("fn", "filename", true, "Output file name");
+		opt.addOption("dt", "databasetype", true, "1) ncbi 2) gbif 3) acc 4) semimerge 5) merge");
+		opt.addOption("sernull", "serializenull", true, "Switch between output with null or no null fields. Type 'true' to activate. Default: Serialize null.");
+		opt.addOption("pr", "port", true, "The port to connect.");
+
+		opt.getOption("db").setRequired(false);
+		opt.getOption("sn").setRequired(false);
+		opt.getOption("us").setRequired(true);
+		opt.getOption("pw").setRequired(true);
+		opt.getOption("ba").setRequired(false);
+		opt.getOption("fn").setRequired(false);
+		opt.getOption("dt").setRequired(true);
+		opt.getOption("sernull").setRequired(false);
+		opt.getOption("pr").setRequired(false);
+	}
+	
 	private static DbConnection getConnectionInstance(CommandLine cmd) {
 		if(cmd.getOptionValue("db") == null) {
 			return new DbConnection(cmd.getOptionValue("sn"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
@@ -64,25 +86,7 @@ public class RunApp {
 	public static void main(String[] args) {
 		//CLI
 		Options opt = new Options();
-		opt.addOption("db", "databasename", true, "MySQL database name to connect to");
-		opt.addOption("sn", "servername", true, "The server to connect to. If this option is left blank, defaults to localhost");
-		opt.addOption("us", "username", true, "MySQL username to connect to.");
-		opt.addOption("pw", "password", true, "MySQL password linked to the username");
-		opt.addOption("ba", "batchsize", true, "Batch size");
-		opt.addOption("fn", "filename", true, "Output file name");
-		opt.addOption("dt", "databasetype", true, "1) ncbi 2) gbif 3) acc 4) semimerge 5) merge");
-		opt.addOption("sernull", "serializenull", false, "Switch between output with null or no null fields. Type 'true' to activate. Default: Serialize null.");
-		opt.addOption("pr", "port", true, "The port to connect.");
-
-		opt.getOption("db").setRequired(false);
-		opt.getOption("sn").setRequired(false);
-		opt.getOption("us").setRequired(true);
-		opt.getOption("pw").setRequired(true);
-		opt.getOption("ba").setRequired(false);
-		opt.getOption("fn").setRequired(false);
-		opt.getOption("dt").setRequired(true);
-		opt.getOption("sernull").setRequired(false);
-		opt.getOption("pr").setRequired(false);
+		optionConfiguration(opt);
 
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -117,6 +121,7 @@ public class RunApp {
 			gson = new GsonBuilder().serializeNulls().create();
 		}
 		
+		gc.open();
 		cv = getTaxonableInit(cmd.getOptionValue("dt"), gc, gson, lim);
 
 		//Working set
