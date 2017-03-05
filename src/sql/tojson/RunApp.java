@@ -28,38 +28,16 @@ import sql.schema.ncbi.Ncbi;
 
 public class RunApp {
 	
-	private static void optionConfiguration(Options opt) {
-		opt.addOption("db", "databasename", true, "MySQL database name to connect to");
-		opt.addOption("sn", "servername", true, "The server to connect to. If this option is left blank, defaults to localhost");
-		opt.addOption("us", "username", true, "MySQL username to connect to.");
-		opt.addOption("pw", "password", true, "MySQL password linked to the username");
+	private static void optionalConfigurations(Options opt) {
 		opt.addOption("ba", "batchsize", true, "Batch size");
 		opt.addOption("fn", "filename", true, "Output file name");
 		opt.addOption("dt", "databasetype", true, "1) ncbi 2) gbif 3) acc 4) semimerge 5) merge");
 		opt.addOption("sernull", "serializenull", true, "Switch between output with null or no null fields. Type 'true' to activate. Default: Serialize null.");
-		opt.addOption("pr", "port", true, "The port to connect.");
-
-		opt.getOption("db").setRequired(false);
-		opt.getOption("sn").setRequired(false);
-		opt.getOption("us").setRequired(true);
-		opt.getOption("pw").setRequired(true);
+		
 		opt.getOption("ba").setRequired(false);
 		opt.getOption("fn").setRequired(false);
 		opt.getOption("dt").setRequired(true);
 		opt.getOption("sernull").setRequired(false);
-		opt.getOption("pr").setRequired(false);
-	}
-	
-	private static DbConnection getConnectionInstance(CommandLine cmd) {
-		if(cmd.getOptionValue("db") == null) {
-			return new DbConnection(cmd.getOptionValue("sn"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
-		}
-		else if(cmd.getOptionValue("pr") == null) {
-			return new DbConnection(cmd.getOptionValue("sn"), cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
-		}
-		else {
-			return new DbConnection(cmd.getOptionValue("sn"), Integer.parseInt(cmd.getOptionValue("pr")), cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
-		}
 	}
 	
 	private static Taxonable getTaxonableInit(String optionValue, DbConnection gc, Gson gson, int lim) {
@@ -89,7 +67,8 @@ public class RunApp {
 	public static void main(String[] args) {
 		//CLI
 		Options opt = new Options();
-		optionConfiguration(opt);
+		CLIConfigurations.serverConfiguration(opt);
+		optionalConfigurations(opt);
 
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
@@ -99,7 +78,7 @@ public class RunApp {
 			cmd = parser.parse(opt, args);
 		} catch (ParseException pee) {
 			System.out.println(pee.getMessage());
-			formatter.printHelp("Transform GBIF SQL rows into JSON", opt);
+			formatter.printHelp("Transform SQL rows into JSON", opt);
 
 			System.exit(1);
 			return;
@@ -108,7 +87,7 @@ public class RunApp {
 		}
 
 		//Init
-		DbConnection gc = getConnectionInstance(cmd);
+		DbConnection gc = CLIConfigurations.getConnectionInstance(cmd);
 		int lim = Integer.parseInt((cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba"));
 		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? 
 				(cmd.getOptionValue("db") == null) ? cmd.getOptionValue("dt").concat("-out.json") : cmd.getOptionValue("db").concat("-out.json") 

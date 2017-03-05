@@ -11,7 +11,6 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 /**
  * 
  * Handles connection credential. Supports only 1 connection.
- * After all, this code is not meant for general purpose translation.
  *
  */
 public class DbConnection {
@@ -46,7 +45,7 @@ public class DbConnection {
 		ds.setPort(port);
 	}
 	
-	public void open() {
+	public Connection open() {
 		try {
 			con = ds.getConnection();
 		} catch (SQLException sqle) {
@@ -54,6 +53,8 @@ public class DbConnection {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		return con;
 	}
 	
 	/**
@@ -61,7 +62,7 @@ public class DbConnection {
 	 * @param user Username associated with the server
 	 * @param password Password associated with the username of the server
 	 */
-	public void open(String user, String password) {
+	public Connection open(String user, String password) {
 		try {
 			con = ds.getConnection(user, password);
 		} catch (SQLException sqle) {
@@ -69,6 +70,8 @@ public class DbConnection {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		return con;
 	}
 	
 	/**
