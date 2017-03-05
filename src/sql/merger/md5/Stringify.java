@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 
 public class Stringify {
 	private MessageDigest m;
+	private static Stringify st = new Stringify();
 	
 	private Stringify() {
 		try {
@@ -16,13 +17,13 @@ public class Stringify {
 	}
 	
 	public static Stringify getInstance() {
-		Stringify st = new Stringify();
-		
 		return st;
 	}
 	
 	public String md5HexString(String str) {
 		m.update(str.getBytes(),0,str.length());
-		return new BigInteger(1,m.digest()).toString(16).toUpperCase();
+		String tmp = new BigInteger(1,m.digest()).toString(16).toUpperCase();
+		m.reset();
+		return tmp;
 	}
 }

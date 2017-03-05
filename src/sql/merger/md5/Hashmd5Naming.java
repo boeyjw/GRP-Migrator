@@ -37,14 +37,12 @@ public class Hashmd5Naming {
 		stmt.executeUpdate("drop table if exists `gbif_vernaming`;");
 		stmt.executeUpdate("create table `gbif_vernaming` ("
 				+ "taxonID int(10) unsigned not null, "
-				+ "vnmd5 char(32) not null, "
-				+ "constraint `pk-gvn-taxonID` primary key (taxonID));");
+				+ "vnmd5 char(32) not null);");
 
 		stmt.executeUpdate("drop table if exists `ncbi_naming`;");
 		stmt.executeUpdate("create table `ncbi_naming` ("
 				+ "tax_id mediumint(11) unsigned not null, "
-				+ "nemd5 char(32) not null, "
-				+ "constraint `pk-nne-tax_id` primary key (tax_id));");
+				+ "nemd5 char(32) not null);");
 
 		stmt.close();
 
@@ -84,21 +82,24 @@ public class Hashmd5Naming {
 		try {
 			Connection con = gc.open();
 			init(con, gc);
+			
 			int offset = 0;
 			int lim = 10000;
 			con.setAutoCommit(false);
+			
 			while(!(gnnDone && gvnDone && nneDone)) {
 				int execSum = 0;
+				
 				if(!gnnDone) {
-					execSum += gnnInsert(gc, lim, offset, md);
+					execSum += gnnInsert(gc, lim, offset, md).length;
 					rs.close();
 				}
 				if(!gvnDone) {
-					execSum += gvnInsert(gc, lim, offset, md);
+					execSum += gvnInsert(gc, lim, offset, md).length;
 					rs.close();
 				}
 				if(!nneDone) {
-					execSum += nneInsert(gc, lim, offset, md);
+					execSum += nneInsert(gc, lim, offset, md).length;
 					rs.close();
 				}
 				
@@ -114,52 +115,52 @@ public class Hashmd5Naming {
 		}
 	}
 
-	private static int gnnInsert(DbConnection gc, int lim, int offset, Stringify md) throws SQLException {
+	private static int[] gnnInsert(DbConnection gc, int lim, int offset, Stringify md) throws SQLException {
 		rs = gc.selStmt("gnn", new int[] {lim, offset});
-		if(rs.isBeforeFirst()) {
+		if(!rs.isBeforeFirst()) {
 			gnnDone = true;
-			return 0;
+			return new int[] {};
 		}
 		
 		while(rs.next()) {
 			istmt[0].setInt(1, rs.getInt(1));
-			istmt[0].setString(2, md.md5HexString(rs.getString(2)));
-			istmt[0].setString(3, md.md5HexString(rs.getString(3)));
+			istmt[0].setString(2, md.md5HexString(rs.getString(2).toLowerCase()));
+			istmt[0].setString(3, md.md5HexString(rs.getString(3).toLowerCase()));
 			istmt[0].addBatch();
 		}
 		
-		return istmt[0].executeUpdate();
+		return istmt[0].executeBatch();
 	}
 
-	private static int gvnInsert(DbConnection gc, int lim, int offset, Stringify md) throws SQLException {
+	private static int[] gvnInsert(DbConnection gc, int lim, int offset, Stringify md) throws SQLException {
 		rs = gc.selStmt("gvn", new int[] {lim, offset});
-		if(rs.isBeforeFirst()) {
-			gnnDone = true;
-			return 0;
+		if(!rs.isBeforeFirst()) {
+			gvnDone = true;
+			return new int[] {};
 		}
 		
 		while(rs.next()) {
 			istmt[1].setInt(1, rs.getInt(1));
-			istmt[1].setString(2, md.md5HexString(rs.getString(2)));
+			istmt[1].setString(2, md.md5HexString(rs.getString(2).toLowerCase()));
 			istmt[1].addBatch();
 		}
 		
-		return istmt[1].executeUpdate();
+		return istmt[1].executeBatch();
 	}
 
-	private static int nneInsert(DbConnection gc, int lim, int offset, Stringify md) throws SQLException {
+	private static int[] nneInsert(DbConnection gc, int lim, int offset, Stringify md) throws SQLException {
 		rs = gc.selStmt("nne", new int[] {lim, offset});
-		if(rs.isBeforeFirst()) {
-			gnnDone = true;
-			return 0;
+		if(!rs.isBeforeFirst()) {
+			nneDone = true;
+			return new int[] {};
 		}
 		
 		while(rs.next()) {
 			istmt[2].setInt(1, rs.getInt(1));
-			istmt[2].setString(2, md.md5HexString(rs.getString(2)));
+			istmt[2].setString(2, md.md5HexString(rs.getString(2).toLowerCase()));
 			istmt[2].addBatch();
 		}
 		
-		return istmt[2].executeUpdate();
+		return istmt[2].executeBatch();
 	}
 }
