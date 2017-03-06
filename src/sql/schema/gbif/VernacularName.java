@@ -27,7 +27,7 @@ public class VernacularName implements SchemableOM {
 			while(rs.next()) {
 				jobj = new JsonObject();
 				for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
-					jobj.addProperty(rsmeta.getColumnName(i), rs.getString(i));
+					jobj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i));
 				}
 				arr.add(jobj);
 			}

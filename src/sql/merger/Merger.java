@@ -5,6 +5,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import sql.queries.DbConnection;
@@ -26,6 +27,8 @@ public class Merger extends Taxonable {
 	
 	private int i; //rsg
 	private int j; //rsn
+	
+	private JsonArray arr;
 
 	public Merger(DbConnection gc, Gson gson, int lim) {
 		super(gc, gson, lim);
@@ -34,10 +37,12 @@ public class Merger extends Taxonable {
 		gc.addPrepStmt("merge", "select * from gbif_ncbi_junction limit ? offset ?;");
 
 		//ncbi
-		gc.addPrepStmt("nodes", "select nn.division_id, nn.genetic_code_id, nn.parent_tax_id, nn.rank, nn.embl_code, nn.inherited_div_flag, nn.inherited_GC_flag, nn.mitochondrial_genetic_code_id, nn.inherited_MGC_flag, nn.GenBank_hidden_flag, nn.hidden_subtree_root_flag, nn.comments "
+		gc.addPrepStmt("nodes", "select nn.division_id, nn.genetic_code_id, nn.parent_tax_id as parentTaxId, nn.rank, nn.embl_code as emblCode, "
+				+ "nn.inherited_div_flag as inheritedDivFlag, nn.inherited_GC_flag as inheritedGCFlag, nn.mitochondrial_genetic_code_id as mitochondrialGencodeId, "
+				+ "nn.inherited_MGC_flag as inheritedMGCFlag, nn.GenBank_hidden_flag as genBankHiddenFlag, nn.hidden_subtree_root_flag as hiddenSubtreeRootFlag, nn.comments "
 				+ "from `ncbi`.ncbi_nodes nn where nn.tax_id=?;");
 
-		gc.addPrepStmt("names", "select nnm.name_txt, nnm.unique_name, nnm.name_class "
+		gc.addPrepStmt("names", "select nnm.name_txt as names, nnm.unique_name as uniqueName, nnm.name_class as nameClass "
 				+ "from `ncbi`.ncbi_nodes nn inner join `ncbi`.ncbi_names nnm on nn.tax_id=nnm.tax_id where nnm.tax_id=?;");
 
 		gc.addPrepStmt("div", "select d.division_cde as cde, d.division_name as name, d.comments "
@@ -46,12 +51,14 @@ public class Merger extends Taxonable {
 		gc.addPrepStmt("gen", "select g.abbreviation, g.name, g.cde, g.starts "
 				+ "from `ncbi`.ncbi_gencode g where g.genetic_code_id=?;");
 
-		gc.addPrepStmt("cit", "select nc.cit_key, nc.pubmed_id, nc.medline_id, nc.url, nc.text "
+		gc.addPrepStmt("cit", "select nc.cit_key as citKey, nc.pubmed_id as pubmedId, nc.medline_id as medlineId, nc.url, nc.text "
 				+ "from `ncbi`.ncbi_nodes nn left join `ncbi`.ncbi_citations_junction ncj on nn.tax_id=ncj.tax_id left join `ncbi`.ncbi_citations nc on ncj.cit_id=nc.cit_id "
 				+ "where nn.tax_id=?;");
 
 		//gbif
-		gc.addPrepStmt("taxon", "select gt.datasetID, gt.parentNameUsageID, gt.acceptedNameUsageID, gt.originalNameUsageID, gt.scientificName, gt.scientificNameAuthorship, gt.canonicalName, gt.genericName, gt.specificEpithet, gt.infraspecificEpithet, gt.taxonRank, gt.nameAccordingTo, gt.namePublishedIn, gt.taxonomicStatus, gt.nomenclaturalStatus, gt.kingdom, gt.phylum, gt.class, gt.order, gt.family, gt.genus, gt.taxonRemarks "
+		gc.addPrepStmt("taxon", "select gt.datasetID, gt.parentNameUsageID, gt.acceptedNameUsageID, gt.originalNameUsageID, gt.scientificName, gt.scientificNameAuthorship, "
+				+ "gt.canonicalName, gt.genericName, gt.specificEpithet, gt.infraspecificEpithet, gt.taxonRank, gt.nameAccordingTo, gt.namePublishedIn, "
+				+ "gt.taxonomicStatus, gt.nomenclaturalStatus, gt.kingdom, gt.phylum, gt.class, gt.order, gt.family, gt.genus, gt.taxonRemarks "
 				+ "from `gbif`.gbif_taxon gt where gt.taxonID=?;");
 
 		gc.addPrepStmt("dist", "select gd.threatStatus, gd.establishmentMeans, gd.lifeStage, gd.source, gd.country, gd.occuranceStatus, gd.countryCode, gd.locationID, gd.locality, gd.locationRemarks "
@@ -113,7 +120,7 @@ public class Merger extends Taxonable {
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //taxonRemarks
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getString(j++)); //comment
 
-					subqueryOM = new Names();
+					/*subqueryOM = new Names();
 					gm_obj.add("names", subqueryOM.retRes(gc, tax_id));
 					subqueryOO = new Division();
 					gm_obj.add("division", subqueryOO.retRes(gc, div_id));
@@ -128,7 +135,31 @@ public class Merger extends Taxonable {
 					subqueryOM = new Reference();
 					gm_obj.add("references", subqueryOM.retRes(gc, taxonID));
 					subqueryOM = new VernacularName();
-					gm_obj.add("vernacularname", subqueryOM.retRes(gc, taxonID));
+					gm_obj.add("vernacularname", subqueryOM.retRes(gc, taxonID));*/
+					
+					subqueryOM = new Names();
+					toIncludeArr("names", subqueryOM.retRes(gc, tax_id));
+					
+					subqueryOO = new Division();
+					gm_obj.add("division", subqueryOO.retRes(gc, div_id));
+					
+					subqueryOO = new Gencode();
+					gm_obj.add("gencode", subqueryOO.retRes(gc, gen_id));
+					
+					subqueryOM = new Citations();
+					toIncludeArr("citations", subqueryOM.retRes(gc, tax_id));
+					
+					subqueryOM = new Distribution();
+					toIncludeArr("distribution", subqueryOM.retRes(gc, taxonID));
+					
+					subqueryOM = new Multimedia();
+					toIncludeArr("multimedia", subqueryOM.retRes(gc, taxonID));
+					
+					subqueryOM = new Reference();
+					toIncludeArr("references", subqueryOM.retRes(gc, taxonID));
+					
+					subqueryOM = new VernacularName();
+					toIncludeArr("vernacularname", subqueryOM.retRes(gc, taxonID));
 				}
 
 				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
@@ -164,6 +195,17 @@ public class Merger extends Taxonable {
 		}
 		
 		return obj;
+	}
+	
+	private void toIncludeArr(String property, JsonArray subqueryArr) {
+		arr = subqueryArr;
+		
+		if(arr.size() > 0) {
+			gm_obj.add(property, arr);
+		}
+		else {
+			return;
+		}
 	}
 
 }

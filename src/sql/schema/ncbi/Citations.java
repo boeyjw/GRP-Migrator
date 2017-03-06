@@ -28,11 +28,11 @@ public class Citations implements SchemableOM {
 				jobj = new JsonObject();
 				int i = 1;
 				
-				jobj.addProperty(rsmeta.getColumnName(i), rs.getString(i++));
-				jobj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++));
-				jobj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++));
-				jobj.addProperty(rsmeta.getColumnName(i), rs.getString(i++));
-				jobj.addProperty(rsmeta.getColumnName(i), rs.getString(i));
+				jobj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++));
+				jobj.addProperty(rsmeta.getColumnLabel(i), rs.getInt(i++));
+				jobj.addProperty(rsmeta.getColumnLabel(i), rs.getInt(i++));
+				jobj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++));
+				jobj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i));
 				
 				arr.add(jobj);
 			}

@@ -46,16 +46,16 @@ public class Hashmd5Naming {
 
 		stmt.close();
 
-		gc.addPrepStmt("gnn", "select taxonID, scientificName, canonicalName from gbif_taxon limit ? offset ?;");
-		gc.addPrepStmt("gvn", "select taxonID, vernacularName from gbif_vernacularname limit ? offset ?;");
-		gc.addPrepStmt("nne", "select tax_id, name_txt from ncbi_names limit ? offset ?;");
+		gc.addPrepStmt("gnn", "select taxonID, scientificName, canonicalName from gbif_taxon order by taxonID asc limit ? offset ?;");
+		gc.addPrepStmt("gvn", "select taxonID, vernacularName from gbif_vernacularname order by taxonID asc limit ? offset ?;");
+		gc.addPrepStmt("nne", "select tax_id, name_txt from ncbi_names order by tax_id asc limit ? offset ?;");
 
 		istmt[0] = con.prepareStatement("insert into gbif_naming (taxonID, snmd5, cnmd5) values (?, ?, ?);");
 		istmt[1] = con.prepareStatement("insert into gbif_vernaming (taxonID, vnmd5) values (?, ?);");
 		istmt[2] = con.prepareStatement("insert into ncbi_naming (tax_id, nemd5) values (?, ?);");
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws SQLException {
 		Options opt =  new Options();
 		CLIConfigurations.serverConfiguration(opt);
 
@@ -78,10 +78,11 @@ public class Hashmd5Naming {
 		//Init
 		DbConnection gc = CLIConfigurations.getConnectionInstance(cmd);
 		Stringify md = Stringify.getInstance();
+		Connection con = gc.open();
 		
 		try {
-			Connection con = gc.open();
 			init(con, gc);
+			System.out.println("Initialized");
 			
 			int offset = 0;
 			int lim = 10000;
@@ -92,24 +93,30 @@ public class Hashmd5Naming {
 				
 				if(!gnnDone) {
 					execSum += gnnInsert(gc, lim, offset, md).length;
+					System.out.print("gnn: " + gnnDone);
+					con.commit();
 					rs.close();
 				}
 				if(!gvnDone) {
 					execSum += gvnInsert(gc, lim, offset, md).length;
+					System.out.print("\tgvn: " + gvnDone);
+					con.commit();
 					rs.close();
 				}
 				if(!nneDone) {
 					execSum += nneInsert(gc, lim, offset, md).length;
+					System.out.println("\tnne: " + nneDone);
+					con.commit();
 					rs.close();
 				}
 				
 				offset += lim;
-				con.commit();
 				
 				System.out.println("Total execution: " + execSum + "\tCursor at: " + offset);
 			}
 		} catch (SQLException sqle) {
 			System.err.println(sqle.getMessage());
+			con.rollback();
 		} finally {
 			gc.close();
 		}
@@ -126,6 +133,7 @@ public class Hashmd5Naming {
 			istmt[0].setInt(1, rs.getInt(1));
 			istmt[0].setString(2, md.md5HexString(rs.getString(2).toLowerCase()));
 			istmt[0].setString(3, md.md5HexString(rs.getString(3).toLowerCase()));
+			//System.out.println(rs.getString(2));
 			istmt[0].addBatch();
 		}
 		
@@ -142,6 +150,7 @@ public class Hashmd5Naming {
 		while(rs.next()) {
 			istmt[1].setInt(1, rs.getInt(1));
 			istmt[1].setString(2, md.md5HexString(rs.getString(2).toLowerCase()));
+			//System.out.println(rs.getString(2));
 			istmt[1].addBatch();
 		}
 		
@@ -158,6 +167,7 @@ public class Hashmd5Naming {
 		while(rs.next()) {
 			istmt[2].setInt(1, rs.getInt(1));
 			istmt[2].setString(2, md.md5HexString(rs.getString(2).toLowerCase()));
+			//System.out.println(rs.getString(2));
 			istmt[2].addBatch();
 		}
 		
