@@ -4,42 +4,53 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 
 import sql.queries.DbConnection;
-import sql.schema.SchemableOM;
 
-public class NuclProt implements SchemableOM {
-	private JsonArray arr;
+public class NuclProt {
 	public static String querySet;
 	
 	public NuclProt() {
-		arr = new JsonArray();
 		querySet = new String();
 	}
-
-	@Override
-	public JsonArray retRes(DbConnection gc, int id) {
+	
+	public void retRes(DbConnection gc, int[] param, JsonWriter arrWriter) {
 		try {
-			JsonObject jobj;
-			ResultSet rs = gc.selStmt(querySet, new int[] {id});
+			ResultSet rs = gc.selStmt(querySet, param);
 			ResultSetMetaData rsmeta = rs.getMetaData();
 			
 			while(rs.next()) {
-				jobj = new JsonObject();
+				arrWriter.beginObject();
 				for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
-					jobj.addProperty(rsmeta.getColumnLabel(i).replace('.', '_'), rs.getString(i));
+					arrWriter.name(rsmeta.getColumnLabel(i));
+					arrWriter.value(rs.getString(i));
 				}
-				arr.add(jobj);
+				arrWriter.endObject();
 			}
 			rs.close();
 		} catch (SQLException sqle) {
-			sqle.getErrorCode();
+			System.out.println(sqle.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return arr;
+		return;
+	}
+	
+	public boolean hasRes(DbConnection gc, int id, String query) {
+		try {
+			ResultSet rs = gc.selStmt(query, new int[] {id});
+			if(rs.next()) {
+				if(!rs.getString(1).isEmpty()) {
+					return true;
+				}
+			}
+			rs.close();
+		} catch (SQLException sqle) {
+			System.out.println(sqle.getMessage());
+		}
+		
+		return false;
 	}
 }
