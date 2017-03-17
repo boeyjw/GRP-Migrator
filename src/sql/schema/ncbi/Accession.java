@@ -93,6 +93,7 @@ public class Accession extends Taxonable {
 				}
 				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
 			}
+			rs.close();
 		} catch (SQLException sqle) {
 			sqle.getErrorCode();
 		} catch (IOException ioe) {

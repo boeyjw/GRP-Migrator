@@ -4,11 +4,11 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class Stringify {
+public class Md5String {
 	private MessageDigest m;
-	private static Stringify st = new Stringify();
+	private static Md5String st = new Md5String();
 	
-	private Stringify() {
+	private Md5String() {
 		try {
 			m = MessageDigest.getInstance("MD5");
 		} catch (NoSuchAlgorithmException e) {
@@ -16,7 +16,7 @@ public class Stringify {
 		}
 	}
 	
-	public static Stringify getInstance() {
+	public static Md5String getInstance() {
 		return st;
 	}
 	
