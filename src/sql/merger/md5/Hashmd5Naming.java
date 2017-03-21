@@ -49,7 +49,6 @@ public class Hashmd5Naming {
 			stmt.executeUpdate("drop table if exists `ncbi_uqnaming`;");
 			stmt.executeUpdate("create table `ncbi_uqnaming` ("
 					+ "tax_id mediumint(11) unsigned not null, "
-					+ "nemd5 char(32) not null, "
 					+ "uqmd5 char(32) not null);");
 
 			stmt.close();
@@ -58,7 +57,7 @@ public class Hashmd5Naming {
 		gc.addPrepStmt("gnn", "select taxonID, scientificName, canonicalName from gbif_taxon order by taxonID asc limit ? offset ?;");
 		gc.addPrepStmt("gvn", "select taxonID, vernacularName from gbif_vernacularname order by taxonID asc limit ? offset ?;");
 		gc.addPrepStmt("nne", "select tax_id, name_txt from ncbi_names order by tax_id asc limit ? offset ?;");
-		gc.addPrepStmt("nue", "select tax_id, name_txt, unique_name from ncbi_names where unique_name is not null and ("
+		gc.addPrepStmt("nue", "select tax_id, unique_name from ncbi_names where unique_name is not null and ("
 				+ "name_class = \"scientific name\" or name_class = \"in-part\" or name_class = \"common name\" or "
 				+ "name_class = \" genbank common name\" or name_class = \"synonym\" or name_class = \"anamorph\") "
 				+ "order by tax_id limit ? offset ?");
@@ -66,7 +65,7 @@ public class Hashmd5Naming {
 		istmt[0] = con.prepareStatement("insert into gbif_naming (taxonID, snmd5, cnmd5) values (?, ?, ?);");
 		istmt[1] = con.prepareStatement("insert into gbif_vernaming (taxonID, vnmd5) values (?, ?);");
 		istmt[2] = con.prepareStatement("insert into ncbi_naming (tax_id, nemd5) values (?, ?);");
-		istmt[3] = con.prepareStatement("insert into ncbi_uqnaming (tax_id, nemd5, uqmd5) values (?, ?, ?);");
+		istmt[3] = con.prepareStatement("insert into ncbi_uqnaming (tax_id, uqmd5) values (?, ?);");
 	}
 
 	public static void main(String[] args) throws SQLException {
@@ -207,11 +206,10 @@ public class Hashmd5Naming {
 		
 		while(rs.next()) {
 			istmt[3].setInt(1, rs.getInt(1));
-			istmt[3].setString(2, md.md5HexString(rs.getString(2).toLowerCase().trim()));
-			String tmpUq = rs.getString(3);
+			String tmpUq = rs.getString(2);
 			//System.out.println(tmpUq);
 			//System.out.println(tmpUq.substring(tmpUq.indexOf("<") + 1, tmpUq.indexOf(">")));
-			istmt[3].setString(3, md.md5HexString(tmpUq.substring(tmpUq.indexOf("<") + 1, tmpUq.indexOf(">")).toLowerCase().trim()));
+			istmt[3].setString(2, md.md5HexString(tmpUq.substring(tmpUq.indexOf("<") + 1, tmpUq.indexOf(">")).toLowerCase().trim()));
 			//System.out.println(rs.getString(2));
 			istmt[3].addBatch();
 		}
