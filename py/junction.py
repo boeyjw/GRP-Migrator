@@ -24,7 +24,7 @@ class Junction:
     def __rf(self):
         """Read all lines in file input"""
         with open('D:\\My Documents Placement\\Eclipse Java workspace\\GBIF-sql-to-json\\py\\cvn_nuq.comm', mode='r') as rfile:
-            names = [lines.split('\n') for lines in rfile.readlines()]
+            names = [lines.strip('\n') for lines in rfile.readlines()]
         return names
 
     def __selectstmt(self, gt, nn, gton, nnon, nnparam):
@@ -33,7 +33,7 @@ class Junction:
         return list
     
     def __uniqsel(self, gt, gton, nnparam):
-        self.__cursor.execute(self.uqquery.format(gt, gton, gton, nnparam))
+        self.__cursor.execute(self.uqquery.format(gt, gton, nnparam))
         list = [(taxonID, tax_id) for (taxonID, tax_id) in self.__cursor]
         return list
 
@@ -46,19 +46,19 @@ class Junction:
         nne = 'name_txt'
         self.__cursor.execute(self.__cquery)
         names = self.__rf()
-        with open('gbif_ncbi_junction.csv', mode='w', encoding='utf-8') as wfile:
+        with open('gbif_ncbi_junction.csv', mode='w', buffering=1, encoding='utf-8') as wfile:
             for lines in names:
                 res = self.__selectstmt(gt, nn, gtcn, nne, lines)
                 if not res:
                     res = self.__uniqsel(gt, gtcn, lines)
-                if not res:
-                    res = self.__selectstmt(gv, nn, gtvn, nne, lines)
-                if not res:
-                    res = self.__uniqsel(gv, gtvn, lines)
-                print(res)
-                for (taxonID, tax_id) in res:
-                    print(''.join((taxonID, tax_id)))
-                    wfile.write(''.join((taxonID, tax_id)) + '\n')
+                    if not res:
+                        res = self.__selectstmt(gv, nn, gtvn, nne, lines)
+                        if not res:
+                            res = self.__uniqsel(gv, gtvn, lines)
+                else:
+                    for (taxonID, tax_id) in res:
+                        print((taxonID, tax_id))
+                        wfile.write(', '.join(map(str, (taxonID, tax_id))) + '\n')
 
 obj = Junction()
 obj.runjunction()
