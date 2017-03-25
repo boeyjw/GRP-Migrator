@@ -1,12 +1,7 @@
 package sql.tojson;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -94,7 +89,6 @@ public class RunApp {
 						: cmd.getOptionValue("fn").concat(".json");
 		Gson gson = null;
 		Taxonable cv = null;
-		boolean reqBatch = false;
 		
 		if(cmd.getOptionValue("sernull") == null) {
 			gson = new Gson();
@@ -110,40 +104,19 @@ public class RunApp {
 		try {
 			int offset = 0;
 			JsonWriter arrWriter;
-			if(reqBatch) {
-				int fcount = 1;
-				Path dir = Files.createDirectory(Paths.get("".concat(fn).replace('.', '-')));
-				File ff;
-				//Loops until there are no more rows in db
-				while(true) {
-					ff = new File(dir.toFile(), fcount++ + fn);
-					arrWriter = new JsonWriter(new FileWriter(ff));
-					cv.setJsonWriter(arrWriter);
-					arrWriter.beginArray();
-					if(!cv.taxonToJson(gc, offset)) {
-						arrWriter.endArray();
-						arrWriter.close();
-						break;
-					}
-					offset += lim;
-					arrWriter.endArray();
-					arrWriter.close();
-				}
-			} else {
-				arrWriter = new JsonWriter(new FileWriter(fn));
-				cv.setJsonWriter(arrWriter);
+			arrWriter = new JsonWriter(new FileWriter(fn));
+			cv.setJsonWriter(arrWriter);
 
-				arrWriter.beginArray();
-				//Loops until there are no more rows in db
-				while(true) {
-					if(!cv.taxonToJson(gc, offset)) {
-						break;
-					}
-					offset += lim;
+			arrWriter.beginArray();
+			//Loops until there are no more rows in db
+			while(true) {
+				if(!cv.taxonToJson(gc, offset)) {
+					break;
 				}
-				arrWriter.endArray();
-				arrWriter.close();
+				offset += lim;
 			}
+			arrWriter.endArray();
+			arrWriter.close();
 		} catch (IOException ioe){
 			System.err.println(ioe.getMessage());
 		} catch (Exception e) {
