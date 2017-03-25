@@ -1,6 +1,8 @@
 package sql.schema;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
@@ -41,7 +43,7 @@ public abstract class Taxonable {
 	 * @param offset The cursor in which the query limit is currently at
 	 * @return True if there may be more rows to be transformed. False if it has reached end of the relation.
 	 */
-	public abstract boolean taxonToJson(DbConnection gc, int offset);
+	public abstract boolean taxonToJson(DbConnection gc, int offset) throws SQLException;
 	
 	/**
 	 * Explicitly sets the stream writer as it is outside the try-catch block

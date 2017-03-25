@@ -49,8 +49,8 @@ public class Accession extends Taxonable {
 	}
 
 	@Override
-	public boolean taxonToJson(DbConnection gc, int offset) {
-		try {
+	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
+		try  {
 			npQuery = new NuclProt();
 			rs = gc.selStmt("nodes", new int[] {lim, offset});
 			if(!rs.isBeforeFirst()) {
@@ -94,12 +94,10 @@ public class Accession extends Taxonable {
 				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
 			}
 			rs.close();
-		} catch (SQLException sqle) {
-			sqle.getErrorCode();
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-
+		
 		return true;
 	}
 

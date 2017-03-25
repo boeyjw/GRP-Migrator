@@ -1,5 +1,7 @@
 package sql.schema;
 
+import java.sql.SQLException;
+
 import com.google.gson.JsonArray;
 
 import sql.queries.DbConnection;
@@ -19,5 +21,5 @@ public interface SchemableOM {
 	 * @param id The foreign key ID associated with the main relation.
 	 * @return The sub-object of the main relation in Json array.
 	 */
-	public JsonArray retRes(DbConnection gc, int id);
+	public JsonArray retRes(DbConnection gc, int id) throws SQLException;
 }

@@ -17,7 +17,7 @@ public class DbConnection {
 	private MysqlDataSource ds;
 	private Connection con;
 	private HashMap<String, PreparedStatement> stmt;
-	
+
 	public DbConnection(String servername, String user, String password) {
 		stmt = new HashMap<String, PreparedStatement>(5);
 		ds = new MysqlDataSource();
@@ -25,7 +25,7 @@ public class DbConnection {
 		ds.setUser(user);
 		ds.setPassword(password);
 	}
-	
+
 	/**
 	 * Initialise database credentials then open a connection
 	 * @param servername The server in which its at
@@ -39,12 +39,12 @@ public class DbConnection {
 			ds.setDatabaseName(dbName);
 		}
 	}
-	
+
 	public DbConnection(String servername, int port, String dbName, String user, String password) {
 		this(servername, dbName, user, password);
 		ds.setPort(port);
 	}
-	
+
 	public Connection open() {
 		try {
 			con = ds.getConnection();
@@ -53,27 +53,22 @@ public class DbConnection {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return con;
 	}
-	
+
 	/**
 	 * Optional re-opening of the connection after closing it.
 	 * @param user Username associated with the server
 	 * @param password Password associated with the username of the server
 	 */
-	public Connection open(String user, String password) {
-		try {
-			con = ds.getConnection(user, password);
-		} catch (SQLException sqle) {
-			System.err.println(sqle.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+	public Connection open(String user, String password) throws SQLException {
+
+		con = ds.getConnection(user, password);
+
 		return con;
 	}
-	
+
 	/**
 	 * Closes the connection. No further operation can be done after this.
 	 */
@@ -84,11 +79,9 @@ public class DbConnection {
 			}
 		} catch (SQLException sqle) {
 			System.err.println(sqle.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Adds  a prepared statement into the map.
 	 * @param purpose The key of the map, also describes what the query is for in one word
@@ -102,10 +95,10 @@ public class DbConnection {
 		} catch (SQLException sqle) {
 			System.err.println(sqle.getMessage());
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Selects a prepared statement from the map and returns its results.
 	 * @param purpose The key of the map which is mapped to the prepared statement
@@ -119,12 +112,12 @@ public class DbConnection {
 					stmt.get(purpose).setInt(i, param[i - 1]);
 				}
 			}
-			
+
 			return stmt.get(purpose).executeQuery();
 		} catch (SQLException sqle) {
 			System.err.println(sqle.getMessage());
 		}
-		
+
 		return null;
 	}
 }

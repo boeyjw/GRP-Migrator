@@ -11,28 +11,23 @@ import sql.schema.SchemableOO;
 
 public class Division implements SchemableOO {
 	private JsonObject obj;
-	
+
 	public Division() {
 		obj = new JsonObject();
 	}
 
 	@Override
-	public JsonObject retRes(DbConnection gc, int id) {
-		try {
-			ResultSet rs = gc.selStmt("div", new int[] {id});
-			ResultSetMetaData rsmeta = rs.getMetaData();
+	public JsonObject retRes(DbConnection gc, int id) throws SQLException {
 
-			if(rs.next()) {
-				for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
-					obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i));
-				}
+		ResultSet rs = gc.selStmt("div", new int[] {id});
+		ResultSetMetaData rsmeta = rs.getMetaData();
+
+		if(rs.next()) {
+			for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
+				obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i));
 			}
-			rs.close();
-		} catch (SQLException sqle) {
-			sqle.getErrorCode();
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+		rs.close();
 
 		return obj;
 	}

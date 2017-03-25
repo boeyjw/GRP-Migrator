@@ -12,33 +12,28 @@ import sql.schema.SchemableOM;
 
 public class Multimedia implements SchemableOM {
 	private JsonArray arr;
-	
-	
+
+
 	public Multimedia() {
 		arr = new JsonArray();
 	}
 
 	@Override
-	public JsonArray retRes(DbConnection gc, int id) {
-		try {
-			JsonObject jobj;
-			ResultSet rs = gc.selStmt("mult", new int[] {id});
-			ResultSetMetaData rsmeta = rs.getMetaData();
-			
-			while(rs.next()) {
-				jobj = new JsonObject();
-				for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
-					jobj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i));
-				}
-				arr.add(jobj);
+	public JsonArray retRes(DbConnection gc, int id) throws SQLException {
+
+		JsonObject jobj;
+		ResultSet rs = gc.selStmt("mult", new int[] {id});
+		ResultSetMetaData rsmeta = rs.getMetaData();
+
+		while(rs.next()) {
+			jobj = new JsonObject();
+			for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
+				jobj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i));
 			}
-			rs.close();
-		} catch (SQLException sqle) {
-			sqle.getErrorCode();
-		} catch (Exception e) {
-			e.printStackTrace();
+			arr.add(jobj);
 		}
-		
+		rs.close();
+
 		return arr;
 	}
 
