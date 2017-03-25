@@ -106,21 +106,21 @@ public class SemiMerge extends Taxonable {
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getString(j++)); //comment
 					
 					subqueryOM = new Names();
-					gm_obj.add("names", subqueryOM.retRes(gc, tax_id));
+					gm_obj.add("names", subqueryOM.retRes());
 					subqueryOO = new Division();
 					gm_obj.add("division", subqueryOO.retRes(gc, div_id));
 					subqueryOO = new Gencode();
 					gm_obj.add("gencode", subqueryOO.retRes(gc, gen_id));
 					subqueryOM = new Citations();
-					gm_obj.add("citations", subqueryOM.retRes(gc, tax_id));
+					gm_obj.add("citations", subqueryOM.retRes());
 					subqueryOM = new Distribution();
-					gm_obj.add("distribution", subqueryOM.retRes(gc, taxonID));
+					gm_obj.add("distribution", subqueryOM.retRes());
 					subqueryOM = new Multimedia();
-					gm_obj.add("multimedia", subqueryOM.retRes(gc, taxonID));
+					gm_obj.add("multimedia", subqueryOM.retRes());
 					subqueryOM = new Reference();
-					gm_obj.add("references", subqueryOM.retRes(gc, taxonID));
+					gm_obj.add("references", subqueryOM.retRes());
 					subqueryOM = new VernacularName();
-					gm_obj.add("vernacularname", subqueryOM.retRes(gc, taxonID));
+					gm_obj.add("vernacularname", subqueryOM.retRes());
 				}
 
 				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);

@@ -11,17 +11,16 @@ import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 
 public class Citations implements SchemableOM {
-	JsonArray arr;
-
+	private JsonArray arr;
+	private ResultSet rs;
+	
 	public Citations() {
 		arr = new JsonArray();
 	}
 
 	@Override
-	public JsonArray retRes(DbConnection gc, int id) throws SQLException {
-
+	public JsonArray retRes() throws SQLException {
 		JsonObject jobj;
-		ResultSet rs = gc.selStmt("cit", new int[] {id});
 		ResultSetMetaData rsmeta = rs.getMetaData();
 
 		while(rs.next()) {
@@ -39,6 +38,17 @@ public class Citations implements SchemableOM {
 		rs.close();
 
 		return arr;
+	}
+
+	@Override
+	public boolean hasRet(DbConnection gc, int id) throws SQLException {
+		rs = gc.selStmt("cit", new int[] {id});
+		
+		if(rs.isBeforeFirst()) {
+			return true;
+		}
+		
+		return false;
 	}
 
 }

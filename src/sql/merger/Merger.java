@@ -138,7 +138,7 @@ public class Merger extends Taxonable {
 					gm_obj.add("vernacularname", subqueryOM.retRes(gc, taxonID));*/
 					
 					subqueryOM = new Names();
-					toIncludeArr("names", subqueryOM.retRes(gc, tax_id));
+					toIncludeArr("names", subqueryOM.retRes());
 					
 					subqueryOO = new Division();
 					gm_obj.add("division", subqueryOO.retRes(gc, div_id));
@@ -147,19 +147,19 @@ public class Merger extends Taxonable {
 					gm_obj.add("gencode", subqueryOO.retRes(gc, gen_id));
 					
 					subqueryOM = new Citations();
-					toIncludeArr("citations", subqueryOM.retRes(gc, tax_id));
+					toIncludeArr("citations", subqueryOM.retRes());
 					
 					subqueryOM = new Distribution();
-					toIncludeArr("distribution", subqueryOM.retRes(gc, taxonID));
+					toIncludeArr("distribution", subqueryOM.retRes());
 					
 					subqueryOM = new Multimedia();
-					toIncludeArr("multimedia", subqueryOM.retRes(gc, taxonID));
+					toIncludeArr("multimedia", subqueryOM.retRes());
 					
 					subqueryOM = new Reference();
-					toIncludeArr("references", subqueryOM.retRes(gc, taxonID));
+					toIncludeArr("references", subqueryOM.retRes());
 					
 					subqueryOM = new VernacularName();
-					toIncludeArr("vernacularname", subqueryOM.retRes(gc, taxonID));
+					toIncludeArr("vernacularname", subqueryOM.retRes());
 				}
 
 				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);

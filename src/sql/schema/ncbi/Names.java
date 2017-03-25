@@ -12,16 +12,15 @@ import sql.schema.SchemableOM;
 
 public class Names implements SchemableOM {
 	private JsonArray arr;
-
+	private ResultSet rs;
+	
 	public Names() {
 		arr = new JsonArray();
 	}
 
 	@Override
-	public JsonArray retRes(DbConnection gc, int id) throws SQLException {
-
+	public JsonArray retRes() throws SQLException {
 		JsonObject jobj;
-		ResultSet rs = gc.selStmt("names", new int[] {id});
 		ResultSetMetaData rsmeta = rs.getMetaData();
 
 		while(rs.next()) {
@@ -34,6 +33,17 @@ public class Names implements SchemableOM {
 		rs.close();
 
 		return arr;
+	}
+
+	@Override
+	public boolean hasRet(DbConnection gc, int id) throws SQLException {
+		rs = gc.selStmt("names", new int[] {id});
+		
+		if(rs.isBeforeFirst()) {
+			return true;
+		}
+		
+		return false;
 	}
 
 }

@@ -1,5 +1,10 @@
 /bin/
+
 /py/*.comm
+
 *.json
-/lib/*-javadoc
+
+/lib
+/*-javadoc
+
 *.csv

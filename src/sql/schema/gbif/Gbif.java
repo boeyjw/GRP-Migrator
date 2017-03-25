@@ -32,6 +32,52 @@ public class Gbif extends Taxonable {
 
 	@Override
 	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
+		rs = gc.selStmt("taxon", new int[] {lim, offset});
+		if(!rs.isBeforeFirst()) {
+			return false;
+		}
+		ResultSetMetaData rsmeta = rs.getMetaData();
+
+		bar.update(0, lim, Integer.MIN_VALUE);
+		while(rs.next()) {
+			gm_obj = new JsonObject();
+			int i = 1;
+			int taxonID = rs.getInt(1);
+
+			gm_obj.addProperty(rsmeta.getColumnName(i++), taxonID); //taxonID
+			gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i++)); //datasetID
+			gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++)); //parentNameUsageID
+			gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++)); //acceptedNameUsageID
+			gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++)); //originalNameUsageID
+
+			for( ; i <= rsmeta.getColumnCount(); i++) {
+				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i));
+			}
+
+			subqueryOM = new Distribution();
+			if(subqueryOM.hasRet(gc, taxonID)) 
+				gm_obj.add("distribution", subqueryOM.retRes());
+			subqueryOM = new Multimedia();
+			if(subqueryOM.hasRet(gc, taxonID)) 
+				gm_obj.add("multimedia", subqueryOM.retRes());
+			subqueryOM = new Reference();
+			if(subqueryOM.hasRet(gc, taxonID)) 
+				gm_obj.add("references", subqueryOM.retRes());
+			subqueryOM = new VernacularName();
+			if(subqueryOM.hasRet(gc, taxonID)) 
+				gm_obj.add("vernacularname", subqueryOM.retRes());
+
+			bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
+			gson.toJson(gm_obj, arrWriter);
+		}
+		rs.close();
+		//System.out.println("offset: " + offset);
+		
+		return true;
+	}
+
+	/*@Override
+	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
 
 		rs = gc.selStmt("taxon", new int[] {lim, offset});
 		if(!rs.isBeforeFirst()) {
@@ -71,6 +117,6 @@ public class Gbif extends Taxonable {
 		//System.out.println("offset: " + offset);
 
 		return true;
-	}
+	}*/
 
 }
