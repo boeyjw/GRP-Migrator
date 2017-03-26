@@ -13,8 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 
-import sql.merger.Merger;
-import sql.merger.SemiMerge;
+import sql.merger.MergeLinker;
 import sql.queries.DbConnection;
 import sql.schema.Taxonable;
 import sql.schema.gbif.Gbif;
@@ -45,11 +44,12 @@ public class RunApp {
 		else if(optionValue.equalsIgnoreCase("acc")) {
 			return new Accession(gc, gson, lim);
 		}
-		else if(optionValue.equalsIgnoreCase("semimerge")) {
+		/*else if(optionValue.equalsIgnoreCase("semimerge")) {
 			return new SemiMerge(gc, gson, lim);
-		}
+		}*/
 		else if(optionValue.equalsIgnoreCase("merge")) {
-			return new Merger(gc, gson, lim);
+			return new MergeLinker(gc, gson, lim);
+			//return new Merger(gc, gson, lim);
 		}
 		else {
 			System.err.println("Invalid switch for -dt");

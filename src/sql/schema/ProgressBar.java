@@ -8,6 +8,7 @@ package sql.schema;
  */
 public class ProgressBar {
 	private StringBuilder progress;
+	private char[] workchars = {'|', '/', '-', '\\'};
 
 	/**
 	 * initialize progress bar properties.
@@ -24,7 +25,6 @@ public class ProgressBar {
 	 * @param total an int representing the total work
 	 */
 	public void update(int done, int total, int actualTotal) {
-		char[] workchars = {'|', '/', '-', '\\'};
 		String format = "\r%3d%% %s %c";
 
 		int percent = (++done * 100) / total;

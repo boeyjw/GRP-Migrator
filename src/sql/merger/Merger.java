@@ -21,13 +21,18 @@ import sql.schema.ncbi.Division;
 import sql.schema.ncbi.Gencode;
 import sql.schema.ncbi.Names;
 
+/**
+ * This class joins between two database, GBIF and NCBI and assumes they are mutually exclusive.
+ * @deprecated Uses outdated database queries.
+ *
+ */
 public class Merger extends Taxonable {
 	private SchemableOM subqueryOM;
 	private SchemableOO subqueryOO;
-	
+
 	private int i; //rsg
 	private int j; //rsn
-	
+
 	private JsonArray arr;
 
 	public Merger(DbConnection gc, Gson gson, int lim) {
@@ -93,30 +98,30 @@ public class Merger extends Taxonable {
 				ResultSet rsn = gc.selStmt("nodes", new int[] {tax_id});
 				ResultSetMetaData rsgmeta = rsg.getMetaData();
 				ResultSetMetaData rsnmeta = rsn.getMetaData();
-				
+
 				i = j = 1;
-				
+
 				while(rsg.next() && rsn.next()) {
 					gm_obj.addProperty("taxonID", taxonID);
 					gm_obj.addProperty("tax_id", tax_id);
 					int div_id = rsn.getInt(j++);
 					int gen_id = rsn.getInt(j++);
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //datasetID
-					
+
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getInt(j++)); //parent_tax_id
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getString(j++)); //rank
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getString(j++)); //embl_code
-					gm_obj.add("flags", objectify(gc, rsn, rsnmeta, true, false, 6)); //NCBI flagging
-					
-					gm_obj.add("usageID", objectify(gc, rsg, rsgmeta, true, true, 3)); //usageIDs
+					gm_obj.add("flags", objectify(rsn, rsnmeta, true, false, 6)); //NCBI flagging
+
+					gm_obj.add("usageID", objectify(rsg, rsgmeta, true, true, 3)); //usageIDs
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //scientificName
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //scientificNameAuthorship
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //canonicalName
-					gm_obj.add("epithet", objectify(gc, rsg, rsgmeta, false, true, 3)); //Epithet tokens
+					gm_obj.add("epithet", objectify(rsg, rsgmeta, false, true, 3)); //Epithet tokens
 					for(int z = 0; z < 5; z++) {
 						gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++));
 					}
-					gm_obj.add("fullTaxonRank", objectify(gc, rsg, rsgmeta, false, true, 6));
+					gm_obj.add("fullTaxonRank", objectify(rsg, rsgmeta, false, true, 6));
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //taxonRemarks
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getString(j++)); //comment
 
@@ -136,28 +141,28 @@ public class Merger extends Taxonable {
 					gm_obj.add("references", subqueryOM.retRes(gc, taxonID));
 					subqueryOM = new VernacularName();
 					gm_obj.add("vernacularname", subqueryOM.retRes(gc, taxonID));*/
-					
+
 					subqueryOM = new Names();
 					toIncludeArr("names", subqueryOM.retRes());
-					
+
 					subqueryOO = new Division();
 					gm_obj.add("division", subqueryOO.retRes(gc, div_id));
-					
+
 					subqueryOO = new Gencode();
 					gm_obj.add("gencode", subqueryOO.retRes(gc, gen_id));
-					
+
 					subqueryOM = new Citations();
 					toIncludeArr("citations", subqueryOM.retRes());
-					
+
 					subqueryOM = new Distribution();
 					toIncludeArr("distribution", subqueryOM.retRes());
-					
+
 					subqueryOM = new Multimedia();
 					toIncludeArr("multimedia", subqueryOM.retRes());
-					
+
 					subqueryOM = new Reference();
 					toIncludeArr("references", subqueryOM.retRes());
-					
+
 					subqueryOM = new VernacularName();
 					toIncludeArr("vernacularname", subqueryOM.retRes());
 				}
@@ -176,30 +181,27 @@ public class Merger extends Taxonable {
 		return true;
 	}
 
-	private JsonObject objectify(DbConnection gc, ResultSet rs, ResultSetMetaData rsmeta, boolean isInt, boolean isI, int loopcount) {
+	@Override
+	protected JsonObject objectify(ResultSet rs, ResultSetMetaData rsmeta, boolean isInt, boolean isI, int loopcount) throws SQLException {
 		JsonObject obj = new JsonObject();
 		
-		try {
-			if(isInt) {
-				for(int z = 0; z < loopcount; z++) {
-					obj.addProperty(rsmeta.getColumnLabel((isI) ? i : j), rs.getInt((isI) ? i++ : j++));
-				}
+		if(isInt) {
+			for(int z = 0; z < loopcount; z++) {
+				obj.addProperty(rsmeta.getColumnLabel((isI) ? i : j), rs.getInt((isI) ? i++ : j++));
 			}
-			else {
-				for(int z = 0; z < loopcount; z++) {
-					obj.addProperty(rsmeta.getColumnLabel((isI) ? i : j), rs.getString((isI) ? i++ : j++));
-				}
-			}
-		} catch (SQLException sqle) {
-			System.err.println(sqle.getMessage());
 		}
-		
+		else {
+			for(int z = 0; z < loopcount; z++) {
+				obj.addProperty(rsmeta.getColumnLabel((isI) ? i : j), rs.getString((isI) ? i++ : j++));
+			}
+		}
+
 		return obj;
 	}
-	
+
 	private void toIncludeArr(String property, JsonArray subqueryArr) {
 		arr = subqueryArr;
-		
+
 		if(arr.size() > 0) {
 			gm_obj.add(property, arr);
 		}

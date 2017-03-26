@@ -16,6 +16,12 @@ import org.apache.commons.cli.ParseException;
 import sql.queries.DbConnection;
 import sql.tojson.CLIConfigurations;
 
+/**
+ * Hashes string retrieved from database into MD5 hashes and reinsert
+ * hashed values into the database in 32-bytes constant characters.
+ * @deprecated Hashing method is inefficient even with constant character. Has inconsistency when it hashes Chinese, Japanese and Korean characters.
+ *
+ */
 public class Hashmd5Naming {
 	private static Statement stmt;
 	private static PreparedStatement[] istmt = new PreparedStatement[4];

@@ -1,9 +1,13 @@
 package sql.schema.ncbi;
 
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import sql.queries.DbConnection;
 import sql.schema.Taxonable;
 
@@ -99,6 +103,12 @@ public class Accession extends Taxonable {
 		}
 		
 		return true;
+	}
+
+	@Override
+	protected JsonObject objectify(ResultSet rs, ResultSetMetaData rsmeta, boolean isInt, boolean isI, int loopcount) throws SQLException {
+		// Stub. This class has no need for JsonObject reference fields.
+		return null;
 	}
 
 }

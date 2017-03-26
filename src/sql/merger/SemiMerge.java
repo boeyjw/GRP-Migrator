@@ -20,6 +20,11 @@ import sql.schema.ncbi.Division;
 import sql.schema.ncbi.Gencode;
 import sql.schema.ncbi.Names;
 
+/**
+ * Test class to translate joined GBIF and NCBI database into JSON. Extremely inefficient.
+ * @deprecated Uses outdated database queries.
+ *
+ */
 public class SemiMerge extends Taxonable {
 	private SchemableOO subqueryOO;
 	private SchemableOM subqueryOM;
@@ -135,6 +140,12 @@ public class SemiMerge extends Taxonable {
 		}
 		
 		return true;
+	}
+
+	@Override
+	protected JsonObject objectify(ResultSet rs, ResultSetMetaData rsmeta, boolean isInt, boolean isI, int loopcount) throws SQLException {
+		// Stub. Won't be updated.
+		return null;
 	}
 
 }
