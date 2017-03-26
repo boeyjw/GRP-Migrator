@@ -17,26 +17,11 @@ public class Ncbi extends Taxonable {
 	private SchemableOM subqueryOM;
 	private int i;
 	
+	public Ncbi() { }
+	
 	public Ncbi(DbConnection gc, Gson gson, int lim) {
 		super(gc, gson, lim);
-		gc.addPrepStmt("nodes", "select tax_id as taxId, division_id, genetic_code_id, parent_tax_id as parentTaxId, "
-				+ "rank, embl_code, inherited_div_flag as inheritedDivFlag, inherited_GC_flag as inheritedGCFlag, "
-				+ "inherited_MGC_flag as inheritedMGCFlag, GenBank_hidden_flag as genBankHiddenFlag, hidden_subtree_root_flag as hiddenSubtreeRootFlag, "
-				+ "mitochondrial_genetic_code_id as mitochondrialGeneticCodeId, comments "
-				+ "from ncbi_nodes nn where nn.division_id=4 order by nn.tax_id limit ? offset ?;");
-
-		gc.addPrepStmt("names", "select nnm.name_txt as name, nnm.unique_name as uniquename, nnm.name_class as nameclass "
-				+ "from ncbi_nodes nn inner join ncbi_names nnm on nn.tax_id=nnm.tax_id where nnm.tax_id=?;");
-
-		gc.addPrepStmt("div", "select d.division_cde as cde, d.division_name as name, d.comments "
-				+ "from ncbi_division d where d.division_id=?;");
-
-		gc.addPrepStmt("gen", "select g.abbreviation, g.name, g.cde, g.starts "
-				+ "from ncbi_gencode g where g.genetic_code_id=?;");
-
-		gc.addPrepStmt("cit", "select nc.cit_key as citkey, nc.pubmed_id as pubmedId, nc.medline_id as medlineId, nc.url, nc.text "
-				+ "from ncbi_nodes nn left join ncbi_citations_junction ncj on nn.tax_id=ncj.tax_id left join ncbi_citations nc on ncj.cit_id=nc.cit_id "
-				+ "where nn.tax_id=?;");
+		initQuery(gc);
 	}
 
 	@Override
@@ -97,7 +82,7 @@ public class Ncbi extends Taxonable {
 	}
 
 	@Override
-	protected JsonObject objectify(ResultSet rs, ResultSetMetaData rsmeta, boolean isInt, boolean isI, int loopcount) throws SQLException {
+	public JsonObject objectify(ResultSet rs, ResultSetMetaData rsmeta, boolean isInt, boolean isI, int loopcount) throws SQLException {
 		JsonObject obj = new JsonObject();
 
 		if(isInt) {
@@ -112,6 +97,27 @@ public class Ncbi extends Taxonable {
 		}
 
 		return obj;
+	}
+	
+	public void initQuery(DbConnection gc) {
+		gc.addPrepStmt("nodes", "select tax_id as taxId, division_id, genetic_code_id, parent_tax_id as parentTaxId, "
+				+ "rank, embl_code, inherited_div_flag as inheritedDivFlag, inherited_GC_flag as inheritedGCFlag, "
+				+ "inherited_MGC_flag as inheritedMGCFlag, GenBank_hidden_flag as genBankHiddenFlag, hidden_subtree_root_flag as hiddenSubtreeRootFlag, "
+				+ "mitochondrial_genetic_code_id as mitochondrialGeneticCodeId, comments "
+				+ "from ncbi_nodes nn where nn.division_id=4 order by nn.tax_id limit ? offset ?;");
+
+		gc.addPrepStmt("names", "select nnm.name_txt as name, nnm.unique_name as uniquename, nnm.name_class as nameclass "
+				+ "from ncbi_nodes nn inner join ncbi_names nnm on nn.tax_id=nnm.tax_id where nnm.tax_id=?;");
+
+		gc.addPrepStmt("div", "select d.division_cde as cde, d.division_name as name, d.comments "
+				+ "from ncbi_division d where d.division_id=?;");
+
+		gc.addPrepStmt("gen", "select g.abbreviation, g.name, g.cde, g.starts "
+				+ "from ncbi_gencode g where g.genetic_code_id=?;");
+
+		gc.addPrepStmt("cit", "select nc.cit_key as citkey, nc.pubmed_id as pubmedId, nc.medline_id as medlineId, nc.url, nc.text "
+				+ "from ncbi_nodes nn left join ncbi_citations_junction ncj on nn.tax_id=ncj.tax_id left join ncbi_citations nc on ncj.cit_id=nc.cit_id "
+				+ "where nn.tax_id=?;");
 	}
 
 }

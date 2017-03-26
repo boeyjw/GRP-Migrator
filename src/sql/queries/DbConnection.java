@@ -90,7 +90,7 @@ public class DbConnection {
 	 */
 	public boolean addPrepStmt(String purpose, String query) {
 		try {
-			stmt.put(purpose, con.prepareStatement(query));
+			stmt.put(purpose.toLowerCase(), con.prepareStatement(query));
 			return true;
 		} catch (SQLException sqle) {
 			System.err.println(sqle.getMessage());
@@ -109,11 +109,11 @@ public class DbConnection {
 		try {
 			if(param != null) {
 				for(int i = 1; i <= param.length; i++) {
-					stmt.get(purpose).setInt(i, param[i - 1]);
+					stmt.get(purpose.toLowerCase()).setInt(i, param[i - 1]);
 				}
 			}
 
-			return stmt.get(purpose).executeQuery();
+			return stmt.get(purpose.toLowerCase()).executeQuery();
 		} catch (SQLException sqle) {
 			System.err.println(sqle.getMessage());
 		}

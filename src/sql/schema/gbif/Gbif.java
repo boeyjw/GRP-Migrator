@@ -14,28 +14,12 @@ import sql.schema.Taxonable;
 public class Gbif extends Taxonable {
 	private SchemableOM subqueryOM;
 	private int i;
-
+	
+	public Gbif() { }
+	
 	public Gbif(DbConnection gc, Gson gson, int lim) {
 		super(gc, gson, lim);
-		gc.addPrepStmt("taxon", "select taxonID, datasetID, parentNameUsageID, acceptedNameUsageID, originalNameUsageID, "
-				+ "scientificName, scientificNameAuthorship, canonicalName, genericName as generic, specificEpithet as 'specific', "
-				+ "infraspecificEpithet as infraspecific, taxonRank, nameAccordingTo, namePublishedIn, taxonomicStatus, nomenclaturalStatus, "
-				+ "kingdom, phylum, 'class', 'order', family, genus, taxonRemarks "
-				+ "from gbif_taxon gt where kingdom = 'Plantae' order by gt.taxonID limit ? offset ?;");
-
-		gc.addPrepStmt("dist", "select gd.threatStatus, gd.establishmentMeans, gd.lifeStage, gd.source, gd.country, gd.occuranceStatus, "
-				+ "gd.countryCode, gd.locationID, gd.locality, gd.locationRemarks "
-				+ "from gbif_taxon gt inner join gbif_distribution gd on gt.taxonID=gd.taxonID where gd.taxonID=?;");
-
-		gc.addPrepStmt("mult", "select gm.license, gm.rightsHolder, gm.creator, gm.references, gm.contributor, "
-				+ "gm.source, gm.identifier, gm.created, gm.title, gm.publisher, gm.description "
-				+ "from gbif_taxon gt inner join gbif_multimedia gm on gt.taxonID=gm.taxonID where gm.taxonID=?;");
-
-		gc.addPrepStmt("ref", "select gr.bibliographicCitation,gr.reference,gr.source,gr.identifier "
-				+ "from gbif_taxon gt inner join gbif_reference gr on gt.taxonID=gr.taxonID where gr.taxonID=?;");
-
-		gc.addPrepStmt("vern", "select gv.sex, gv.lifeStage, gv.source, gv.vernacularName as name, gv.language, gv.country, gv.countryCode "
-				+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.taxonID=gv.taxonID where gv.taxonID=?;");
+		initQuery(gc);
 	}
 
 	@Override
@@ -97,7 +81,7 @@ public class Gbif extends Taxonable {
 	}
 
 	@Override
-	protected JsonObject objectify(ResultSet rs, ResultSetMetaData rsmeta, boolean isInt, boolean isI, int loopcount) throws SQLException {
+	public JsonObject objectify(ResultSet rs, ResultSetMetaData rsmeta, boolean isInt, boolean isI, int loopcount) throws SQLException {
 		JsonObject obj = new JsonObject();
 
 		if(isInt) {
@@ -112,6 +96,29 @@ public class Gbif extends Taxonable {
 		}
 
 		return obj;
+	}
+
+	@Override
+	public void initQuery(DbConnection gc) {
+		gc.addPrepStmt("taxon", "select taxonID, datasetID, parentNameUsageID, acceptedNameUsageID, originalNameUsageID, "
+				+ "scientificName, scientificNameAuthorship, canonicalName, genericName as generic, specificEpithet as 'specific', "
+				+ "infraspecificEpithet as infraspecific, taxonRank, nameAccordingTo, namePublishedIn, taxonomicStatus, nomenclaturalStatus, "
+				+ "kingdom, phylum, 'class', 'order', family, genus, taxonRemarks "
+				+ "from gbif_taxon gt where kingdom = 'Plantae' order by gt.taxonID limit ? offset ?;");
+
+		gc.addPrepStmt("dist", "select gd.threatStatus, gd.establishmentMeans, gd.lifeStage, gd.source, gd.country, gd.occuranceStatus, "
+				+ "gd.countryCode, gd.locationID, gd.locality, gd.locationRemarks "
+				+ "from gbif_taxon gt inner join gbif_distribution gd on gt.taxonID=gd.taxonID where gd.taxonID=?;");
+
+		gc.addPrepStmt("mult", "select gm.license, gm.rightsHolder, gm.creator, gm.references, gm.contributor, "
+				+ "gm.source, gm.identifier, gm.created, gm.title, gm.publisher, gm.description "
+				+ "from gbif_taxon gt inner join gbif_multimedia gm on gt.taxonID=gm.taxonID where gm.taxonID=?;");
+
+		gc.addPrepStmt("ref", "select gr.bibliographicCitation,gr.reference,gr.source,gr.identifier "
+				+ "from gbif_taxon gt inner join gbif_reference gr on gt.taxonID=gr.taxonID where gr.taxonID=?;");
+
+		gc.addPrepStmt("vern", "select gv.sex, gv.lifeStage, gv.source, gv.vernacularName as name, gv.language, gv.country, gv.countryCode "
+				+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.taxonID=gv.taxonID where gv.taxonID=?;");
 	}
 
 	/*@Override

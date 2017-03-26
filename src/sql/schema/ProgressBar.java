@@ -23,6 +23,7 @@ public class ProgressBar {
 	 *
 	 * @param done an int representing the work done so far
 	 * @param total an int representing the total work
+	 * @param the absolute amount of work done on every iteration
 	 */
 	public void update(int done, int total, int actualTotal) {
 		String format = "\r%3d%% %s %c";

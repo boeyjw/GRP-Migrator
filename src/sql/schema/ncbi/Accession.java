@@ -17,33 +17,8 @@ public class Accession extends Taxonable {
 
 	public Accession(DbConnection gc, Gson gson, int lim) {
 		super(gc, gson, lim);
-		gc.addPrepStmt("nodes", "select tax_id from ncbi_nodes nn where nn.division_id=4 order by nn.tax_id limit ? offset ?;");
-
-		gc.addPrepStmt("est", "select nne.accession, nne.`accession.version` as version, nne.gi "
-				+ "from ncbi_nodes nn inner join ncbi_nucl_est nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
-		gc.addPrepStmt("estck", "select nne.gi "
-				+ "from ncbi_nodes nn inner join ncbi_nucl_est nne on nne.tax_id=nn.tax_id where nne.tax_id=? limit 1;");
-
-		gc.addPrepStmt("wgs", "select nne.accession, nne.`accession.version` as version, nne.gi "
-				+ "from ncbi_nodes nn inner join ncbi_nucl_wgs nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
-		gc.addPrepStmt("wgsck", "select nne.gi "
-				+ "from ncbi_nodes nn inner join ncbi_nucl_wgs nne on nne.tax_id=nn.tax_id where nne.tax_id=? limit 1;");
-
-		gc.addPrepStmt("gss", "select nne.accession, nne.`accession.version` as version, nne.gi "
-				+ "from ncbi_nodes nn inner join ncbi_nucl_gss nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
-		gc.addPrepStmt("gssck", "select nne.gi "
-				+ "from ncbi_nodes nn inner join ncbi_nucl_gss nne on nne.tax_id=nn.tax_id where nne.tax_id=? limit 1;");
-
-		gc.addPrepStmt("gb", "select nne.accession, nne.`accession.version` as version, nne.gi "
-				+ "from ncbi_nodes nn inner join ncbi_nucl_gb nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
-		gc.addPrepStmt("gbck", "select nne.gi "
-				+ "from ncbi_nodes nn inner join ncbi_nucl_gb nne on nne.tax_id=nn.tax_id where nne.tax_id=? limit 1;");
-
-		gc.addPrepStmt("prot", "select nne.accession, nne.`accession.version` as version, nne.gi "
-				+ "from ncbi_nodes nn inner join ncbi_prot nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
-		gc.addPrepStmt("protck", "select nne.gi "
-				+ "from ncbi_nodes nn inner join ncbi_prot nne on nne.tax_id=nn.tax_id where nne.tax_id=? limit 1;");
-
+		initQuery(gc);		
+		
 		np_list = new String[5];
 		np_list[0] = "est";
 		np_list[1] = "wgs";
@@ -106,9 +81,39 @@ public class Accession extends Taxonable {
 	}
 
 	@Override
-	protected JsonObject objectify(ResultSet rs, ResultSetMetaData rsmeta, boolean isInt, boolean isI, int loopcount) throws SQLException {
+	public JsonObject objectify(ResultSet rs, ResultSetMetaData rsmeta, boolean isInt, boolean isI, int loopcount) throws SQLException {
 		// Stub. This class has no need for JsonObject reference fields.
 		return null;
+	}
+
+	@Override
+	public void initQuery(DbConnection gc) {
+		gc.addPrepStmt("nodes", "select tax_id from ncbi_nodes nn where nn.division_id=4 order by nn.tax_id limit ? offset ?;");
+
+		gc.addPrepStmt("est", "select nne.accession, nne.`accession.version` as version, nne.gi "
+				+ "from ncbi_nodes nn inner join ncbi_nucl_est nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
+		gc.addPrepStmt("estck", "select nne.gi "
+				+ "from ncbi_nodes nn inner join ncbi_nucl_est nne on nne.tax_id=nn.tax_id where nne.tax_id=? limit 1;");
+
+		gc.addPrepStmt("wgs", "select nne.accession, nne.`accession.version` as version, nne.gi "
+				+ "from ncbi_nodes nn inner join ncbi_nucl_wgs nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
+		gc.addPrepStmt("wgsck", "select nne.gi "
+				+ "from ncbi_nodes nn inner join ncbi_nucl_wgs nne on nne.tax_id=nn.tax_id where nne.tax_id=? limit 1;");
+
+		gc.addPrepStmt("gss", "select nne.accession, nne.`accession.version` as version, nne.gi "
+				+ "from ncbi_nodes nn inner join ncbi_nucl_gss nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
+		gc.addPrepStmt("gssck", "select nne.gi "
+				+ "from ncbi_nodes nn inner join ncbi_nucl_gss nne on nne.tax_id=nn.tax_id where nne.tax_id=? limit 1;");
+
+		gc.addPrepStmt("gb", "select nne.accession, nne.`accession.version` as version, nne.gi "
+				+ "from ncbi_nodes nn inner join ncbi_nucl_gb nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
+		gc.addPrepStmt("gbck", "select nne.gi "
+				+ "from ncbi_nodes nn inner join ncbi_nucl_gb nne on nne.tax_id=nn.tax_id where nne.tax_id=? limit 1;");
+
+		gc.addPrepStmt("prot", "select nne.accession, nne.`accession.version` as version, nne.gi "
+				+ "from ncbi_nodes nn inner join ncbi_prot nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
+		gc.addPrepStmt("protck", "select nne.gi "
+				+ "from ncbi_nodes nn inner join ncbi_prot nne on nne.tax_id=nn.tax_id where nne.tax_id=? limit 1;");
 	}
 
 }
