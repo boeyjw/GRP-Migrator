@@ -138,9 +138,9 @@ public class MergeLinker extends Taxonable {
 		
 		//Replace GBIF parent table query
 		gc.addPrepStmt("taxon", "select taxonID, datasetID, parentNameUsageID, acceptedNameUsageID, originalNameUsageID, "
-				+ "scientificName, scientificNameAuthorship, canonicalName, genericName as generic, specificEpithet as 'specific', "
+				+ "scientificName, scientificNameAuthorship, canonicalName, genericName as generic, specificEpithet as `specific`, "
 				+ "infraspecificEpithet as infraspecific, taxonRank, nameAccordingTo, namePublishedIn, taxonomicStatus, nomenclaturalStatus, "
-				+ "kingdom, phylum, 'class', 'order', family, genus, taxonRemarks "
+				+ "kingdom, phylum, `class`, `order`, family, genus, taxonRemarks "
 				+ "from gbif_taxon where taxonID=?;");
 		
 		//Replace NCBI parent table query
