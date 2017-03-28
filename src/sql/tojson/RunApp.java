@@ -1,7 +1,11 @@
 package sql.tojson;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -102,18 +106,25 @@ public class RunApp {
 
 		//Working set
 		try {
+			File file = new File("json\\" + fn.substring(0, fn.indexOf('.')) + '_' + Integer.toString(0) + fn.substring(fn.indexOf('.'), fn.length()));
+			file.getParentFile().mkdir();
+			
 			int offset = 0;
-			JsonWriter arrWriter;
-			arrWriter = new JsonWriter(new FileWriter(fn));
+			PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+			JsonWriter arrWriter = new JsonWriter(writer);
 			cv.setJsonWriter(arrWriter);
 
 			arrWriter.beginArray();
 			//Loops until there are no more rows in db
-			while(true) {
-				if(!cv.taxonToJson(gc, offset)) {
-					break;
-				}
+			while(cv.taxonToJson(gc, offset)) {
+				arrWriter.endArray();
+				arrWriter.close();
 				offset += lim;
+				file = new File("json\\" + fn.substring(0, fn.indexOf('.')) + '_' + Integer.toString(offset/lim) + fn.substring(fn.indexOf('.'), fn.length()));
+				writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+				arrWriter = new JsonWriter(writer);
+				cv.setJsonWriter(arrWriter);
+				arrWriter.beginArray();
 			}
 			arrWriter.endArray();
 			arrWriter.close();
