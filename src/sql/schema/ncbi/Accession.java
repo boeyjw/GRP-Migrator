@@ -88,7 +88,7 @@ public class Accession extends Taxonable {
 
 	@Override
 	public void initQuery(DbConnection gc) {
-		gc.addPrepStmt("nodes", "select tax_id from ncbi_nodes nn where nn.division_id=4 order by nn.tax_id limit ? offset ?;");
+		gc.addPrepStmt("nodes", "select distinct tax_id from ncbi_nodes nn inner join gbif_ncbi_junction gnj using (tax_id) order by nn.tax_id limit ? offset ?;");
 
 		gc.addPrepStmt("est", "select nne.accession, nne.`accession.version` as version, nne.gi "
 				+ "from ncbi_nodes nn inner join ncbi_nucl_est nne on nne.tax_id=nn.tax_id where nne.tax_id=?;");
