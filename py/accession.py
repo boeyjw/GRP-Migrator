@@ -2,6 +2,7 @@ import threading
 import re
 from json import dump
 from queue import Queue
+from sys import getsizeof
 from connection import Connection
 
 lsjson = Queue(10000)
@@ -12,7 +13,7 @@ class Accession(threading.Thread):
         threading.Thread.__init__(self)
         self.__conn = Connection()
         self.__cnx = self.__conn.getconn()
-        self.__cursor = self.__cnx.cursor()
+        self.__cursor = self.__cnx.cursor(buffered=True)
         self.__table = table
         self.acc = ('SELECT nne.accession, nne.`accession.version` AS version, nne.gi '
                     'FROM ncbi_{} nne INNER JOIN ncbi_nodes nn USING (tax_id) '
@@ -21,22 +22,25 @@ class Accession(threading.Thread):
     def run(self):
         for ids in lstaxId:
             idd = int(re.findall('\d+', str(ids))[0])
-            """print(self.__table + "\t" + str(idd))"""
             self.__cursor.execute(self.acc.format(self.__table, idd, idd))
-            iddict = {
-                'taxId': idd,
-                self.__table: [
-                    {
-                        'accession': str(accession),
-                        'version': str(version),
-                        'gi': int(gi)
-                    }
-                    for (accession, version, gi) in self.__cursor
-                ]
-            }
+            print(getsizeof(self.__cursor))
+            try:
+                iddict = {
+                    'taxId': idd,
+                    self.__table: [
+                        {
+                            'accession': str(accession),
+                            'version': str(version),
+                            'gi': int(gi)
+                        }
+                        for (accession, version, gi) in self.__cursor
+                    ]
+                }
+            except MemoryError:
+                pass
             if iddict[self.__table]:
                 lsjson.put(iddict)
-            print(str(idd) + '\t' + str(lsjson.qsize()))
+            """print(str(idd) + '\t' + str(lsjson.qsize()))"""
         self.closeconn()
 
     def closeconn(self):
