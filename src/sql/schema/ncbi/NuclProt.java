@@ -24,7 +24,11 @@ public class NuclProt {
 			String accession = null;
 			arrWriter.beginObject();
 			for(int i = 1; i <= rsmeta.getColumnCount(); i++) {
-				arrWriter.name(rsmeta.getColumnLabel(i));
+				try {
+					arrWriter.name(rsmeta.getColumnLabel(i).substring(0, 3));
+				} catch (IndexOutOfBoundsException iob) {
+					arrWriter.name(rsmeta.getColumnLabel(i));
+				}
 				if(rsmeta.getColumnLabel(i).equals("accession")) {
 					accession = rs.getString(i);
 				}
