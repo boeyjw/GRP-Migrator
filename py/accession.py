@@ -1,11 +1,13 @@
 import threading
 import re
+import os
+from sys import getsizeof
 from json import dump
 from queue import Queue
-from sys import getsizeof
 from connection import Connection
 
-lsjson = Queue(10000)
+MAXDOCSIZE = 20000
+lsjson = Queue(1000)
 lstaxId = []
 
 class Accession(threading.Thread):
@@ -13,34 +15,58 @@ class Accession(threading.Thread):
         threading.Thread.__init__(self)
         self.__conn = Connection()
         self.__cnx = self.__conn.getconn()
-        self.__cursor = self.__cnx.cursor(buffered=True)
+        self.__cursor = self.__cnx.cursor()
         self.__table = table
         self.acc = ('SELECT nne.accession, nne.`accession.version` AS version, nne.gi '
                     'FROM ncbi_{} nne INNER JOIN ncbi_nodes nn USING (tax_id) '
-                    'WHERE nne.tax_id = {} AND nn.tax_id = {}')
+                    'WHERE nne.tax_id = {} AND nn.tax_id = {} {};')
 
     def run(self):
         for ids in lstaxId:
             idd = int(re.findall('\d+', str(ids))[0])
-            self.__cursor.execute(self.acc.format(self.__table, idd, idd))
-            print(getsizeof(self.__cursor))
+            self.__cursor.execute(self.acc.format(self.__table, idd, idd, ''))
             try:
-                iddict = {
-                    'taxId': idd,
-                    self.__table: [
-                        {
-                            'accession': str(accession),
-                            'version': str(version),
-                            'gi': int(gi)
-                        }
-                        for (accession, version, gi) in self.__cursor
-                    ]
-                }
+                maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
+                while maxdoclength:
+                    iddict = {
+                        'taxId': idd,
+                        self.__table: [
+                            {
+                                'accession': str(accession),
+                                'version': str(version),
+                                'gi': int(gi)
+                            }
+                            for (accession, version, gi) in maxdoclength
+                        ]
+                    }
+                    if iddict[self.__table]:
+                        lsjson.put(iddict)
+                    maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
+                print('Normal: ' + str(idd) + '\t' + str(lsjson.qsize()))
             except MemoryError:
-                pass
-            if iddict[self.__table]:
-                lsjson.put(iddict)
-            """print(str(idd) + '\t' + str(lsjson.qsize()))"""
+                limit = MAXDOCSIZE
+                offset = 0
+                while True:
+                    self.__cursor.execute(self.acc.format(self.__table, idd, idd, 'limit ' + str(offset) + ',' + str(limit)))
+                    if not self.__cursor:
+                        break
+                    else:
+                        iddict = {
+                            'taxId': idd,
+                            self.__table: [
+                                {
+                                    'accession': str(accession),
+                                    'version': str(version),
+                                    'gi': int(gi)
+                                }
+                                for (accession, version, gi) in self.__cursor
+                            ]
+                        }
+                        if iddict[self.__table]:
+                            lsjson.put(iddict)
+                        limit += MAXDOCSIZE
+                        offset += limit
+                print('Memory error: ' + str(idd) + '\t' + str(lsjson.qsize()))
         self.closeconn()
 
     def closeconn(self):
@@ -61,7 +87,9 @@ def makeidlist():
 
 def worker():
     while True:
-        dump(lsjson.get(), wfile)
+        tmp = lsjson.get()
+        print("[WRITE] " + str(tmp['taxId']))
+        dump(tmp, wfile)
         checkalive = [x.is_alive() for x in threads]
         if any(True for x in checkalive):
             wfile.write(',')
@@ -77,8 +105,11 @@ for th in threads:
     th.start()
 twriter.start()
 
-for t in threads:
-    t.join()
-twriter.join()
+for th in threads:
+    th.join()
+
 wfile.write(']')
+print("File size: " + os.stat(wfile).st_size)
 wfile.close()
+twriter.join()
+print('Completed')
