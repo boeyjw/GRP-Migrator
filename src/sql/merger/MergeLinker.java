@@ -53,12 +53,12 @@ public class MergeLinker extends Taxonable {
 			while(grs.next() && nrs.next()) {
 				int taxonID = grs.getInt(i);
 				int tax_id = nrs.getInt(j);
-				gm_obj.addProperty(nrsmeta.getColumnLabel(j++), tax_id); //tax_id
+				gm_obj.addProperty("ncbi_" + nrsmeta.getColumnLabel(j++), tax_id); //tax_id
 				int div_id = nrs.getInt(j++);
 				int gen_id = nrs.getInt(j++);
 				gm_obj.addProperty(nrsmeta.getColumnLabel(j), nrs.getInt(j++)); //parent_tax_id
 				
-				gm_obj.addProperty(grsmeta.getColumnLabel(i++), taxonID); //taxonID
+				gm_obj.addProperty("gbif_" + grsmeta.getColumnLabel(i++), taxonID); //taxonID
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //datasetID
 				gm_obj.add("usageID", objectify(grs, grsmeta, true, true, 3)); //Usage IDs
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //scientificName
