@@ -1,12 +1,13 @@
 import threading
 import re
 import os
-from sys import getsizeof
+import sys
+import time
 from json import dump
 from queue import Queue
 from connection import Connection
 
-MAXDOCSIZE = 20000
+MAXDOCSIZE = 1000000
 lsjson = Queue(1000)
 lstaxId = []
 
@@ -22,18 +23,21 @@ class Accession(threading.Thread):
                     'WHERE nne.tax_id = {} AND nn.tax_id = {} {};')
 
     def run(self):
+        """Queries and store json results into sync queue"""
         for ids in lstaxId:
             idd = int(re.findall('\d+', str(ids))[0])
-            self.__cursor.execute(self.acc.format(self.__table, idd, idd, ''))
             try:
+                self.__cursor.execute(self.acc.format(self.__table, idd, idd, ''))
                 maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
+                if maxdoclength:
+                    print('[SIZE] ' + self.__table + "\t" + str(idd) + '\t' + str(sys.getsizeof(maxdoclength)))
                 while maxdoclength:
                     iddict = {
                         'taxId': idd,
                         self.__table: [
                             {
-                                'accession': str(accession),
-                                'version': str(version),
+                                'acc': str(accession),
+                                'vers': str(version),
                                 'gi': int(gi)
                             }
                             for (accession, version, gi) in maxdoclength
@@ -42,8 +46,10 @@ class Accession(threading.Thread):
                     if iddict[self.__table]:
                         lsjson.put(iddict)
                     maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
-                print('Normal: ' + str(idd) + '\t' + str(lsjson.qsize()))
+                print('[Normal] ' + self.__table + "\t" + str(idd) + '\t' + str(lsjson.qsize()))
             except MemoryError:
+                if self.__cursor:
+                    self.__cursor.fetchall()
                 limit = MAXDOCSIZE
                 offset = 0
                 while True:
@@ -64,16 +70,17 @@ class Accession(threading.Thread):
                         }
                         if iddict[self.__table]:
                             lsjson.put(iddict)
-                        limit += MAXDOCSIZE
                         offset += limit
-                print('Memory error: ' + str(idd) + '\t' + str(lsjson.qsize()))
+                print('[Memory error] ' + str(idd) + '\t' + str(lsjson.qsize()))
         self.closeconn()
 
     def closeconn(self):
+        """Explicitly closes connection"""
         self.__cursor.close()
         self.__conn.closeconn()
 
 def makeidlist():
+    """Store entire list of tax_ids into shared Memory"""
     conn = Connection()
     cnx = conn.getconn()
     cursor = cnx.cursor()
@@ -86,6 +93,8 @@ def makeidlist():
     conn.closeconn()
 
 def worker():
+    """Write into a single json file in json array format"""
+    wfile.write('[')
     while True:
         tmp = lsjson.get()
         print("[WRITE] " + str(tmp['taxId']))
@@ -93,23 +102,25 @@ def worker():
         checkalive = [x.is_alive() for x in threads]
         if any(True for x in checkalive):
             wfile.write(',')
+    wfile.write(']')
 
-makeidlist()
-wfile = open('ncbi_acc.json', mode='w', encoding='utf-8')
-wfile.write('[')
-tables = ['nucl_gb', 'nucl_gss', 'nucl_wgs', 'nucl_est', 'prot']
-threads = [Accession(t) for t in tables]
-twriter = threading.Thread(target=worker)
+if __name__ == '__main__':
+    makeidlist()
+    wfile = open('ncbi_acc.json', mode='w', buffering=16*1024, encoding='utf-8')
+    tables = ['nucl_gb', 'nucl_gss', 'nucl_wgs', 'nucl_est', 'prot']
+    threads = [Accession(t) for t in tables]
+    twriter = threading.Thread(target=worker)
 
-for th in threads:
-    th.start()
-twriter.start()
+    for th in threads:
+        th.daemon = True
+        th.start()
+    twriter.daemon = True
+    twriter.start()
 
-for th in threads:
-    th.join()
+    for th in threads:
+        th.join(1000)
+    twriter.join(1000)
 
-wfile.write(']')
-print("File size: " + os.stat(wfile).st_size)
-wfile.close()
-twriter.join()
-print('Completed')
+    print("File size: " + str(os.stat('ncbi_acc.json').st_size))
+    wfile.close()
+    print('Completed')
