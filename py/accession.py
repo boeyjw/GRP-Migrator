@@ -7,8 +7,12 @@ from json import dump
 from queue import Queue
 from connection import Connection
 
-MAXDOCSIZE = 1000000
-lsjson = Queue(1000)
+#300000 because that is the near 16mb BSON limit
+MAXDOCSIZE = 300000
+#Adaptable Queue capacity at the cost of memory. Too low will slow the entire program
+lsjson = Queue(500)
+#Thread completion indication. Popped when a thread completes its task
+lscompleted = [True for x in range(0, 5)]
 lstaxId = []
 
 class Accession(threading.Thread):
@@ -29,15 +33,13 @@ class Accession(threading.Thread):
             try:
                 self.__cursor.execute(self.acc.format(self.__table, idd, idd, ''))
                 maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
-                if maxdoclength:
-                    print('[SIZE] ' + self.__table + "\t" + str(idd) + '\t' + str(sys.getsizeof(maxdoclength)))
                 while maxdoclength:
                     iddict = {
                         'taxId': idd,
                         self.__table: [
                             {
                                 'acc': str(accession),
-                                'vers': str(version),
+                                'vers': re.sub(str(accession), '', str(version)),
                                 'gi': int(gi)
                             }
                             for (accession, version, gi) in maxdoclength
@@ -46,8 +48,10 @@ class Accession(threading.Thread):
                     if iddict[self.__table]:
                         lsjson.put(iddict)
                     maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
-                print('[Normal] ' + self.__table + "\t" + str(idd) + '\t' + str(lsjson.qsize()))
+                print('[Normal] ' + self.__table + "\t" + str(idd))
             except MemoryError:
+                #Typically this exception does not occur in 64-bit Python
+                #Left here as fail safe for 32-bit Python
                 if self.__cursor:
                     self.__cursor.fetchall()
                 limit = MAXDOCSIZE
@@ -62,7 +66,7 @@ class Accession(threading.Thread):
                             self.__table: [
                                 {
                                     'accession': str(accession),
-                                    'version': str(version),
+                                    'version': re.sub(str(accession), '', str(version)),
                                     'gi': int(gi)
                                 }
                                 for (accession, version, gi) in self.__cursor
@@ -73,6 +77,33 @@ class Accession(threading.Thread):
                         offset += limit
                 print('[Memory error] ' + str(idd) + '\t' + str(lsjson.qsize()))
         self.closeconn()
+        lscompleted.pop()
+
+    """ DEBUG
+    def run(self):
+        idd = 4577
+        self.__cursor.execute(self.acc.format(self.__table, idd, idd, ''))
+        maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
+        while maxdoclength:
+            print(len(maxdoclength))
+            iddict = {
+                'taxId': idd,
+                self.__table: [
+                    {
+                        'acc': str(accession),
+                        'vers': re.sub(str(accession), '', str(version)),
+                        'gi': int(gi)
+                    }
+                    for (accession, version, gi) in maxdoclength
+                ]
+            }
+            if iddict[self.__table]:
+                lsjson.put(iddict)
+            maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
+        print('[Normal] ' + self.__table + "\t" + str(idd) + '\t' + str(lsjson.qsize()))
+        self.closeconn()
+        lscompleted.pop()
+    """
 
     def closeconn(self):
         """Explicitly closes connection"""
@@ -89,6 +120,8 @@ def makeidlist():
                    'ORDER BY tax_id;')
     for taxId in cursor:
         lstaxId.append(taxId)
+    #Regex substring for version is slow
+    cursor.execute('SET net_write_timeout = 180;')
     cursor.close()
     conn.closeconn()
 
@@ -96,12 +129,12 @@ def worker():
     """Write into a single json file in json array format"""
     wfile.write('[')
     while True:
-        tmp = lsjson.get()
-        print("[WRITE] " + str(tmp['taxId']))
-        dump(tmp, wfile)
-        checkalive = [x.is_alive() for x in threads]
-        if any(True for x in checkalive):
+        print("[WRITE] " + str(lsjson.qsize()))
+        dump(lsjson.get(), wfile)
+        if lscompleted:
             wfile.write(',')
+        else:
+            break
     wfile.write(']')
 
 if __name__ == '__main__':
