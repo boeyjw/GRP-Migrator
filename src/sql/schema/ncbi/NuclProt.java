@@ -9,13 +9,27 @@ import com.google.gson.stream.JsonWriter;
 
 import sql.queries.DbConnection;
 
+/**
+ * NCBI nucleotide and protein accession IDs processing.
+ * Composed by {@link sql.schema.ncbi.Accession}.
+ *
+ */
 public class NuclProt {
 	public static String querySet;
 
 	public NuclProt() {
 		querySet = new String();
 	}
-
+	
+	/**
+	 * Similar to {@link sql.schema.SchemableOM#retRes()}.
+	 * However, this method supports JSON write stream without buffer.
+	 * @param gc Database connection
+	 * @param param Parameters to be passed to server in prepared statement
+	 * @param arrWriter Writer for streaming
+	 * @throws SQLException
+	 * @throws IOException Write error
+	 */
 	public void retRes(DbConnection gc, int[] param, JsonWriter arrWriter) throws SQLException, IOException {
 		ResultSet rs = gc.selStmt(querySet, param);
 		ResultSetMetaData rsmeta = rs.getMetaData();
@@ -56,7 +70,16 @@ public class NuclProt {
 
 		return;
 	}
-
+	
+	/**
+	 * Similar to {@link sql.schema.SchemableOM#hasRet(DbConnection, int)}.
+	 * However, the ResultSet returned will be entirely stored in memory, which is too large.
+	 * @param gc Database connection
+	 * @param id Parameter to be passed for prepared statement
+	 * @param query Query to be sent, only returns either 1 or no rows
+	 * @return True if the associated tax_id has accession IDs. False otherwise.
+	 * @throws SQLException
+	 */
 	public boolean hasRes(DbConnection gc, int id, String query) throws SQLException {
 		ResultSet rs = gc.selStmt(query, new int[] {id});
 		if(rs.next()) {

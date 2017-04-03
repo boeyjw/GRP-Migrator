@@ -20,6 +20,10 @@ import sql.schema.gbif.Gbif;
 import sql.schema.ncbi.Accession;
 import sql.schema.ncbi.Ncbi;
 
+/**
+ * The main CLI strategy class to choose output.
+ *
+ */
 public class RunApp {
 	
 	private static void optionalConfigurations(Options opt) {
@@ -42,6 +46,7 @@ public class RunApp {
 			return new Ncbi(gc, gson, lim);
 		}
 		else if(optionValue.equalsIgnoreCase("acc")) {
+			//Runnable but deprecated output.
 			return new Accession(gc, gson, lim);
 		}
 		/*else if(optionValue.equalsIgnoreCase("semimerge")) {

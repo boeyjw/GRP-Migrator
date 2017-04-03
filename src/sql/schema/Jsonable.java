@@ -8,6 +8,10 @@ import com.google.gson.JsonObject;
 
 import sql.queries.DbConnection;
 
+/**
+ * Implemented by classes which translates SQL to JSON format.
+ *
+ */
 public interface Jsonable {
 	/**
 	 * Transform ResultSet from queries into JSON formatted output.

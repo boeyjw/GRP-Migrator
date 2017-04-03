@@ -19,7 +19,8 @@ import sql.tojson.CLIConfigurations;
 /**
  * Hashes string retrieved from database into MD5 hashes and reinsert
  * hashed values into the database in 32-bytes constant characters.
- * @deprecated Hashing method is inefficient even with constant character. Has inconsistency when it hashes Chinese, Japanese and Korean characters.
+ * @deprecated Hashing method is inefficient even with constant character.
+ * Has inconsistency when hashed Chinese, Japanese and Korean characters.
  *
  */
 public class Hashmd5Naming {
@@ -31,7 +32,14 @@ public class Hashmd5Naming {
 	private static boolean gvnDone = false;
 	private static boolean nneDone = false;
 	private static boolean nueDone = false;
-
+	
+	/**
+	 * Initialises queries to ready database and script.
+	 * @param con Database connection
+	 * @param gc Database connection for class specific methods
+	 * @param delete Whether to DROP TABLE IF EXISTS, for cleanup
+	 * @throws SQLException
+	 */
 	private static void init(Connection con, DbConnection gc, boolean delete) throws SQLException {
 		if(delete) {
 			stmt = con.createStatement();

@@ -9,6 +9,10 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.SchemableOO;
 
+/**
+ * NCBI division schema
+ *
+ */
 public class Division implements SchemableOO {
 	private JsonObject obj;
 

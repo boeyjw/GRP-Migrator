@@ -11,6 +11,12 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.Taxonable;
 
+/**
+ * NCBI Accession IDs. All accessions are combined into a single document referencing NCBI tax_id.
+ * @deprecated Produces JSON objects >24mb which translates to approximately >16mb BSON in MongoDB.
+ * Please use the Python code instead {@linkplain ./py/accession.py}
+ *
+ */
 public class Accession extends Taxonable {
 	private NuclProt npQuery;
 	private String[] np_list;

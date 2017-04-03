@@ -22,7 +22,7 @@ import sql.schema.ncbi.Names;
 
 /**
  * Test class to translate joined GBIF and NCBI database into JSON. Extremely inefficient.
- * @deprecated Uses outdated database queries.
+ * @deprecated Uses outdated database queries. This is also used for testing purposes only.
  *
  */
 public class SemiMerge extends Taxonable {

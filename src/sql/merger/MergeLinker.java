@@ -22,12 +22,15 @@ import sql.schema.ncbi.Gencode;
 import sql.schema.ncbi.Names;
 import sql.schema.ncbi.Ncbi;
 
+/**
+ * The updated merging class that is being utilised producing correct JSON schema.
+ *
+ */
 public class MergeLinker extends Taxonable {
 	private SchemableOM subqueryOM;
 	private SchemableOO subqueryOO;
-	private int i;
-	private int j;
-	
+	private int i; //Pointer for GBIF
+	private int j; //Pointer for NCBI
 	
 	public MergeLinker(DbConnection gc, Gson gson, int lim) {
 		super(gc, gson, lim);

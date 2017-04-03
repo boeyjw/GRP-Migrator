@@ -1,8 +1,6 @@
-import threading
 import re
 import os
-import sys
-import time
+import threading
 from json import dump
 from queue import Queue
 from connection import Connection
@@ -10,12 +8,15 @@ from connection import Connection
 #300000 because that is the near 16mb BSON limit
 MAXDOCSIZE = 300000
 #Adaptable Queue capacity at the cost of memory. Too low will slow the entire program
+#500 is ~4.3GB at peak and average ~3.8GB memory. Perfect for 8GB + 16GB (pagefile) systems
 lsjson = Queue(500)
 #Thread completion indication. Popped when a thread completes its task
 lscompleted = [True for x in range(0, 5)]
+#List to store the entire junction tax_id in memory
 lstaxId = []
 
 class Accession(threading.Thread):
+    """Extracts accession ids from SQL and translate to JSON array"""
     def __init__(self, table):
         threading.Thread.__init__(self)
         self.__conn = Connection()
@@ -39,12 +40,14 @@ class Accession(threading.Thread):
                         self.__table: [
                             {
                                 'acc': str(accession),
+                                #Trims off accession substrings, keeping only the version 
                                 'vers': re.sub(str(accession), '', str(version)),
                                 'gi': int(gi)
                             }
                             for (accession, version, gi) in maxdoclength
                         ]
                     }
+                    #Put only non-empty lists into the queue
                     if iddict[self.__table]:
                         lsjson.put(iddict)
                     maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
@@ -151,8 +154,8 @@ if __name__ == '__main__':
     twriter.start()
 
     for th in threads:
-        th.join(1000)
-    twriter.join(1000)
+        th.join()
+    twriter.join()
 
     print("File size: " + str(os.stat('ncbi_acc.json').st_size))
     wfile.close()

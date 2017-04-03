@@ -5,6 +5,11 @@ import org.apache.commons.cli.Options;
 
 import sql.queries.DbConnection;
 
+/**
+ * CLI initialisation.
+ * Contains the backbone for using CLI options.
+ *
+ */
 public class CLIConfigurations {
 	public static void serverConfiguration(Options opt) {
 		opt.addOption("db", "databasename", true, "MySQL database name to connect to");

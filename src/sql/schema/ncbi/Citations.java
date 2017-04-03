@@ -10,6 +10,10 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 
+/**
+ * NCBI citations schema
+ *
+ */
 public class Citations implements SchemableOM {
 	private JsonArray arr;
 	private ResultSet rs;

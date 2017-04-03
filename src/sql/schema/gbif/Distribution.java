@@ -10,6 +10,10 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 
+/**
+ * GBIF distribution schema.
+ *
+ */
 public class Distribution implements SchemableOM {
 	private JsonArray arr;
 	private ResultSet rs;

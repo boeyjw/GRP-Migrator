@@ -9,6 +9,10 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.SchemableOO;
 
+/**
+ * NCBI gencode schema
+ *
+ */
 public class Gencode implements SchemableOO {
 	private JsonObject obj;
 

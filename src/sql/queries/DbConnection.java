@@ -27,7 +27,7 @@ public class DbConnection {
 	}
 
 	/**
-	 * Initialise database credentials then open a connection
+	 * Initialise database credentials with localhost
 	 * @param servername The server in which its at
 	 * @param dbName The GBIF and NCBI database name in the server
 	 * @param user Username associated with the server
@@ -39,12 +39,24 @@ public class DbConnection {
 			ds.setDatabaseName(dbName);
 		}
 	}
-
+	
+	/**
+	 * Initialises database credentials with remote server.
+	 * @param servername Remote server access point
+	 * @param port Access point port
+	 * @param dbName The database to be accessed
+	 * @param user Username associated with the remote server
+	 * @param password Password associated with the username of the remote server
+	 */
 	public DbConnection(String servername, int port, String dbName, String user, String password) {
 		this(servername, dbName, user, password);
 		ds.setPort(port);
 	}
-
+	
+	/**
+	 * Opens a connection with the server.
+	 * @return The connection object.
+	 */
 	public Connection open() {
 		try {
 			con = ds.getConnection();

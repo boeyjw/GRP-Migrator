@@ -11,6 +11,13 @@ import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 import sql.schema.Taxonable;
 
+/**
+ * GBIF translation class.
+ * Composes of every class in {@link sql.schema.gbif}. 
+ * {@link sql.schema.gbif.Distribution}, {@link sql.schema.gbif.Multimedia}, 
+ * {@link sql.schema.gbif.Reference}, and {@link sql.schema.gbif.VernacularName}.
+ *
+ */
 public class Gbif extends Taxonable {
 	private SchemableOM subqueryOM;
 	private int i;
@@ -35,16 +42,6 @@ public class Gbif extends Taxonable {
 			gm_obj = new JsonObject();
 			i = 1;
 			int taxonID = rs.getInt(1);
-
-			/*gm_obj.addProperty(rsmeta.getColumnLabel(i++), taxonID); //taxonID
-			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //datasetID
-			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getInt(i++)); //parentNameUsageID
-			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getInt(i++)); //acceptedNameUsageID
-			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getInt(i++)); //originalNameUsageID
-
-			for( ; i <= rsmeta.getColumnCount(); i++) {
-				gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i));
-			}*/
 			
 			gm_obj.addProperty(rsmeta.getColumnLabel(i++), taxonID); //taxonID
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //datasetID
@@ -75,7 +72,6 @@ public class Gbif extends Taxonable {
 			gson.toJson(gm_obj, arrWriter);
 		}
 		rs.close();
-		//System.out.println("offset: " + offset);
 
 		return true;
 	}
@@ -120,48 +116,5 @@ public class Gbif extends Taxonable {
 		gc.addPrepStmt("vern", "select gv.sex, gv.lifeStage, gv.source, gv.vernacularName as name, gv.language, gv.country, gv.countryCode "
 				+ "from gbif_taxon gt inner join gbif_vernacularname gv on gt.taxonID=gv.taxonID where gv.taxonID=?;");
 	}
-
-	/*@Override
-	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
-
-		rs = gc.selStmt("taxon", new int[] {lim, offset});
-		if(!rs.isBeforeFirst()) {
-			return false;
-		}
-		ResultSetMetaData rsmeta = rs.getMetaData();
-
-		bar.update(0, lim, Integer.MIN_VALUE);
-		while(rs.next()) {
-			gm_obj = new JsonObject();
-			int i = 1;
-			int taxonID = rs.getInt(1);
-
-			gm_obj.addProperty(rsmeta.getColumnName(i++), taxonID); //taxonID
-			gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i++)); //datasetID
-			gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++)); //parentNameUsageID
-			gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++)); //acceptedNameUsageID
-			gm_obj.addProperty(rsmeta.getColumnName(i), rs.getInt(i++)); //originalNameUsageID
-
-			for( ; i <= rsmeta.getColumnCount(); i++) {
-				gm_obj.addProperty(rsmeta.getColumnName(i), rs.getString(i));
-			}
-
-			subqueryOM = new Distribution();
-			gm_obj.add("distribution", subqueryOM.retRes(gc, taxonID));
-			subqueryOM = new Multimedia();
-			gm_obj.add("multimedia", subqueryOM.retRes(gc, taxonID));
-			subqueryOM = new Reference();
-			gm_obj.add("references", subqueryOM.retRes(gc, taxonID));
-			subqueryOM = new VernacularName();
-			gm_obj.add("vernacularname", subqueryOM.retRes(gc, taxonID));
-
-			bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
-			gson.toJson(gm_obj, arrWriter);
-		}
-		rs.close();
-		//System.out.println("offset: " + offset);
-
-		return true;
-	}*/
 
 }

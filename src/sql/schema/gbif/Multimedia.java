@@ -10,6 +10,10 @@ import com.google.gson.JsonObject;
 import sql.queries.DbConnection;
 import sql.schema.SchemableOM;
 
+/**
+ * GBIF Multimedia schema
+ *
+ */
 public class Multimedia implements SchemableOM {
 	private JsonArray arr;
 	private ResultSet rs;
