@@ -105,11 +105,11 @@ public class MergeLinker extends Taxonable {
 				if(subqueryOM.hasRet(gc, tax_id))
 					gm_obj.add("citations", subqueryOM.retRes());
 
-				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
 				gson.toJson(gm_obj, arrWriter);
 			}
 			grs.close();
 			nrs.close();
+			bar.update(rs.getRow() - 1, lim, offset + rs.getRow());
 		}
 		rs.close();
 

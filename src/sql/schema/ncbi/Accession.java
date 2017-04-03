@@ -76,7 +76,7 @@ public class Accession extends Taxonable {
 
 					arrWriter.endObject();
 				}
-				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
+				bar.update(rs.getRow() - 1, lim, offset + rs.getRow());
 			}
 			rs.close();
 		} catch (IOException ioe) {

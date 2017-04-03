@@ -26,7 +26,7 @@ public class ProgressBar {
 	 * @param the absolute amount of work done on every iteration
 	 */
 	public void update(int done, int total, int actualTotal) {
-		String format = "\r%3d%% %s %c";
+		String format = "\r%3d%% %s %c %s";
 
 		int percent = (++done * 100) / total;
 		int extrachars = (percent / 2) - this.progress.length();
@@ -34,9 +34,9 @@ public class ProgressBar {
 		while (extrachars-- > 0) {
 			progress.append('#');
 		}
-
+		
 		System.out.printf(format, percent, progress,
-				workchars[done % workchars.length]);
+				workchars[done % workchars.length], done != total && actualTotal != Integer.MIN_VALUE ? actualTotal : "");
 
 		if (done == total) {
 			System.out.print("\t" + actualTotal);

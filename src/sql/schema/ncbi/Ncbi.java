@@ -46,20 +46,6 @@ public class Ncbi extends Taxonable {
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //embl_code
 			gm_obj.add("flags", objectify(rs, rsmeta, true, true, 6)); //All flags
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i)); //comments
-			
-			/*gm_obj.addProperty(rsmeta.getColumnLabel(i++), tax_id); //tax_id
-			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getInt(i++)); //parent_tax_id
-			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //rank
-			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //embl_code
-			int div_id = rs.getInt(i++); //division_id
-			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getInt(i++)); //inherited_div_flag
-			int gen_id = rs.getInt(i++); //genetic_code_id
-
-			for( ; i <= rsmeta.getColumnCount() - 1; i++) {
-				gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getInt(i));
-			}
-
-			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i));*/
 
 			subqueryOM = new Names();
 			if(subqueryOM.hasRet(gc, tax_id))
@@ -72,11 +58,10 @@ public class Ncbi extends Taxonable {
 			if(subqueryOM.hasRet(gc, tax_id))
 				gm_obj.add("citations", subqueryOM.retRes());
 
-			bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
+			bar.update(rs.getRow() - 1, lim, offset + rs.getRow());
 			gson.toJson(gm_obj, arrWriter);
 		}
 		rs.close();
-		//System.out.println("offset: " + offset);
 
 		return true;
 	}

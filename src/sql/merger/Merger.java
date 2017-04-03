@@ -86,23 +86,6 @@ public class Merger extends Taxonable {
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //taxonRemarks
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getString(j++)); //comment
 
-					/*subqueryOM = new Names();
-					gm_obj.add("names", subqueryOM.retRes(gc, tax_id));
-					subqueryOO = new Division();
-					gm_obj.add("division", subqueryOO.retRes(gc, div_id));
-					subqueryOO = new Gencode();
-					gm_obj.add("gencode", subqueryOO.retRes(gc, gen_id));
-					subqueryOM = new Citations();
-					gm_obj.add("citations", subqueryOM.retRes(gc, tax_id));
-					subqueryOM = new Distribution();
-					gm_obj.add("distribution", subqueryOM.retRes(gc, taxonID));
-					subqueryOM = new Multimedia();
-					gm_obj.add("multimedia", subqueryOM.retRes(gc, taxonID));
-					subqueryOM = new Reference();
-					gm_obj.add("references", subqueryOM.retRes(gc, taxonID));
-					subqueryOM = new VernacularName();
-					gm_obj.add("vernacularname", subqueryOM.retRes(gc, taxonID));*/
-
 					subqueryOM = new Names();
 					toIncludeArr("names", subqueryOM.retRes());
 
@@ -128,7 +111,7 @@ public class Merger extends Taxonable {
 					toIncludeArr("vernacularname", subqueryOM.retRes());
 				}
 
-				bar.update(rs.getRow(), lim, offset + rs.getRow() + 1);
+				bar.update(rs.getRow() - 1, lim, offset + rs.getRow());
 				gson.toJson(gm_obj, arrWriter);
 			}
 			rs.close();
