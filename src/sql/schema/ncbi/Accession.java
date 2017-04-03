@@ -37,12 +37,12 @@ public class Accession extends Taxonable {
 	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
 		try  {
 			npQuery = new NuclProt();
-			rs = gc.selStmt("nodes", new int[] {lim, offset});
+			rs = gc.selStmt("nodes", new int[] {limit, offset});
 			if(!rs.isBeforeFirst()) {
 				return false;
 			}
 
-			bar.update(0, lim, Integer.MIN_VALUE);
+			bar.update(0, limit, Integer.MIN_VALUE);
 			while(rs.next()) {
 				int tax_id = rs.getInt(1);
 				boolean[] selectiveExist = new boolean[np_list.length];
@@ -76,7 +76,7 @@ public class Accession extends Taxonable {
 
 					arrWriter.endObject();
 				}
-				bar.update(rs.getRow() - 1, lim, offset + rs.getRow());
+				bar.update(rs.getRow() - 1, limit, offset + rs.getRow());
 			}
 			rs.close();
 		} catch (IOException ioe) {

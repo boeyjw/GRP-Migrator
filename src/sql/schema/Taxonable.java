@@ -18,7 +18,7 @@ import sql.queries.DbConnection;
 public abstract class Taxonable implements Jsonable {
 	protected JsonWriter arrWriter;
 	protected Gson gson;
-	protected int lim;
+	protected int limit;
 
 	protected ProgressBar bar;
 	protected JsonObject gm_obj;
@@ -38,7 +38,7 @@ public abstract class Taxonable implements Jsonable {
 	public Taxonable(DbConnection gc, Gson gson, int lim) {
 		bar = new ProgressBar();
 		this.gson = gson;
-		this.lim = lim;
+		this.limit = lim;
 	}
 	
 	/**

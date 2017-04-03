@@ -14,16 +14,16 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
  *
  */
 public class DbConnection {
-	private MysqlDataSource ds;
-	private Connection con;
-	private HashMap<String, PreparedStatement> stmt;
+	private MysqlDataSource dataSource;
+	private Connection connection;
+	private HashMap<String, PreparedStatement> statement;
 
 	public DbConnection(String servername, String user, String password) {
-		stmt = new HashMap<String, PreparedStatement>(5);
-		ds = new MysqlDataSource();
-		ds.setServerName(servername);
-		ds.setUser(user);
-		ds.setPassword(password);
+		statement = new HashMap<String, PreparedStatement>(5);
+		dataSource = new MysqlDataSource();
+		dataSource.setServerName(servername);
+		dataSource.setUser(user);
+		dataSource.setPassword(password);
 	}
 
 	/**
@@ -36,7 +36,7 @@ public class DbConnection {
 	public DbConnection(String servername, String dbName, String user, String password) {
 		this(servername, user, password);
 		if(dbName != null) {
-			ds.setDatabaseName(dbName);
+			dataSource.setDatabaseName(dbName);
 		}
 	}
 	
@@ -50,7 +50,7 @@ public class DbConnection {
 	 */
 	public DbConnection(String servername, int port, String dbName, String user, String password) {
 		this(servername, dbName, user, password);
-		ds.setPort(port);
+		dataSource.setPort(port);
 	}
 	
 	/**
@@ -59,14 +59,14 @@ public class DbConnection {
 	 */
 	public Connection open() {
 		try {
-			con = ds.getConnection();
+			connection = dataSource.getConnection();
 		} catch (SQLException sqle) {
 			System.err.println(sqle.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return con;
+		return connection;
 	}
 
 	/**
@@ -76,9 +76,9 @@ public class DbConnection {
 	 */
 	public Connection open(String user, String password) throws SQLException {
 
-		con = ds.getConnection(user, password);
+		connection = dataSource.getConnection(user, password);
 
-		return con;
+		return connection;
 	}
 
 	/**
@@ -86,8 +86,8 @@ public class DbConnection {
 	 */
 	public void close() {
 		try {
-			if(!con.isClosed()) {
-				con.close();
+			if(!connection.isClosed()) {
+				connection.close();
 			}
 		} catch (SQLException sqle) {
 			System.err.println(sqle.getMessage());
@@ -102,7 +102,7 @@ public class DbConnection {
 	 */
 	public boolean addPrepStmt(String purpose, String query) {
 		try {
-			stmt.put(purpose.toLowerCase(), con.prepareStatement(query));
+			statement.put(purpose.toLowerCase(), connection.prepareStatement(query));
 			return true;
 		} catch (SQLException sqle) {
 			System.err.println(sqle.getMessage());
@@ -121,11 +121,11 @@ public class DbConnection {
 		try {
 			if(param != null) {
 				for(int i = 1; i <= param.length; i++) {
-					stmt.get(purpose.toLowerCase()).setInt(i, param[i - 1]);
+					statement.get(purpose.toLowerCase()).setInt(i, param[i - 1]);
 				}
 			}
 
-			return stmt.get(purpose.toLowerCase()).executeQuery();
+			return statement.get(purpose.toLowerCase()).executeQuery();
 		} catch (SQLException sqle) {
 			System.err.println(sqle.getMessage());
 		}

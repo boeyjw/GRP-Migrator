@@ -26,13 +26,13 @@ public class Ncbi extends Taxonable {
 
 	@Override
 	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
-		rs = gc.selStmt("nodes", new int[] {lim, offset});
+		rs = gc.selStmt("nodes", new int[] {limit, offset});
 		if(!rs.isBeforeFirst()) {
 			return false;
 		}
 		ResultSetMetaData rsmeta = rs.getMetaData();
 
-		bar.update(0, lim, Integer.MIN_VALUE);
+		bar.update(0, limit, Integer.MIN_VALUE);
 		while(rs.next()) {
 			gm_obj = new JsonObject();
 			i = 1;
@@ -58,7 +58,7 @@ public class Ncbi extends Taxonable {
 			if(subqueryOM.hasRet(gc, tax_id))
 				gm_obj.add("citations", subqueryOM.retRes());
 
-			bar.update(rs.getRow() - 1, lim, offset + rs.getRow());
+			bar.update(rs.getRow() - 1, limit, offset + rs.getRow());
 			gson.toJson(gm_obj, arrWriter);
 		}
 		rs.close();

@@ -37,13 +37,13 @@ public class SemiMerge extends Taxonable {
 	@Override
 	public boolean taxonToJson(DbConnection gc, int offset) {
 		try {
-			rs = gc.selStmt("merge", new int[] {lim, offset});
+			rs = gc.selStmt("merge", new int[] {limit, offset});
 			if(!rs.isBeforeFirst()) {
 				return false;
 			}
 			//ResultSetMetaData rsmeta = rs.getMetaData();
 
-			bar.update(0, lim, Integer.MIN_VALUE);
+			bar.update(0, limit, Integer.MIN_VALUE);
 			while(rs.next()) {
 				gm_obj = new JsonObject();
 				int taxonID = rs.getInt(1);
@@ -93,7 +93,7 @@ public class SemiMerge extends Taxonable {
 					gm_obj.add("vernacularname", subqueryOM.retRes());
 				}
 
-				bar.update(rs.getRow() - 1, lim, offset + rs.getRow());
+				bar.update(rs.getRow() - 1, limit, offset + rs.getRow());
 				gson.toJson(gm_obj, arrWriter);
 			}
 			rs.close();

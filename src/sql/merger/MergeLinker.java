@@ -39,12 +39,12 @@ public class MergeLinker extends Taxonable {
 
 	@Override
 	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
-		rs = gc.selStmt("gnjunction", new int[] {lim, offset});
+		rs = gc.selStmt("gnjunction", new int[] {limit, offset});
 		if(!rs.isBeforeFirst()) {
 			return false;
 		}
 
-		bar.update(0, lim, Integer.MIN_VALUE);
+		bar.update(0, limit, Integer.MIN_VALUE);
 		while(rs.next()) {
 			ResultSet grs = gc.selStmt("taxon", new int[] {rs.getInt(1)});
 			ResultSetMetaData grsmeta = grs.getMetaData();
@@ -109,7 +109,7 @@ public class MergeLinker extends Taxonable {
 			}
 			grs.close();
 			nrs.close();
-			bar.update(rs.getRow() - 1, lim, offset + rs.getRow());
+			bar.update(rs.getRow() - 1, limit, offset + rs.getRow());
 		}
 		rs.close();
 
