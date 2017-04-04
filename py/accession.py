@@ -26,11 +26,14 @@ class Accession(threading.Thread):
         self.acc = ('SELECT nne.accession, nne.`accession.version` AS version, nne.gi '
                     'FROM ncbi_{} nne INNER JOIN ncbi_nodes nn USING (tax_id) '
                     'WHERE nne.tax_id = {} AND nn.tax_id = {} {};')
+        self.getdistincttaxid = ('SELECT DISTINCT tax_id FROM ncbi_{};')
 
     def run(self):
         """Queries and store json results into sync queue"""
-        for ids in lstaxId:
-            idd = int(re.findall('\d+', str(ids))[0])
+        self.__cursor.execute(self.getdistincttaxid.format(self.__table))
+        disttaxid = self.__cursor.fetchall()
+        taxids = [tuple(z)[0] for z in disttaxid if tuple(z)[0] in lstaxId]
+        for idd in taxids:
             try:
                 self.__cursor.execute(self.acc.format(self.__table, idd, idd, ''))
                 maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
@@ -48,8 +51,7 @@ class Accession(threading.Thread):
                         ]
                     }
                     #Put only non-empty lists into the queue
-                    if iddict[self.__table]:
-                        lsjson.put(iddict)
+                    lsjson.put(iddict)
                     maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
                 print('[Normal] ' + self.__table + "\t" + str(idd))
             except MemoryError:
@@ -122,9 +124,9 @@ def makeidlist():
                    'FROM ncbi_nodes INNER JOIN gbif_ncbi_junction USING (tax_id) '
                    'ORDER BY tax_id;')
     for taxId in cursor:
-        lstaxId.append(taxId)
+        lstaxId.append(int(tuple(taxId)[0]))
     #Regex substring for version is slow
-    cursor.execute('SET net_write_timeout = 180;')
+    cursor.execute('SET net_write_timeout = 300;')
     cursor.close()
     conn.closeconn()
 
@@ -142,7 +144,7 @@ def worker():
 
 if __name__ == '__main__':
     makeidlist()
-    wfile = open('ncbi_acc.json', mode='w', buffering=16*1024, encoding='utf-8')
+    wfile = open('accession.json', mode='w', buffering=16*1024, encoding='utf-8')
     tables = ['nucl_gb', 'nucl_gss', 'nucl_wgs', 'nucl_est', 'prot']
     threads = [Accession(t) for t in tables]
     twriter = threading.Thread(target=worker)
@@ -157,6 +159,6 @@ if __name__ == '__main__':
         th.join()
     twriter.join()
 
-    print("File size: " + str(os.stat('ncbi_acc.json').st_size))
+    print("File size: " + str(os.stat('accession.json').st_size))
     wfile.close()
     print('Completed')
