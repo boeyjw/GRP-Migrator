@@ -43,7 +43,7 @@ public class Gbif extends Taxonable {
 			i = 1;
 			int taxonID = rs.getInt(1);
 			
-			gm_obj.addProperty(rsmeta.getColumnLabel(i++), taxonID); //taxonID
+			gm_obj.addProperty("gbif_" + rsmeta.getColumnLabel(i++), taxonID); //taxonID
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //datasetID
 			gm_obj.add("usageID", objectify(rs, rsmeta, true, true, 3)); //Usage IDs
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //scientificName
@@ -99,7 +99,7 @@ public class Gbif extends Taxonable {
 		gc.addPrepStmt("taxon", "select taxonID, datasetID, parentNameUsageID, acceptedNameUsageID, originalNameUsageID, "
 				+ "scientificName, scientificNameAuthorship, canonicalName, genericName as generic, specificEpithet as 'specific', "
 				+ "infraspecificEpithet as infraspecific, taxonRank, taxonomicStatus, "
-				+ "kingdom, phylum, 'class', 'order', family, genus, taxonRemarks "
+				+ "kingdom, phylum, `class`, `order`, family, genus, taxonRemarks "
 				+ "from gbif_taxon gt where kingdom = 'Plantae' order by gt.taxonID limit ? offset ?;");
 
 		gc.addPrepStmt("dist", "select gd.threatStatus, gd.establishmentMeans, gd.lifeStage, gd.source, gd.country, gd.occuranceStatus, "

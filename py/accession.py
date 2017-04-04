@@ -36,7 +36,7 @@ class Accession(threading.Thread):
                 maxdoclength = self.__cursor.fetchmany(size=MAXDOCSIZE)
                 while maxdoclength:
                     iddict = {
-                        'taxId': idd,
+                        'ncbi_taxId': idd,
                         self.__table: [
                             {
                                 'acc': str(accession),

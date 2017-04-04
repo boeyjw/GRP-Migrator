@@ -37,7 +37,7 @@ public class Ncbi extends Taxonable {
 			gm_obj = new JsonObject();
 			i = 1;
 			int tax_id = rs.getInt(i);
-			gm_obj.addProperty(rsmeta.getColumnLabel(i++), tax_id); //tax_id
+			gm_obj.addProperty("ncbi_" + rsmeta.getColumnLabel(i++), tax_id); //tax_id
 			int div_id = rs.getInt(i++);
 			int gen_id = rs.getInt(i++);
 						
