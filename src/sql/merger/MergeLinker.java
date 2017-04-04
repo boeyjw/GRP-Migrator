@@ -59,7 +59,7 @@ public class MergeLinker extends Taxonable {
 				gm_obj.addProperty("ncbi_" + nrsmeta.getColumnLabel(j++), tax_id); //tax_id
 				int div_id = nrs.getInt(j++);
 				int gen_id = nrs.getInt(j++);
-				gm_obj.addProperty(nrsmeta.getColumnLabel(j), nrs.getInt(j++)); //parent_tax_id
+				gm_obj.addProperty("ncbi_" + nrsmeta.getColumnLabel(j), nrs.getInt(j++)); //parent_tax_id
 				
 				gm_obj.addProperty("gbif_" + grsmeta.getColumnLabel(i++), taxonID); //taxonID
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //datasetID
@@ -68,8 +68,8 @@ public class MergeLinker extends Taxonable {
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //scientificNameAuthorship
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //canonicalName
 				gm_obj.add("epithet", objectify(grs, grsmeta, false, true, 3)); //Taxon epithets
-				gm_obj.add("nameref", objectify(grs, grsmeta, false, true, 2)); //Taxon name reference
-				gm_obj.add("status", objectify(grs, grsmeta, false, true, 2)); //Taxon status
+				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //Taxon rank
+				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //Taxon status
 				gm_obj.add("taxontree", objectify(grs, grsmeta, false, true, 6)); //Taxon tree rank
 				gm_obj.addProperty(nrsmeta.getColumnLabel(j), nrs.getString(j++)); //rank
 				gm_obj.addProperty(nrsmeta.getColumnLabel(j), nrs.getString(j++)); //embl_code
@@ -142,7 +142,7 @@ public class MergeLinker extends Taxonable {
 		//Replace GBIF parent table query
 		gc.addPrepStmt("taxon", "select taxonID, datasetID, parentNameUsageID, acceptedNameUsageID, originalNameUsageID, "
 				+ "scientificName, scientificNameAuthorship, canonicalName, genericName as generic, specificEpithet as `specific`, "
-				+ "infraspecificEpithet as infraspecific, taxonRank, nameAccordingTo, namePublishedIn, taxonomicStatus, nomenclaturalStatus, "
+				+ "infraspecificEpithet as infraspecific, taxonRank, taxonomicStatus, "
 				+ "kingdom, phylum, `class`, `order`, family, genus, taxonRemarks "
 				+ "from gbif_taxon where taxonID=?;");
 		

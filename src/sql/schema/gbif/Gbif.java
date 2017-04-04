@@ -50,9 +50,9 @@ public class Gbif extends Taxonable {
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //scientificNameAuthorship
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //canonicalName
 			gm_obj.add("epithet", objectify(rs, rsmeta, false, true, 3)); //Taxon epithets
-			gm_obj.add("nameref", objectify(rs, rsmeta, false, true, 2)); //Taxon name reference
-			gm_obj.add("status", objectify(rs, rsmeta, false, true, 2)); //Taxon status
-			gm_obj.add("taxontree", objectify(rs, rsmeta, false, true, 6)); //Taxon tree tank
+			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //Taxon rank
+			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //Taxon status
+			gm_obj.add("taxontree", objectify(rs, rsmeta, false, true, 6)); //Taxon tree rank
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //taxonRemarks
 
 			subqueryOM = new Distribution();
@@ -98,7 +98,7 @@ public class Gbif extends Taxonable {
 	public void initQuery(DbConnection gc) {
 		gc.addPrepStmt("taxon", "select taxonID, datasetID, parentNameUsageID, acceptedNameUsageID, originalNameUsageID, "
 				+ "scientificName, scientificNameAuthorship, canonicalName, genericName as generic, specificEpithet as 'specific', "
-				+ "infraspecificEpithet as infraspecific, taxonRank, nameAccordingTo, namePublishedIn, taxonomicStatus, nomenclaturalStatus, "
+				+ "infraspecificEpithet as infraspecific, taxonRank, taxonomicStatus, "
 				+ "kingdom, phylum, 'class', 'order', family, genus, taxonRemarks "
 				+ "from gbif_taxon gt where kingdom = 'Plantae' order by gt.taxonID limit ? offset ?;");
 
