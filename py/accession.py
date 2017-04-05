@@ -27,12 +27,19 @@ class Accession(threading.Thread):
                     'FROM ncbi_{} nne INNER JOIN ncbi_nodes nn USING (tax_id) '
                     'WHERE nne.tax_id = {} AND nn.tax_id = {} {};')
         self.getdistincttaxid = ('SELECT DISTINCT tax_id FROM ncbi_{};')
+        #Regex substring for version is slow
+        #List filtering is extremely slow
+        #Initialisation is slow
+        self.__cursor.execute('SET net_write_timeout = 28800;')
 
     def run(self):
         """Queries and store json results into sync queue"""
+        #Initialisation
         self.__cursor.execute(self.getdistincttaxid.format(self.__table))
         disttaxid = self.__cursor.fetchall()
+        #Filter for tax_ids hit only
         taxids = [tuple(z)[0] for z in disttaxid if tuple(z)[0] in lstaxId]
+        #Working loop
         for idd in taxids:
             try:
                 self.__cursor.execute(self.acc.format(self.__table, idd, idd, ''))
@@ -125,8 +132,6 @@ def makeidlist():
                    'ORDER BY tax_id;')
     for taxId in cursor:
         lstaxId.append(int(tuple(taxId)[0]))
-    #Regex substring for version is slow
-    cursor.execute('SET net_write_timeout = 300;')
     cursor.close()
     conn.closeconn()
 
