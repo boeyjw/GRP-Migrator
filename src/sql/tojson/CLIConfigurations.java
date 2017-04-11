@@ -16,13 +16,15 @@ public class CLIConfigurations {
 		opt.addOption("sn", "servername", true, "The server to connect to. If this option is left blank, defaults to localhost");
 		opt.addOption("us", "username", true, "MySQL username to connect to.");
 		opt.addOption("pw", "password", true, "MySQL password linked to the username");
-		opt.addOption("pr", "port", true, "The port to connect.");
+		opt.addOption("pr", "port", true, "The port to connect. Defaults to 3306.");
+		opt.addOption("h", "help", false, "Display help.");
 
-		opt.getOption("db").setRequired(false);
-		opt.getOption("sn").setRequired(true);
+		opt.getOption("db").setRequired(true);
+		opt.getOption("sn").setRequired(false);
 		opt.getOption("us").setRequired(true);
 		opt.getOption("pw").setRequired(true);
 		opt.getOption("pr").setRequired(false);
+		opt.getOption("h").setRequired(false);
 	}
 	
 	public static DbConnection getConnectionInstance(CommandLine cmd) {

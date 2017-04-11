@@ -27,10 +27,10 @@ import sql.schema.ncbi.Ncbi;
 public class RunApp {
 	
 	private static void optionalConfigurations(Options opt) {
-		opt.addOption("ba", "batchsize", true, "Batch size");
-		opt.addOption("fn", "filename", true, "Output file name");
-		opt.addOption("dt", "databasetype", true, "1) ncbi 2) gbif 3) acc 4) semimerge 5) merge");
-		opt.addOption("sernull", "serializenull", true, "Switch between output with null or no null fields. Type 'true' to activate. Default: Serialize null.");
+		opt.addOption("ba", "batchsize", true, "Batch size to process per instance. High batch size consumes more memory. Low batch size reduces performance. Defaults to 200000.");
+		opt.addOption("fn", "filename", true, "Output file name. Defaults to *databasetype*-out.json.");
+		opt.addOption("dt", "databasetype", true, "Transform SQL to JSON for dataset:\n\t1) ncbi\n\t2) gbif\n\t3) acc\n\t4) semimerge\n\t5) merge");
+		opt.addOption("sernull", "serializenull", false, "Switch between output with null or no null fields. Default: Do not serialize null.");
 		
 		opt.getOption("ba").setRequired(false);
 		opt.getOption("fn").setRequired(false);
@@ -39,20 +39,20 @@ public class RunApp {
 	}
 	
 	private static Taxonable getTaxonableInit(String optionValue, DbConnection gc, Gson gson, int lim) {
-		if(optionValue.equalsIgnoreCase("gbif")) {
-			return new Gbif(gc, gson, lim);
-		}
-		else if(optionValue.equalsIgnoreCase("ncbi")) {
+		if(optionValue.equalsIgnoreCase("ncbi") || optionValue.equals("1")) {
 			return new Ncbi(gc, gson, lim);
 		}
-		else if(optionValue.equalsIgnoreCase("acc")) {
+		else if(optionValue.equalsIgnoreCase("gbif") || optionValue.equals("2")) {
+			return new Gbif(gc, gson, lim);
+		}
+		else if(optionValue.equalsIgnoreCase("acc") || optionValue.equals("3")) {
 			//Runnable but deprecated output.
 			return new Accession(gc, gson, lim);
 		}
 		/*else if(optionValue.equalsIgnoreCase("semimerge")) {
 			return new SemiMerge(gc, gson, lim);
 		}*/
-		else if(optionValue.equalsIgnoreCase("merge")) {
+		else if(optionValue.equalsIgnoreCase("merge") || optionValue.equals("4")) {
 			return new MergeLinker(gc, gson, lim);
 			//return new Merger(gc, gson, lim);
 		}
@@ -62,6 +62,22 @@ public class RunApp {
 		}
 		
 		return null;
+	}
+	
+	private static void showHelp() {
+		System.out.println("gvcn2json - Transform SQL rows into JSON");
+		System.out.println("Required options: ");
+		System.out.println("-us, -username\t\t\tMySQL username to connect to.");
+		System.out.println("-pw, -password\t\t\tMySQL password linked to the username");
+		System.out.println("-db, -databasename\t\tMySQL database name to connect to");
+		System.out.println("-dt, -databasetype\t\tTransform SQL to JSON for dataset:\n\t1) ncbi\n\t2) gbif\n\t3) acc\n\t4) semimerge\n\t5) merge");
+		System.out.println("Optional options: ");
+		System.out.println("-sn, -servername\t\tThe server to connect to. Defaults to localhost.");
+		System.out.println("-pr, -port\t\t\tThe port to connect. Defaults to 3306.");
+		System.out.println("-ba, -batchsize\t\t\tBatch size to process per instance. High batch size consumes more memory. Low batch size reduces performance. Defaults to 200000.");
+		System.out.println("-fn, -filename\t\t\tOutput file name. Defaults to *databasetype*-out.json.");
+		System.out.println("-sernull, -serializenull\tSwitch between output with null or no null fields. Default: Do not serialize null, false.");
+		System.out.println("-h, -help\t\t\tShows this help screen.");
 	}
 	
 	public static void main(String[] args) {
@@ -76,10 +92,16 @@ public class RunApp {
 
 		try {
 			cmd = parser.parse(opt, args);
+			if(!cmd.hasOption("us") || !cmd.hasOption("pw") || 
+					!cmd.hasOption("db") || !cmd.hasOption("dt") ||
+					cmd.hasOption("h")) {
+				showHelp();
+				System.exit(1);
+			}
 		} catch (ParseException pee) {
 			System.out.println(pee.getMessage());
 			formatter.printHelp("Transform SQL rows into JSON", opt);
-
+			
 			System.exit(1);
 			return;
 		} catch (NullPointerException npe) {
@@ -88,14 +110,17 @@ public class RunApp {
 
 		//Init
 		DbConnection gc = CLIConfigurations.getConnectionInstance(cmd);
+		//Get batch size
 		int lim = Integer.parseInt((cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba"));
+		//Initialise file name
 		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? 
 				(cmd.getOptionValue("db") == null) ? cmd.getOptionValue("dt").concat("-out.json") : cmd.getOptionValue("db").concat("-out.json") 
 						: cmd.getOptionValue("fn").concat(".json");
 		Gson gson = null;
 		Taxonable cv = null;
 		
-		if(cmd.getOptionValue("sernull") == null) {
+		//Initialise Gson object parameters
+		if(cmd.hasOption("sernull")) {
 			gson = new Gson();
 		}
 		else {
