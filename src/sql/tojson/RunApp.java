@@ -31,11 +31,13 @@ public class RunApp {
 		opt.addOption("fn", "filename", true, "Output file name. Defaults to *databasetype*-out.json.");
 		opt.addOption("dt", "databasetype", true, "Transform SQL to JSON for dataset:\n\t1) ncbi\n\t2) gbif\n\t3) acc\n\t4) semimerge\n\t5) merge");
 		opt.addOption("sernull", "serializenull", false, "Switch between output with null or no null fields. Default: Do not serialize null.");
+		opt.addOption("pp", "prettyprint", false, "Outputs human-readable JSON format. Bloats file size due to whitespace.");
 		
 		opt.getOption("ba").setRequired(false);
 		opt.getOption("fn").setRequired(false);
 		opt.getOption("dt").setRequired(true);
 		opt.getOption("sernull").setRequired(false);
+		opt.getOption("pp").setRequired(false);
 	}
 	
 	private static Taxonable getTaxonableInit(String optionValue, DbConnection gc, Gson gson, int lim) {
@@ -121,10 +123,10 @@ public class RunApp {
 		
 		//Initialise Gson object parameters
 		if(cmd.hasOption("sernull")) {
-			gson = new Gson();
+			gson = cmd.hasOption("pp") ? new GsonBuilder().serializeNulls().setPrettyPrinting().create() : new GsonBuilder().serializeNulls().create();
 		}
 		else {
-			gson = new GsonBuilder().serializeNulls().create();
+			gson = cmd.hasOption("pp") ? new GsonBuilder().setPrettyPrinting().create() : new Gson();
 		}
 		
 		gc.open();
