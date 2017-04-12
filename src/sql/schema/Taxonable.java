@@ -19,6 +19,8 @@ public abstract class Taxonable implements Jsonable {
 	protected JsonWriter arrWriter;
 	protected Gson gson;
 	protected int limit;
+	protected int breakat;
+	protected int br; //Incrementor to track row count of an instant
 
 	protected ProgressBar bar;
 	protected JsonObject gm_obj;
@@ -34,11 +36,14 @@ public abstract class Taxonable implements Jsonable {
 	/**
 	 * Initialises all prepared statement for the specified database.
 	 * @param gc The connection for query purposes
+	 * @param breakat TODO
 	 */
-	public Taxonable(DbConnection gc, Gson gson, int lim) {
+	public Taxonable(DbConnection gc, Gson gson, int lim, int breakat) {
 		bar = new ProgressBar();
 		this.gson = gson;
 		this.limit = lim;
+		this.breakat = breakat;
+		br = 0;
 	}
 	
 	/**
@@ -54,5 +59,17 @@ public abstract class Taxonable implements Jsonable {
 	 */
 	public void setJsonWriter(JsonWriter arrWriter) {
 		this.arrWriter = arrWriter;
+	}
+	
+	/**
+	 * Break at provided number of rows if user uses this option. Has greater priority than {@link #limit}.
+	 * @param br Current row count. Incremented per row basis.
+	 * @return True if current row count is the breaking point. False otherwise.
+	 */
+	protected boolean stopPoint(int br) {
+		if(this.breakat == Integer.MIN_VALUE) {
+			return false;
+		}
+		return br > this.breakat ? true : false;
 	}
 }

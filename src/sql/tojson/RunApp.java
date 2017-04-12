@@ -67,21 +67,21 @@ public class RunApp {
 	
 	private static Taxonable getTaxonableInit(String optionValue, DbConnection gc, Gson gson, int lim, int breakat) {
 		if(optionValue.equalsIgnoreCase("ncbi") || optionValue.equals("1")) {
-			return new Ncbi(gc, gson, lim);
+			return new Ncbi(gc, gson, lim, breakat);
 		}
 		else if(optionValue.equalsIgnoreCase("gbif") || optionValue.equals("2")) {
-			return new Gbif(gc, gson, lim);
+			return new Gbif(gc, gson, lim, breakat);
 		}
 		else if(optionValue.equalsIgnoreCase("acc") || optionValue.equals("3")) {
 			//Runnable but deprecated output.
-			return new Accession(gc, gson, lim);
+			return new Accession(gc, gson, lim, breakat);
 		}
 		/*else if(optionValue.equalsIgnoreCase("semimerge")) {
 			//Deprecated completely
 			return new SemiMerge(gc, gson, lim);
 		}*/
 		else if(optionValue.equalsIgnoreCase("merge") || optionValue.equals("4")) {
-			return new MergeLinker(gc, gson, lim);
+			return new MergeLinker(gc, gson, lim, breakat);
 			//return new Merger(gc, gson, lim);
 		}
 		else {

@@ -35,8 +35,8 @@ public class Merger extends Taxonable {
 
 	private JsonArray arr;
 
-	public Merger(DbConnection gc, Gson gson, int lim) {
-		super(gc, gson, lim);
+	public Merger(DbConnection gc, Gson gson, int lim, int breakat) {
+		super(gc, gson, lim, breakat);
 		initQuery(gc);
 	}
 
@@ -44,13 +44,13 @@ public class Merger extends Taxonable {
 	public boolean taxonToJson(DbConnection gc, int offset) {
 		try {
 			rs = gc.selStmt("merge", new int[] {limit, offset});
-			if(!rs.isBeforeFirst()) {
+			if(!rs.isBeforeFirst() || stopPoint(br)) {
 				return false;
 			}
 			//ResultSetMetaData rsmeta = rs.getMetaData();
 
 			bar.update(0, limit, Integer.MIN_VALUE);
-			while(rs.next()) {
+			while(rs.next() && !stopPoint(++br)) {
 				gm_obj = new JsonObject();
 				int taxonID = rs.getInt(1);
 				int tax_id = rs.getInt(2);

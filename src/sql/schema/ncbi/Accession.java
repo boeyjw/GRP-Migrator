@@ -21,8 +21,8 @@ public class Accession extends Taxonable {
 	private NuclProt npQuery;
 	private String[] np_list;
 
-	public Accession(DbConnection gc, Gson gson, int lim) {
-		super(gc, gson, lim);
+	public Accession(DbConnection gc, Gson gson, int lim, int breakat) {
+		super(gc, gson, lim, breakat);
 		initQuery(gc);		
 		
 		np_list = new String[5];
@@ -38,12 +38,12 @@ public class Accession extends Taxonable {
 		try  {
 			npQuery = new NuclProt();
 			rs = gc.selStmt("nodes", new int[] {limit, offset});
-			if(!rs.isBeforeFirst()) {
+			if(!rs.isBeforeFirst() || stopPoint(br)) {
 				return false;
 			}
 
 			bar.update(0, limit, Integer.MIN_VALUE);
-			while(rs.next()) {
+			while(rs.next() && !stopPoint(++br)) {
 				int tax_id = rs.getInt(1);
 				boolean[] selectiveExist = new boolean[np_list.length];
 				boolean noneExist = true;

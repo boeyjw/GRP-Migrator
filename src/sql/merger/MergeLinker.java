@@ -32,20 +32,20 @@ public class MergeLinker extends Taxonable {
 	private int i; //Pointer for GBIF
 	private int j; //Pointer for NCBI
 	
-	public MergeLinker(DbConnection gc, Gson gson, int lim) {
-		super(gc, gson, lim);
+	public MergeLinker(DbConnection gc, Gson gson, int lim, int breakat) {
+		super(gc, gson, lim, breakat);
 		initQuery(gc);
 	}
 
 	@Override
 	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
 		rs = gc.selStmt("gnjunction", new int[] {limit, offset});
-		if(!rs.isBeforeFirst()) {
+		if(!rs.isBeforeFirst() || stopPoint(br)) {
 			return false;
 		}
 
 		bar.update(0, limit, Integer.MIN_VALUE);
-		while(rs.next()) {
+		while(rs.next() && !stopPoint(++br)) {
 			ResultSet grs = gc.selStmt("taxon", new int[] {rs.getInt(1)});
 			ResultSetMetaData grsmeta = grs.getMetaData();
 			ResultSet nrs = gc.selStmt("nodes", new int[] {rs.getInt(2)});
