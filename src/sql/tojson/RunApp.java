@@ -112,7 +112,7 @@ public class RunApp {
 					!cmd.hasOption("db") || !cmd.hasOption("dt") ||
 					cmd.hasOption("h")) {
 				formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
-				System.exit(1);
+				System.exit(0);
 			}
 		} catch (ParseException pee) {
 			System.err.println(pee.getMessage());
@@ -121,7 +121,7 @@ public class RunApp {
 		} catch (NullPointerException npe) {
 			System.err.println(npe.getMessage());
 			formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
-			System.exit(1);
+			System.exit(2);
 		}
 
 		//Init
@@ -147,8 +147,10 @@ public class RunApp {
 		
 		gc.open();
 		cv = getTaxonableInit(cmd.getOptionValue("dt"), gc, gson, lim, breakat);
-		if(cv == null)
+		if(cv == null) {
 			formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
+			System.exit(3);
+		}
 
 		//Working set
 		try {
