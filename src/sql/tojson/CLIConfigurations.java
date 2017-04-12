@@ -1,6 +1,7 @@
 package sql.tojson;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import sql.queries.DbConnection;
@@ -11,20 +12,45 @@ import sql.queries.DbConnection;
  *
  */
 public class CLIConfigurations {
+	
 	public static void serverConfiguration(Options opt) {
-		opt.addOption("db", "databasename", true, "MySQL database name to connect to");
-		opt.addOption("sn", "servername", true, "The server to connect to. If this option is left blank, defaults to localhost");
-		opt.addOption("us", "username", true, "MySQL username to connect to.");
-		opt.addOption("pw", "password", true, "MySQL password linked to the username");
-		opt.addOption("pr", "port", true, "The port to connect. Defaults to 3306.");
-		opt.addOption("h", "help", false, "Display help.");
-
-		opt.getOption("db").setRequired(true);
-		opt.getOption("sn").setRequired(false);
-		opt.getOption("us").setRequired(true);
-		opt.getOption("pw").setRequired(true);
-		opt.getOption("pr").setRequired(false);
-		opt.getOption("h").setRequired(false);
+		opt.addOption(Option.builder("us")
+							.longOpt("username")
+							.hasArg()
+							.required()
+							.argName("USERNAME")
+							.desc("SQL server username.")
+							.build());
+		opt.addOption(Option.builder("pw")
+							.longOpt("password")
+							.hasArg()
+							.required()
+							.argName("PASSWORD")
+							.desc("SQL server password.")
+							.build());
+		opt.addOption(Option.builder("db")
+							.longOpt("databasename")
+							.hasArg()
+							.required()
+							.argName("DATABASE")
+							.desc("SQL database to query from.")
+							.build());
+		opt.addOption(Option.builder("pr")
+							.longOpt("port")
+							.hasArg()
+							.argName("PORT")
+							.desc("SQL server port.")
+							.build());
+		opt.addOption(Option.builder("sn")
+							.longOpt("servername")
+							.hasArg()
+							.argName("HOST")
+							.desc("SQL server host. Defaults to localhost.")
+							.build());
+		opt.addOption(Option.builder("h")
+							.longOpt("help")
+							.desc("Display this help.")
+							.build());
 	}
 	
 	public static DbConnection getConnectionInstance(CommandLine cmd) {

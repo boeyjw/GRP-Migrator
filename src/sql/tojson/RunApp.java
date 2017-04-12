@@ -2,10 +2,13 @@ package sql.tojson;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Comparator;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
@@ -14,6 +17,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 
 import sql.merger.MergeLinker;
+import sql.merger.SemiMerge;
 import sql.queries.DbConnection;
 import sql.schema.Taxonable;
 import sql.schema.gbif.Gbif;
@@ -24,25 +28,44 @@ import sql.schema.ncbi.Ncbi;
  * The main CLI strategy class to choose output.
  *
  */
-public class RunApp {
-	
+public class RunApp {	
 	private static void optionalConfigurations(Options opt) {
-		opt.addOption("ba", "batchsize", true, "Batch size to process per instance. High batch size consumes more memory. Low batch size reduces performance. Defaults to 200000.");
-		opt.addOption("fn", "filename", true, "Output file name. Defaults to *databasetype*-out.json.");
-		opt.addOption("dt", "databasetype", true, "Transform SQL to JSON for dataset:\n\t1) ncbi\n\t2) gbif\n\t3) acc\n\t4) semimerge\n\t5) merge");
-		opt.addOption("sernull", "serializenull", false, "Switch between output with null or no null fields. Default: Do not serialize null.");
-		opt.addOption("pp", "prettyprint", false, "Outputs human-readable JSON format. Bloats file size due to whitespace.");
-		opt.addOption("br", "breakat", true, "Translate only x number of JSON documents. If x < batchsize, then only x number of documents are produced.");
-		
-		opt.getOption("ba").setRequired(false);
-		opt.getOption("fn").setRequired(false);
-		opt.getOption("dt").setRequired(true);
-		opt.getOption("sernull").setRequired(false);
-		opt.getOption("pp").setRequired(false);
-		opt.getOption("br").setRequired(false);
+		opt.addOption(Option.builder("dt")
+							.longOpt("databasetype")
+							.hasArg()
+							.required()
+							.argName("PARSEARG")
+							.desc("Select ONE parse argument:\n1) ncbi\n2) gbif\n3) acc <DEPRECATED, use ./py/accession.py instead>\n4) merge")
+							.build());
+		opt.addOption(Option.builder("ba")
+							.longOpt("batchsize")
+							.hasArg()
+							.argName("NUMROWS")
+							.desc("Batch size to process per instance. High batch size consumes more memory. Low batch size reduces performance. Defaults to 200000.")
+							.build());
+		opt.addOption(Option.builder("fn")
+							.longOpt("filename")
+							.hasArg()
+							.argName("FILENAME")
+							.desc("Output file name. Defaults to *databasetype*-out.json.")
+							.build());
+		opt.addOption(Option.builder("sernull")
+							.longOpt("serializenull")
+							.desc("Output JSON documents with NULL fields")
+							.build());
+		opt.addOption(Option.builder("pp")
+							.longOpt("prettyprint")
+							.desc("Outputs human-readable JSON format. Will increase file size due to whitespace.")
+							.build());
+		opt.addOption(Option.builder("br")
+							.longOpt("breakat")
+							.hasArg()
+							.argName("NUMROWS")
+							.desc("Translate only x number of JSON documents. If x < batchsize, then only x number of documents are produced.")
+							.build());
 	}
 	
-	private static Taxonable getTaxonableInit(String optionValue, DbConnection gc, Gson gson, int lim) {
+	private static Taxonable getTaxonableInit(String optionValue, DbConnection gc, Gson gson, int lim, int breakat) {
 		if(optionValue.equalsIgnoreCase("ncbi") || optionValue.equals("1")) {
 			return new Ncbi(gc, gson, lim);
 		}
@@ -54,6 +77,7 @@ public class RunApp {
 			return new Accession(gc, gson, lim);
 		}
 		/*else if(optionValue.equalsIgnoreCase("semimerge")) {
+			//Deprecated completely
 			return new SemiMerge(gc, gson, lim);
 		}*/
 		else if(optionValue.equalsIgnoreCase("merge") || optionValue.equals("4")) {
@@ -62,28 +86,8 @@ public class RunApp {
 		}
 		else {
 			System.err.println("Invalid switch for -dt");
-			showHelp();
-			System.exit(1);
+			return null;
 		}
-		
-		return null;
-	}
-	
-	private static void showHelp() {
-		System.out.println("gvcn2json - Transform SQL rows into JSON");
-		System.out.println("Required options: ");
-		System.out.println("-us, -username\t\t\tMySQL username to connect to.");
-		System.out.println("-pw, -password\t\t\tMySQL password linked to the username. If no password, enter \"\"");
-		System.out.println("-db, -databasename\t\tMySQL database name to connect to");
-		System.out.println("-dt, -databasetype\t\tTransform SQL to JSON for dataset:\n\t1) ncbi\n\t2) gbif\n\t3) acc\n\t4) semimerge\n\t5) merge");
-		System.out.println("Optional options: ");
-		System.out.println("-sn, -servername\t\tThe server to connect to. Defaults to localhost.");
-		System.out.println("-pr, -port\t\t\tThe port to connect. Defaults to 3306.");
-		System.out.println("-ba, -batchsize\t\t\tBatch size to process per instance. High batch size consumes more memory. Low batch size reduces performance. Defaults to 200000.");
-		System.out.println("-fn, -filename\t\t\tOutput file name. Defaults to *databasetype*-out.json.");
-		System.out.println("-sernull, -serializenull\tSwitch between output with null or no null fields. Default: Do not serialize null, false.");
-		System.out.println("-br, -breakat\t\t\tTranslate only x number of JSON documents. If x < batchsize, then only x number of documents are produced.");
-		System.out.println("-h, -help\t\t\tShows this help screen.");
 	}
 	
 	public static void main(String[] args) {
@@ -95,23 +99,29 @@ public class RunApp {
 		CommandLineParser parser = new DefaultParser();
 		HelpFormatter formatter = new HelpFormatter();
 		CommandLine cmd = null;
-
+		
 		try {
 			cmd = parser.parse(opt, args);
+			formatter.setOptionComparator(new Comparator<Option>() {
+				@Override
+				public int compare(Option o1, Option o2) {
+					return o1.isRequired() ? -1 : 1;
+				}
+			});
 			if(!cmd.hasOption("us") || !cmd.hasOption("pw") || 
 					!cmd.hasOption("db") || !cmd.hasOption("dt") ||
 					cmd.hasOption("h")) {
-				showHelp();
+				formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
 				System.exit(1);
 			}
 		} catch (ParseException pee) {
-			System.out.println(pee.getMessage());
-			formatter.printHelp("Transform SQL rows into JSON", opt);
-			showHelp();
+			System.err.println(pee.getMessage());
+			formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
 			System.exit(1);
-			return;
 		} catch (NullPointerException npe) {
 			System.err.println(npe.getMessage());
+			formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
+			System.exit(1);
 		}
 
 		//Init
@@ -136,7 +146,9 @@ public class RunApp {
 		}
 		
 		gc.open();
-		cv = getTaxonableInit(cmd.getOptionValue("dt"), gc, gson, lim);
+		cv = getTaxonableInit(cmd.getOptionValue("dt"), gc, gson, lim, breakat);
+		if(cv == null)
+			formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
 
 		//Working set
 		try {
