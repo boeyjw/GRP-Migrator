@@ -32,12 +32,14 @@ public class RunApp {
 		opt.addOption("dt", "databasetype", true, "Transform SQL to JSON for dataset:\n\t1) ncbi\n\t2) gbif\n\t3) acc\n\t4) semimerge\n\t5) merge");
 		opt.addOption("sernull", "serializenull", false, "Switch between output with null or no null fields. Default: Do not serialize null.");
 		opt.addOption("pp", "prettyprint", false, "Outputs human-readable JSON format. Bloats file size due to whitespace.");
+		opt.addOption("br", "breakat", true, "Translate only x number of JSON documents. If x < batchsize, then only x number of documents are produced.");
 		
 		opt.getOption("ba").setRequired(false);
 		opt.getOption("fn").setRequired(false);
 		opt.getOption("dt").setRequired(true);
 		opt.getOption("sernull").setRequired(false);
 		opt.getOption("pp").setRequired(false);
+		opt.getOption("br").setRequired(false);
 	}
 	
 	private static Taxonable getTaxonableInit(String optionValue, DbConnection gc, Gson gson, int lim) {
@@ -60,6 +62,7 @@ public class RunApp {
 		}
 		else {
 			System.err.println("Invalid switch for -dt");
+			showHelp();
 			System.exit(1);
 		}
 		
@@ -70,7 +73,7 @@ public class RunApp {
 		System.out.println("gvcn2json - Transform SQL rows into JSON");
 		System.out.println("Required options: ");
 		System.out.println("-us, -username\t\t\tMySQL username to connect to.");
-		System.out.println("-pw, -password\t\t\tMySQL password linked to the username");
+		System.out.println("-pw, -password\t\t\tMySQL password linked to the username. If no password, enter \"\"");
 		System.out.println("-db, -databasename\t\tMySQL database name to connect to");
 		System.out.println("-dt, -databasetype\t\tTransform SQL to JSON for dataset:\n\t1) ncbi\n\t2) gbif\n\t3) acc\n\t4) semimerge\n\t5) merge");
 		System.out.println("Optional options: ");
@@ -79,6 +82,7 @@ public class RunApp {
 		System.out.println("-ba, -batchsize\t\t\tBatch size to process per instance. High batch size consumes more memory. Low batch size reduces performance. Defaults to 200000.");
 		System.out.println("-fn, -filename\t\t\tOutput file name. Defaults to *databasetype*-out.json.");
 		System.out.println("-sernull, -serializenull\tSwitch between output with null or no null fields. Default: Do not serialize null, false.");
+		System.out.println("-br, -breakat\t\t\tTranslate only x number of JSON documents. If x < batchsize, then only x number of documents are produced.");
 		System.out.println("-h, -help\t\t\tShows this help screen.");
 	}
 	
@@ -103,7 +107,7 @@ public class RunApp {
 		} catch (ParseException pee) {
 			System.out.println(pee.getMessage());
 			formatter.printHelp("Transform SQL rows into JSON", opt);
-			
+			showHelp();
 			System.exit(1);
 			return;
 		} catch (NullPointerException npe) {
@@ -113,11 +117,13 @@ public class RunApp {
 		//Init
 		DbConnection gc = CLIConfigurations.getConnectionInstance(cmd);
 		//Get batch size
-		int lim = Integer.parseInt((cmd.getOptionValue("ba") == null || cmd.getOptionValue("ba").equals("")) ? "200000" : cmd.getOptionValue("ba"));
+		int lim = (!cmd.hasOption("ba") || cmd.getOptionValue("ba").equals("")) ? 200000 : Integer.parseInt(cmd.getOptionValue("ba"));
 		//Initialise file name
-		String fn = (cmd.getOptionValue("fn") == null || cmd.getOptionValue("fn").equals("")) ? 
-				(cmd.getOptionValue("db") == null) ? cmd.getOptionValue("dt").concat("-out.json") : cmd.getOptionValue("db").concat("-out.json") 
-						: cmd.getOptionValue("fn").concat(".json");
+		String fn = (!cmd.hasOption("fn") || cmd.getOptionValue("fn").equals("")) ? 
+				(!cmd.hasOption("db")) ? cmd.getOptionValue("dt").concat("-out.json") : cmd.getOptionValue("db").concat("-out.json") 
+						: cmd.getOptionValue("fn").replaceAll("\\s+", "-").concat(".json");
+		//Get JSON document limit
+		int breakat = cmd.hasOption("br") ? Integer.parseInt(cmd.getOptionValue("br")) : Integer.MIN_VALUE;
 		Gson gson = null;
 		Taxonable cv = null;
 		
