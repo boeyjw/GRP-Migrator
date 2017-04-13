@@ -101,13 +101,13 @@ public class RunApp {
 		CommandLine cmd = null;
 		
 		try {
-			cmd = parser.parse(opt, args);
 			formatter.setOptionComparator(new Comparator<Option>() {
 				@Override
 				public int compare(Option o1, Option o2) {
 					return o1.isRequired() ? -1 : 1;
 				}
 			});
+			cmd = parser.parse(opt, args);
 			if(!cmd.hasOption("us") || !cmd.hasOption("pw") || 
 					!cmd.hasOption("db") || !cmd.hasOption("dt") ||
 					cmd.hasOption("h")) {
@@ -130,7 +130,7 @@ public class RunApp {
 		int lim = (!cmd.hasOption("ba") || cmd.getOptionValue("ba").equals("")) ? 200000 : Integer.parseInt(cmd.getOptionValue("ba"));
 		//Initialise file name
 		String fn = (!cmd.hasOption("fn") || cmd.getOptionValue("fn").equals("")) ? 
-				(!cmd.hasOption("db")) ? cmd.getOptionValue("dt").concat("-out.json") : cmd.getOptionValue("db").concat("-out.json") 
+				cmd.getOptionValue("dt").concat("-").concat(cmd.getOptionValue("db").concat("-out.json"))
 						: cmd.getOptionValue("fn").replaceAll("\\s+", "-").concat(".json");
 		//Get JSON document limit
 		int breakat = cmd.hasOption("br") ? Integer.parseInt(cmd.getOptionValue("br")) : Integer.MIN_VALUE;

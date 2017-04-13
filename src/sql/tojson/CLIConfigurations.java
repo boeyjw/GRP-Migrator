@@ -19,7 +19,7 @@ public class CLIConfigurations {
 							.hasArg()
 							.required()
 							.argName("USERNAME")
-							.desc("SQL server username.")
+							.desc("SQL server username. Enter \"\" if no password.")
 							.build());
 		opt.addOption(Option.builder("pw")
 							.longOpt("password")
