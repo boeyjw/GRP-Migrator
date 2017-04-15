@@ -198,7 +198,8 @@ public class RunApp {
 			if(cmd.hasOption("dmdb")) {
 				mongodb = cmd.hasOption("muri") ? new MongoConnection(cmd.getOptionValue("muri"), cmd.hasOption("mdb") ? 
 						cmd.getOptionValue("mdb") : cmd.getOptionValue("db"), cmd.hasOption("mcol") ? cmd.getOptionValue("mcol") : dtnaming)
-						: new MongoConnection(cmd.getOptionValue("mdb"), cmd.getOptionValue("mcol"));
+						: new MongoConnection(cmd.hasOption("mdb") ? cmd.getOptionValue("mdb") : cmd.getOptionValue("db"), 
+								cmd.hasOption("mcol") ? cmd.getOptionValue("mcol") : dtnaming);
 				cv.setMongoCollection(mongodb.getMcol());
 			}
 			else {
