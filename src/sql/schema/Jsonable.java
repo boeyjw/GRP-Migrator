@@ -18,7 +18,7 @@ public interface Jsonable {
 	 * The JSON output is based on the schema which is programmed into the subclasses of this class.
 	 * @param gc The database connection for query purposes
 	 * @param offset The cursor in which the query limit is currently at
-	 * @param toMongoDB TODO
+	 * @param toMongoDB Directly insert data into MongoDB if true.
 	 * @return True if there may be more rows to be transformed. False if it has reached end of the relation.
 	 */
 	public abstract boolean taxonToJson(DbConnection gc, int offset, boolean toMongoDB) throws SQLException;

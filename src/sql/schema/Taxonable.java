@@ -68,6 +68,10 @@ public abstract class Taxonable implements Jsonable {
 		this.arrWriter = arrWriter;
 	}
 	
+	/**
+	 * Explicitly sets the MongoDB collection to insert into.
+	 * @param mcol MongoDB collection
+	 */
 	public void setMongoCollection(MongoCollection<Document> mcol) {
 		this.mcol = mcol;
 	}
@@ -84,6 +88,9 @@ public abstract class Taxonable implements Jsonable {
 		return br > this.breakat ? true : false;
 	}
 	
+	/**
+	 * Adds a JSON formatted result into MongoDB collection
+	 */
 	protected void addDocument() {
 		try {
 			mcol.insertOne(Document.parse(gson.toJson(gm_obj)));

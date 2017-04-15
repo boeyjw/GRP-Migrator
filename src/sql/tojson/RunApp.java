@@ -86,7 +86,7 @@ public class RunApp {
 							.longOpt("mongodbcollection")
 							.hasArg()
 							.argName("MONGODB COLLECTION")
-							.desc("The direct MongoDB collection to import into. Only applicable with dmdb switch.")
+							.desc("The direct MongoDB collection to import into. WARNING: DROPS COLLECTION OF THE SAME NAME! Only applicable with dmdb switch.")
 							.build());
 	}
 	
@@ -196,7 +196,8 @@ public class RunApp {
 			JsonWriter arrWriter = null;
 			MongoConnection mongodb = null;
 			if(cmd.hasOption("dmdb")) {
-				mongodb = cmd.hasOption("muri") ? new MongoConnection(cmd.getOptionValue("muri"), cmd.getOptionValue("mdb"), cmd.getOptionValue("mcol"))
+				mongodb = cmd.hasOption("muri") ? new MongoConnection(cmd.getOptionValue("muri"), cmd.hasOption("mdb") ? 
+						cmd.getOptionValue("mdb") : cmd.getOptionValue("db"), cmd.hasOption("mcol") ? cmd.getOptionValue("mcol") : dtnaming)
 						: new MongoConnection(cmd.getOptionValue("mdb"), cmd.getOptionValue("mcol"));
 				cv.setMongoCollection(mongodb.getMcol());
 			}
@@ -221,6 +222,7 @@ public class RunApp {
 				arrWriter.endArray();
 				arrWriter.close();
 			}
+			System.out.println("Successfully processed ".concat(cmd.hasOption("br") ? cmd.getOptionValue("br") : "all") + " documents.");
 		} catch (IOException ioe){
 			System.err.println(ioe.getMessage());
 		} catch (MongoSocketOpenException msoe) {
@@ -230,6 +232,5 @@ public class RunApp {
 		} finally {
 			gc.close();
 		}
-		System.out.println();
 	}
 }
