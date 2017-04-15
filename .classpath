@@ -3,6 +3,11 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="D:/My Documents Placement/Eclipse Java workspace/GBIF-sql-to-json/lib/mysql-connector-java-5.1.40-bin.jar"/>
+	<classpathentry kind="lib" path="lib/mongo-java-driver-3.4.2.jar" sourcepath="lib/mongo-java-driver-3.4.2-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/GBIF-sql-to-json/lib/mongo-java-driver-3.4.2-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/gson-2.8.0.jar">
 		<attributes>

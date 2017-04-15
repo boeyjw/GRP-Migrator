@@ -41,7 +41,7 @@ public class Merger extends Taxonable {
 	}
 
 	@Override
-	public boolean taxonToJson(DbConnection gc, int offset) {
+	public boolean taxonToJson(DbConnection gc, int offset, boolean toMongoDB) {
 		try {
 			rs = gc.selStmt("merge", new int[] {limit, offset});
 			if(!rs.isBeforeFirst() || stopPoint(br)) {
@@ -112,7 +112,11 @@ public class Merger extends Taxonable {
 				}
 
 				bar.update(rs.getRow() - 1, limit, offset + rs.getRow());
-				gson.toJson(gm_obj, arrWriter);
+				
+				if(toMongoDB)
+					addDocument();
+				else
+					gson.toJson(gm_obj, arrWriter);
 			}
 			rs.close();
 			//System.out.println("offset: " + offset);

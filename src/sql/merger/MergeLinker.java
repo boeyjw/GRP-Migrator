@@ -38,7 +38,7 @@ public class MergeLinker extends Taxonable {
 	}
 
 	@Override
-	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
+	public boolean taxonToJson(DbConnection gc, int offset, boolean toMongoDB) throws SQLException {
 		rs = gc.selStmt("gnjunction", new int[] {limit, offset});
 		if(!rs.isBeforeFirst() || stopPoint(br)) {
 			return false;
@@ -105,7 +105,10 @@ public class MergeLinker extends Taxonable {
 				if(subqueryOM.hasRet(gc, tax_id))
 					gm_obj.add("citations", subqueryOM.retRes());
 
-				gson.toJson(gm_obj, arrWriter);
+				if(toMongoDB)
+					addDocument();
+				else
+					gson.toJson(gm_obj, arrWriter);
 			}
 			grs.close();
 			nrs.close();

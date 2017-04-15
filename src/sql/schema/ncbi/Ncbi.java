@@ -25,7 +25,7 @@ public class Ncbi extends Taxonable {
 	}
 
 	@Override
-	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
+	public boolean taxonToJson(DbConnection gc, int offset, boolean toMongoDB) throws SQLException {
 		rs = gc.selStmt("nodes", new int[] {limit, offset});
 		if(!rs.isBeforeFirst() || stopPoint(br)) {
 			return false;
@@ -59,7 +59,11 @@ public class Ncbi extends Taxonable {
 				gm_obj.add("citations", subqueryOM.retRes());
 
 			bar.update(rs.getRow() - 1, limit, offset + rs.getRow());
-			gson.toJson(gm_obj, arrWriter);
+
+			if(toMongoDB)
+				addDocument();
+			else
+				gson.toJson(gm_obj, arrWriter);
 		}
 		rs.close();
 

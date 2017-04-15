@@ -34,7 +34,7 @@ public class Accession extends Taxonable {
 	}
 
 	@Override
-	public boolean taxonToJson(DbConnection gc, int offset) throws SQLException {
+	public boolean taxonToJson(DbConnection gc, int offset, boolean toMongoDB) throws SQLException {
 		try  {
 			npQuery = new NuclProt();
 			rs = gc.selStmt("nodes", new int[] {limit, offset});

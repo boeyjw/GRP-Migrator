@@ -35,7 +35,7 @@ public class SemiMerge extends Taxonable {
 	}
 
 	@Override
-	public boolean taxonToJson(DbConnection gc, int offset) {
+	public boolean taxonToJson(DbConnection gc, int offset, boolean toMongoDB) {
 		try {
 			rs = gc.selStmt("merge", new int[] {limit, offset});
 			if(!rs.isBeforeFirst() || stopPoint(br)) {

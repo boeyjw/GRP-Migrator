@@ -1,9 +1,14 @@
 package sql.schema;
 
 import java.sql.ResultSet;
+
+import org.bson.Document;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
+import com.mongodb.MongoWriteException;
+import com.mongodb.client.MongoCollection;
 
 import sql.queries.DbConnection;
 
@@ -16,6 +21,8 @@ import sql.queries.DbConnection;
  *
  */
 public abstract class Taxonable implements Jsonable {
+	private MongoCollection<Document> mcol;
+	
 	protected JsonWriter arrWriter;
 	protected Gson gson;
 	protected int limit;
@@ -61,6 +68,10 @@ public abstract class Taxonable implements Jsonable {
 		this.arrWriter = arrWriter;
 	}
 	
+	public void setMongoCollection(MongoCollection<Document> mcol) {
+		this.mcol = mcol;
+	}
+	
 	/**
 	 * Break at provided number of rows if user uses this option. Has greater priority than {@link #limit}.
 	 * @param br Current row count. Incremented per row basis.
@@ -71,5 +82,13 @@ public abstract class Taxonable implements Jsonable {
 			return false;
 		}
 		return br > this.breakat ? true : false;
+	}
+	
+	protected void addDocument() {
+		try {
+			mcol.insertOne(Document.parse(gson.toJson(gm_obj)));
+		} catch(MongoWriteException mwe) {
+			System.out.println(mwe.getMessage());
+		}
 	}
 }

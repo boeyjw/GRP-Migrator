@@ -2,6 +2,8 @@ package sql.tojson;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.sql.SQLException;
 import java.util.Comparator;
 
 import org.apache.commons.cli.CommandLine;
@@ -15,10 +17,14 @@ import org.apache.commons.cli.ParseException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
+import com.mongodb.DBObject;
+import com.mongodb.MongoSocketOpenException;
+import com.mongodb.util.JSON;
 
 import sql.merger.MergeLinker;
 import sql.merger.SemiMerge;
 import sql.queries.DbConnection;
+import sql.queries.MongoConnection;
 import sql.schema.Taxonable;
 import sql.schema.gbif.Gbif;
 import sql.schema.ncbi.Accession;
@@ -35,7 +41,8 @@ public class RunApp {
 							.hasArg()
 							.required()
 							.argName("PARSEARG")
-							.desc("Select ONE parse argument:\n1) ncbi\n2) gbif\n3) acc <DEPRECATED, use ./py/accession.py instead>\n4) merge")
+							.desc("Select ONE parse argument:\n1) ncbi\n2) gbif\n3) acc <DEPRECATED, use ./py/accession.py instead> "
+									+ "<Cannot use dmdb switch because of memory issues>\n4) merge")
 							.build());
 		opt.addOption(Option.builder("ba")
 							.longOpt("batchsize")
@@ -58,6 +65,28 @@ public class RunApp {
 							.hasArg()
 							.argName("NUMROWS")
 							.desc("Translate only x number of JSON documents. If x <= batchsize, then only x number of documents are produced.")
+							.build());
+		opt.addOption(Option.builder("dmdb")
+							.longOpt("directmongodb")
+							.desc("Does mongoimport directly. If selected, defaults to localhost with default port 27017. Default file output.")
+							.build());
+		opt.addOption(Option.builder("muri")
+							.longOpt("mongodburi")
+							.hasArg()
+							.argName("MONGODB URI")
+							.desc("If dmdb selected and import to server outside localhost. If using cloud database, just paste the host. URI string format: mongodb:\\\\host:port")
+							.build());
+		opt.addOption(Option.builder("mdb")
+							.longOpt("mongodbdatabase")
+							.hasArg()
+							.argName("MONGODB DATABASE")
+							.desc("The direct MongoDB database to import into. Only applicable with dmdb switch.")
+							.build());
+		opt.addOption(Option.builder("mcol")
+							.longOpt("mongodbcollection")
+							.hasArg()
+							.argName("MONGODB COLLECTION")
+							.desc("The direct MongoDB collection to import into. Only applicable with dmdb switch.")
 							.build());
 	}
 	
@@ -164,24 +193,40 @@ public class RunApp {
 		//Working set
 		try {
 			int offset = 0;
-			JsonWriter arrWriter;
-			arrWriter = new JsonWriter(new FileWriter(fn));
-			cv.setJsonWriter(arrWriter);
+			JsonWriter arrWriter = null;
+			MongoConnection mongodb = null;
+			if(cmd.hasOption("dmdb")) {
+				mongodb = cmd.hasOption("muri") ? new MongoConnection(cmd.getOptionValue("muri"), cmd.getOptionValue("mdb"), cmd.getOptionValue("mcol"))
+						: new MongoConnection(cmd.getOptionValue("mdb"), cmd.getOptionValue("mcol"));
+				cv.setMongoCollection(mongodb.getMcol());
+			}
+			else {
+				arrWriter = new JsonWriter(new FileWriter(fn));
+				cv.setJsonWriter(arrWriter);
 
-			arrWriter.beginArray();
+				arrWriter.beginArray();
+			}
 			//Loops until there are no more rows in db
 			while(true) {
-				if(!cv.taxonToJson(gc, offset)) {
+				if(!cv.taxonToJson(gc, offset, cmd.hasOption("dmdb"))) {
 					break;
 				}
 				offset += lim;
 			}
-			arrWriter.endArray();
-			arrWriter.close();
+			if(cmd.hasOption("dmdb")) {
+				System.out.println();
+				mongodb.closeconn();
+			}
+			else {
+				arrWriter.endArray();
+				arrWriter.close();
+			}
 		} catch (IOException ioe){
 			System.err.println(ioe.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (MongoSocketOpenException msoe) {
+			System.err.println(msoe.getMessage());
+		} catch (SQLException sqle) {
+			System.err.println(sqle.getMessage());
 		} finally {
 			gc.close();
 		}
