@@ -19,14 +19,14 @@ public class CLIConfigurations {
 							.hasArg()
 							.required()
 							.argName("USERNAME")
-							.desc("SQL server username. Enter \"\" if no password.")
+							.desc("SQL server username.")
 							.build());
 		opt.addOption(Option.builder("pw")
 							.longOpt("password")
 							.hasArg()
 							.required()
 							.argName("PASSWORD")
-							.desc("SQL server password.")
+							.desc("SQL server password. Enter \"\" if no password.")
 							.build());
 		opt.addOption(Option.builder("db")
 							.longOpt("databasename")
@@ -39,7 +39,7 @@ public class CLIConfigurations {
 							.longOpt("port")
 							.hasArg()
 							.argName("PORT")
-							.desc("SQL server port.")
+							.desc("SQL server port. Defaults to 3306.")
 							.build());
 		opt.addOption(Option.builder("sn")
 							.longOpt("servername")

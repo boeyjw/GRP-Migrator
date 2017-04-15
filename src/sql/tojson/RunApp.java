@@ -51,17 +51,13 @@ public class RunApp {
 							.build());
 		opt.addOption(Option.builder("sernull")
 							.longOpt("serializenull")
-							.desc("Output JSON documents with NULL fields")
-							.build());
-		opt.addOption(Option.builder("pp")
-							.longOpt("prettyprint")
-							.desc("Outputs human-readable JSON format. Will increase file size due to whitespace.")
+							.desc("Output JSON documents with NULL fields. Default no null field JSON.")
 							.build());
 		opt.addOption(Option.builder("br")
 							.longOpt("breakat")
 							.hasArg()
 							.argName("NUMROWS")
-							.desc("Translate only x number of JSON documents. If x < batchsize, then only x number of documents are produced.")
+							.desc("Translate only x number of JSON documents. If x <= batchsize, then only x number of documents are produced.")
 							.build());
 	}
 	
@@ -82,7 +78,7 @@ public class RunApp {
 		}*/
 		else if(optionValue.equalsIgnoreCase("merge") || optionValue.equals("4")) {
 			return new MergeLinker(gc, gson, lim, breakat);
-			//return new Merger(gc, gson, lim);
+			//return new Merger(gc, gson, lim); //Deprecated completely
 		}
 		else {
 			System.err.println("Invalid switch for -dt");
@@ -128,10 +124,23 @@ public class RunApp {
 		DbConnection gc = CLIConfigurations.getConnectionInstance(cmd);
 		//Get batch size
 		int lim = (!cmd.hasOption("ba") || cmd.getOptionValue("ba").equals("")) ? 200000 : Integer.parseInt(cmd.getOptionValue("ba"));
+		
 		//Initialise file name
+		String dtnaming = cmd.getOptionValue("dt");
+		if(dtnaming.matches("\\d+")) {
+			if(dtnaming.matches("4"))
+				dtnaming = "merge";
+			else if(dtnaming.matches("3"))
+				dtnaming = "accession";
+			else if(dtnaming.matches("2"))
+				dtnaming = "gbif";
+			else if(dtnaming.matches("1"))
+				dtnaming = "ncbi";
+		}
 		String fn = (!cmd.hasOption("fn") || cmd.getOptionValue("fn").equals("")) ? 
-				cmd.getOptionValue("dt").concat("-").concat(cmd.getOptionValue("db").concat("-out.json"))
+				dtnaming.concat("-out.json")
 						: cmd.getOptionValue("fn").replaceAll("\\s+", "-").concat(".json");
+				
 		//Get JSON document limit
 		int breakat = cmd.hasOption("br") ? Integer.parseInt(cmd.getOptionValue("br")) : Integer.MIN_VALUE;
 		Gson gson = null;
@@ -139,10 +148,10 @@ public class RunApp {
 		
 		//Initialise Gson object parameters
 		if(cmd.hasOption("sernull")) {
-			gson = cmd.hasOption("pp") ? new GsonBuilder().serializeNulls().setPrettyPrinting().create() : new GsonBuilder().serializeNulls().create();
+			gson = new GsonBuilder().serializeNulls().create();
 		}
 		else {
-			gson = cmd.hasOption("pp") ? new GsonBuilder().setPrettyPrinting().create() : new Gson();
+			gson = new Gson();
 		}
 		
 		gc.open();
