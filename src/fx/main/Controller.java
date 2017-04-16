@@ -1,5 +1,6 @@
 package fx.main;
 
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,6 +118,12 @@ public class Controller implements Initializable{
 			executeRunApp(Main.param.toArray(new String[0]));
 		else {
 			cliargs = new ArrayList<String>();
+			
+			Console console = new Console(cliTxtOut);
+			PrintStream ps = new PrintStream(console, true);
+			System.setOut(ps);
+			System.setErr(ps);
+			
 			initReqArgs();
 			initOptArgsProcessing();
 			initOptArgsOutput();
@@ -224,7 +231,8 @@ public class Controller implements Initializable{
 	}
     
 	@FXML
-    private void execApp() {	
+    private void execApp() {
+		//Requires overhaul
 		validateAndAppendReqArgs();
 		
 		if(sqlpr.getText() != null || !sqlpr.getText().trim().isEmpty()) {
