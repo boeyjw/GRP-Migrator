@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.cli.CommandLine;
@@ -48,7 +49,8 @@ public class RunApp {
 							.longOpt("batchsize")
 							.hasArg()
 							.argName("NUMROWS")
-							.desc("Batch size to process per instance. High batch size consumes more memory. Low batch size reduces performance. Defaults to 200000.")
+							.desc("Batch size to process per instance. High batch size consumes more memory. "
+									+ "Low batch size reduces performance. Defaults to 200000.")
 							.build());
 		opt.addOption(Option.builder("fn")
 							.longOpt("filename")
@@ -74,19 +76,21 @@ public class RunApp {
 							.longOpt("mongodburi")
 							.hasArg()
 							.argName("MONGODB URI")
-							.desc("If dmdb selected and import to server outside localhost. If using cloud database, just paste the host. URI string format: mongodb:\\\\host:port")
+							.desc("If dmdb selected and import to server outside localhost. If using cloud database, just paste the host. "
+									+ "URI string format: mongodb:\\\\host:port")
 							.build());
 		opt.addOption(Option.builder("mdb")
-							.longOpt("mongodbdatabase")
+							.longOpt("mongodbdb")
 							.hasArg()
 							.argName("MONGODB DATABASE")
-							.desc("The direct MongoDB database to import into. Only applicable with dmdb switch.")
+							.desc("The direct MongoDB database to import into. Defaults to SQL database name. Only applicable with dmdb switch.")
 							.build());
 		opt.addOption(Option.builder("mcol")
-							.longOpt("mongodbcollection")
+							.longOpt("mongodbcol")
 							.hasArg()
 							.argName("MONGODB COLLECTION")
-							.desc("The direct MongoDB collection to import into. WARNING: DROPS COLLECTION OF THE SAME NAME! Only applicable with dmdb switch.")
+							.desc("The direct MongoDB collection to import into. Defaults to SQL database type. "
+									+ "WARNING: DROPS COLLECTION OF THE SAME NAME! Only applicable with dmdb switch.")
 							.build());
 	}
 	
@@ -132,6 +136,7 @@ public class RunApp {
 					return o1.isRequired() ? -1 : 1;
 				}
 			});
+			formatter.setWidth(100);
 			cmd = parser.parse(opt, args);
 			if(!cmd.hasOption("us") || !cmd.hasOption("pw") || 
 					!cmd.hasOption("db") || !cmd.hasOption("dt") ||
