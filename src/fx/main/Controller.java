@@ -1,6 +1,5 @@
 package fx.main;
 
-import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +21,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
@@ -39,8 +37,6 @@ public class Controller implements Initializable{
     private AnchorPane mainAnchor;
     
     //Splitter for interface
-    @FXML
-    private SplitPane splitMainAnchor;
     @FXML
     private AnchorPane argsSplit;
     @FXML
@@ -92,12 +88,6 @@ public class Controller implements Initializable{
     @FXML
     private TextField mcol;
     
-    //The CLI text area
-    @FXML
-    private AnchorPane cliSplit;
-    @FXML
-    private TextArea cliTxtOut;
-    
     //Execution buttons
     @FXML
     private Button exit;
@@ -119,7 +109,6 @@ public class Controller implements Initializable{
     
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		cliTxtOut.setEditable(false);
 		if(!Main.param.isEmpty())
 			executeRunApp(Main.param.toArray(new String[0]));
 		else {
@@ -132,11 +121,6 @@ public class Controller implements Initializable{
 			validdocbr = true;
 			validsqlba = true;
 			validsqlpr = true;
-			
-			Console console = new Console(cliTxtOut);
-			PrintStream ps = new PrintStream(console, true);
-			System.setOut(ps);
-			System.setErr(ps);
 			
 			initReqArgs();
 			initOptArgsProcessing();
@@ -276,7 +260,6 @@ public class Controller implements Initializable{
     
 	@FXML
     private void execApp() {
-		cliTxtOut.clear();
 		if(validdocbr && validparsedt && validsqlba && validsqldb && validsqlpr) {
 			//Required
 			addCLIargs("-us", sqlus.getText() == null || sqlus.getText().trim().isEmpty() ? sqlus.getPromptText() : sqlus.getText().trim());
@@ -335,7 +318,6 @@ public class Controller implements Initializable{
 
     @FXML
     private void resetFields() {
-    	cliTxtOut.clear();
     	sqlus.clear();
     	sqlpw.clear();
     	sqldb.clear();
