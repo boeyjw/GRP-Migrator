@@ -7,6 +7,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
@@ -14,6 +15,7 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 
 <AnchorPane fx:id="mainAnchor" prefHeight="600.0" prefWidth="291.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fx.main.Controller">
    <children>
@@ -140,8 +142,18 @@
         <buttons>
           <Button fx:id="exit" mnemonicParsing="false" onMouseClicked="#quitApp" text="Quit" />
             <Button fx:id="reset" mnemonicParsing="false" onMouseClicked="#resetFields" text="Reset" />
-            <Button fx:id="execute" mnemonicParsing="false" onMouseClicked="#execApp" text="Execute" />
+            <Button fx:id="execute" mnemonicParsing="false" text="Execute" />
         </buttons>
       </ButtonBar>
+      <StackPane fx:id="execStack" prefHeight="600.0" prefWidth="292.0">
+         <children>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <ProgressIndicator fx:id="execpi" layoutX="46.0" layoutY="200.0" prefHeight="200.0" prefWidth="200.0" progress="0.0" />
+                  <Label fx:id="batchval" layoutX="65.0" layoutY="156.0" prefHeight="36.0" prefWidth="161.0" text="Label" />
+               </children>
+            </AnchorPane>
+         </children>
+      </StackPane>
    </children>
 </AnchorPane>

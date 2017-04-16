@@ -1,5 +1,6 @@
 package fx.main;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,21 +12,30 @@ import java.util.regex.Pattern;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 import sql.tojson.RunApp;
 
 public class Controller implements Initializable{
@@ -96,6 +106,16 @@ public class Controller implements Initializable{
     @FXML
     private Button execute;
     
+    //Execution time
+    @FXML
+    private StackPane execStack;
+    @FXML
+    private ProgressIndicator execpi;
+    @FXML
+    private Label batchval;
+    
+    private CLIService backApp;
+    
     //Integer only validation regex
     private Pattern digitPat;
 	private Matcher digitmat;
@@ -106,13 +126,17 @@ public class Controller implements Initializable{
 	private boolean validsqlpr;
 	private boolean validsqlba;
 	private boolean validdocbr;
-    
+	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		execStack.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
+		hideOverlay();
 		if(!Main.param.isEmpty())
 			executeRunApp(Main.param.toArray(new String[0]));
 		else {
 			cliargs = new ArrayList<String>();
+			backApp = new CLIService();
+			
 			digitPat = Pattern.compile("\\d+");
 			digitmat = digitPat.matcher("");
 			
@@ -125,7 +149,20 @@ public class Controller implements Initializable{
 			initReqArgs();
 			initOptArgsProcessing();
 			initOptArgsOutput();
+			execute.setOnAction((event) -> {
+				execApp();
+			});
 		}
+	}
+	
+	private void hideOverlay() {
+		execStack.setDisable(true);
+		execStack.setVisible(false);
+	}
+	
+	private void showOverlay() {
+		execStack.setDisable(false);
+		execStack.setVisible(true);
 	}
 	
 	private void initReqArgs() {
@@ -258,7 +295,6 @@ public class Controller implements Initializable{
 			System.err.println("Insufficient arguments.");
 	}
     
-	@FXML
     private void execApp() {
 		if(validdocbr && validparsedt && validsqlba && validsqldb && validsqlpr) {
 			//Required
@@ -290,8 +326,22 @@ public class Controller implements Initializable{
 					addCLIargs("-mcol", mcol.getText().trim());
 			}
 			
-			System.out.println(Arrays.toString(cliargs.toArray(new String[0])));
-			RunApp.main(cliargs.toArray(new String[0]));
+			showOverlay();
+			launchConsole();
+			backApp.setParams(cliargs.toArray(new String[0]));
+			backApp.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+				@Override
+				public void handle(WorkerStateEvent event) {
+					System.out.println(backApp.getValue());
+				}
+			});
+			backApp.setOnFailed(new EventHandler<WorkerStateEvent>() {
+				@Override
+				public void handle(WorkerStateEvent event) {
+					
+				}
+			});
+			backApp.start();
 		}
 		else {
 			Alert alert = new Alert(AlertType.ERROR);
@@ -304,6 +354,20 @@ public class Controller implements Initializable{
 					.concat(validsqlpr ? "" : "\nInvalid *SQL port* input! Only accepts numbers."));
 			alert.showAndWait();
 		}
+    }
+    
+    private void launchConsole() {
+    	Parent root;
+        try {
+            root = FXMLLoader.load(getClass().getResource("gncv2Json_console.fxml"));
+            Stage stage = new Stage();
+            stage.setTitle("gncv2Json Console Log");
+            stage.setScene(new Scene(root));
+            stage.show();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 	
 	private void addCLIargs(String flag, String value) {
