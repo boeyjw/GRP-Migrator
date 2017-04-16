@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Accordion;
@@ -108,8 +107,15 @@ public class Controller implements Initializable{
     private Button execute;
     
     //Integer only validation regex
-    private Pattern digitPat = Pattern.compile("\\d+");
-	private Matcher digitmat = digitPat.matcher("");
+    private Pattern digitPat;
+	private Matcher digitmat;
+	
+	//Specific validity checks
+	private boolean validsqldb;
+	private boolean validparsedt;
+	private boolean validsqlpr;
+	private boolean validsqlba;
+	private boolean validdocbr;
     
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -118,6 +124,14 @@ public class Controller implements Initializable{
 			executeRunApp(Main.param.toArray(new String[0]));
 		else {
 			cliargs = new ArrayList<String>();
+			digitPat = Pattern.compile("\\d+");
+			digitmat = digitPat.matcher("");
+			
+			validsqldb = false;
+			validparsedt = false;
+			validdocbr = true;
+			validsqlba = true;
+			validsqlpr = true;
 			
 			Console console = new Console(cliTxtOut);
 			PrintStream ps = new PrintStream(console, true);
@@ -139,19 +153,26 @@ public class Controller implements Initializable{
 		sqldb.setTooltip(new Tooltip("Enter SQL database to access. Must have an entry."));
 		sqldb.focusedProperty().addListener((arg0, oldValue, newValue) -> {
 			if(!newValue) {
-				if(sqldb.getText() == null ||sqldb.getText().trim().isEmpty()) {
-					//validation error! Stop them from executing!
+				if(sqldb.getText() == null || sqldb.getText().trim().isEmpty()) {
+					validsqldb = false;
+					if(!sqldb.getStyleClass().contains("error"))
+						sqldb.getStyleClass().add("error");
 				}
 				else {
+					validsqldb = true;
+					sqldb.getStyleClass().remove("error");
 					mdb.setPromptText(sqldb.getText().trim());
 				}
 			}
 		});
 		
+		parsedt.setValue("Parse?");
 		parsedt.setItems(FXCollections.observableList(Arrays.asList((new String[]{"ncbi", "gbif", "acc <deprecated>", "merge"}))));
 		parsedt.focusedProperty().addListener((arg0, oldValue, newValue) -> {
-			outputfn.setPromptText(parsedt.getValue());
+			outputfn.setPromptText(parsedt.getValue() + "-out");
 			mcol.setPromptText(parsedt.getValue());
+			if(newValue)
+				validparsedt = true;
 		});
 	}
 	
@@ -161,8 +182,14 @@ public class Controller implements Initializable{
 		sqlpr.focusedProperty().addListener((arg0, oldValue, newValue) -> {
 			if(!newValue) {
 				digitmat.reset(sqlpr.getText());
-				if(!digitmat.matches()) {
-					//validation error! Stop them from executing!
+				if(!sqlpr.getText().trim().isEmpty() && !digitmat.matches()) {
+					validsqlpr = false;
+					if(!sqlpr.getStyleClass().contains("error"))
+						sqlpr.getStyleClass().add("error");
+				}
+				else {
+					validsqlpr = true;
+					sqlpr.getStyleClass().remove("error");
 				}
 			}
 		});
@@ -176,8 +203,14 @@ public class Controller implements Initializable{
 		sqlba.focusedProperty().addListener((arg0, oldValue, newValue) -> {
 			if(!newValue) {
 				digitmat.reset(sqlba.getText());
-				if(!digitmat.matches()) {
-					//validation error! Stop them from executing!
+				if(!sqlba.getText().trim().isEmpty() && !digitmat.matches()) {
+					validsqlba = false;
+					if(!sqlba.getStyleClass().contains("error"))
+						sqlba.getStyleClass().add("error");
+				}
+				else {
+					validsqlba = true;
+					sqlba.getStyleClass().remove("error");
 				}
 			}
 		});
@@ -186,14 +219,23 @@ public class Controller implements Initializable{
 		docbr.focusedProperty().addListener((arg0, oldValue, newValue) -> {
 			if(!newValue) {
 				digitmat.reset(docbr.getText());
-				if(!digitmat.matches()) {
-					//validation error! Stop them from executing!
+				if(!docbr.getText().trim().isEmpty() && !digitmat.matches()) {
+					validdocbr = false;
+					if(!docbr.getStyleClass().contains("error"))
+						docbr.getStyleClass().add("error");
+				}
+				else {
+					validdocbr = true;
+					docbr.getStyleClass().remove("error");
 				}
 			}
 		});
+		
+		sernull.setSelected(false);
 	}
 	
 	private void initOptArgsOutput() {
+		dmdb.setSelected(false);
 		muri.setDisable(true);
 		mdb.setDisable(true);
 		mcol.setDisable(true);
@@ -228,65 +270,62 @@ public class Controller implements Initializable{
 	private void executeRunApp(String[] args) {
 		if(args.length >= 4)
 			RunApp.main(args);
+		else
+			System.err.println("Insufficient arguments.");
 	}
     
 	@FXML
     private void execApp() {
-		//Requires overhaul
-		validateAndAppendReqArgs();
-		
-		if(sqlpr.getText() != null || !sqlpr.getText().trim().isEmpty()) {
-			digitmat.reset(sqlpr.getText());
-			if(digitmat.matches())
+		cliTxtOut.clear();
+		if(validdocbr && validparsedt && validsqlba && validsqldb && validsqlpr) {
+			//Required
+			addCLIargs("-us", sqlus.getText() == null || sqlus.getText().trim().isEmpty() ? sqlus.getPromptText() : sqlus.getText().trim());
+			addCLIargs("-pw", sqlpw.getText() == null || sqlpw.getText().trim().isEmpty() ? "" : sqlpw.getText().trim());
+			addCLIargs("-db", sqldb.getText().trim());
+			addCLIargs("-dt", parsedt.getValue());
+			
+			//Optional processing
+			if(sqlpr.getText() != null && !sqlpr.getText().trim().isEmpty())
 				addCLIargs("-pr", sqlpr.getText().trim());
-		}
-		if(sqlsn.getText() != null || !sqlsn.getText().trim().isEmpty())
-			addCLIargs("-sn", sqlsn.getText().trim());
-		if(sqlba.getText() != null || !sqlba.getText().trim().isEmpty()) {
-			digitmat.reset(sqlba.getText());
-			if(digitmat.matches())
+			if(sqlsn.getText() != null && !sqlsn.getText().trim().isEmpty())
+				addCLIargs("-sn", sqlsn.getText().trim());
+			if(sqlba.getText() != null && !sqlba.getText().trim().isEmpty())
 				addCLIargs("-ba", sqlba.getText().trim());
-		}
-		if(docbr.getText() != null || !docbr.getText().trim().isEmpty()) {
-			digitmat.reset(docbr.getText());
-			if(digitmat.matches())
+			if(docbr.getText() != null && !docbr.getText().trim().isEmpty())
 				addCLIargs("-br", docbr.getText().trim());
-		}
-		if(sernull.isSelected())
-			addCLIargs("-sernull", "");
-		
-		if(dmdb.isSelected()) {
-			addCLIargs("-dmdb", "");
-			if(muri.getText() != null || !muri.getText().trim().isEmpty())
-				addCLIargs("-muri", muri.getText().trim());
-			if(mdb.getText() != null || !mdb.getText().trim().isEmpty())
-				addCLIargs("-mdb", mdb.getText().trim());
-			if(mcol.getText() != null || !mcol.getText().trim().isEmpty())
-				addCLIargs("-mcol", mcol.getText().trim());
+			if(sernull.isSelected())
+				cliargs.add("-sernull");
+			
+			//Optional output
+			if(dmdb.isSelected()) {
+				cliargs.add("-dmdb");
+				if(muri.getText() != null && !muri.getText().trim().isEmpty())
+					addCLIargs("-muri", muri.getText().trim());
+				if(mdb.getText() != null && !mdb.getText().trim().isEmpty())
+					addCLIargs("-mdb", mdb.getText().trim());
+				if(mcol.getText() != null && !mcol.getText().trim().isEmpty())
+					addCLIargs("-mcol", mcol.getText().trim());
+			}
+			
+			System.out.println(Arrays.toString(cliargs.toArray(new String[0])));
+			RunApp.main(cliargs.toArray(new String[0]));
 		}
 		else {
-			if(outputfn.getText() != null || !outputfn.getText().trim().isEmpty())
-				addCLIargs("-fn", outputfn.getText().trim());
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Argument mismatch!");
+			alert.setContentText("Please check your inputs for red boxes!"
+					.concat(validsqldb ? "" : "\nMust enter *SQL database name*!")
+					.concat(validparsedt ? "" : "\nMust select a *database type*!")
+					.concat(validdocbr ? "" : "\nInvalid *break at* input! Only accepts numbers.")
+					.concat(validsqlba ? "" : "\nInvalid *batch size* input! Only accepts numbers.")
+					.concat(validsqlpr ? "" : "\nInvalid *SQL port* input! Only accepts numbers."));
+			alert.showAndWait();
 		}
     }
 	
 	private void addCLIargs(String flag, String value) {
 		cliargs.add(flag);
 		cliargs.add(value);
-	}
-	
-	private void validateAndAppendReqArgs() {
-		String error = "";
-		
-		if(sqldb.getText() == null || sqldb.getText().trim().isEmpty())
-			error += "SQL database";
-		
-		if(error.isEmpty()) {
-			addCLIargs("-us", sqlus.getText() == null || sqlus.getText().trim().isEmpty() ? "root" : sqlus.getText().trim());
-			addCLIargs("-pw", sqlpw.getText() == null || sqlpw.getText().trim().isEmpty() ? "" : sqlpw.getText().trim());
-			addCLIargs("-db", sqldb.getText().trim());
-			addCLIargs("-dt", parsedt.getValue());
-		}
 	}
 
     @FXML
@@ -296,6 +335,7 @@ public class Controller implements Initializable{
 
     @FXML
     private void resetFields() {
+    	cliTxtOut.clear();
     	sqlus.clear();
     	sqlpw.clear();
     	sqldb.clear();
@@ -318,4 +358,3 @@ public class Controller implements Initializable{
     	initOptArgsOutput();
     }
 }
-

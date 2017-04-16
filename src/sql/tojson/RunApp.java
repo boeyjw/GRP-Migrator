@@ -2,9 +2,7 @@ package sql.tojson;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.cli.CommandLine;
@@ -18,12 +16,8 @@ import org.apache.commons.cli.ParseException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
-import com.mongodb.DBObject;
 import com.mongodb.MongoSocketOpenException;
-import com.mongodb.util.JSON;
-
 import sql.merger.MergeLinker;
-import sql.merger.SemiMerge;
 import sql.queries.DbConnection;
 import sql.queries.MongoConnection;
 import sql.schema.Taxonable;
