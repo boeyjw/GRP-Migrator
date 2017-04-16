@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane fx:id="mainAnchor" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="mainAnchor" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fx.main.Controller">
    <children>
       <SplitPane fx:id="splitMainAnchor" dividerPositions="0.33376623376623377" layoutX="14.0" layoutY="14.0" prefHeight="550.0" prefWidth="772.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
         <items>
@@ -93,7 +93,7 @@
                                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                              <children>
                                                 <CheckBox fx:id="dmdb" layoutX="10.0" layoutY="6.0" mnemonicParsing="false" text="Insert directly into MongoDB?" />
-                                                <SplitPane dividerPositions="0.2503" layoutX="-1.0" layoutY="23.0" orientation="VERTICAL" prefHeight="160.0" prefWidth="213.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+                                                <SplitPane fx:id="optargsSplit" dividerPositions="0.25" layoutX="-1.0" layoutY="23.0" orientation="VERTICAL" prefHeight="160.0" prefWidth="213.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
                                                   <items>
                                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                                          <children>
