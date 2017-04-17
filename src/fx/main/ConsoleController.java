@@ -4,6 +4,8 @@ import java.io.PrintStream;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -23,6 +25,12 @@ public class ConsoleController extends Service<String> implements Initializable{
     
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		cliTxtOut.textProperty().addListener(new ChangeListener<Object>() {
+			@Override
+			public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+				cliTxtOut.setScrollTop(Double.MAX_VALUE);
+			}
+		});
 		console = new Console(cliTxtOut);
 		ps = new PrintStream(console, true);
 		System.setErr(ps);

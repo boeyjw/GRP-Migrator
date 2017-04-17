@@ -94,6 +94,8 @@ public class Controller implements Initializable{
     @FXML
     private TextField muri;
     @FXML
+    private TextField mpw;
+    @FXML
     private TextField mdb;
     @FXML
     private TextField mcol;
@@ -258,6 +260,7 @@ public class Controller implements Initializable{
 	private void initOptArgsOutput() {
 		dmdb.setSelected(false);
 		muri.setDisable(true);
+		mpw.setDisable(true);
 		mdb.setDisable(true);
 		mcol.setDisable(true);
 		dmdb.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -282,6 +285,17 @@ public class Controller implements Initializable{
 		
 		muri.setTooltip(new Tooltip("Enter or paste URI here. Defaults to mongodb://localhost:27017."));
 		muri.setPromptText("mongodb://localhost:27017");
+		
+		muri.focusedProperty().addListener((arg0, oldValue, newValue) -> {
+			if(!newValue) {
+				if(muri.getText() == null || muri.getText().trim().isEmpty())
+					mpw.setDisable(true);
+				else
+					mpw.setDisable(false);
+			}
+		});
+		
+		mpw.setTooltip(new Tooltip("Enter MongoDB password here. Only applicable if you use URI."));
 		
 		mdb.setTooltip(new Tooltip("Enter MongoDB database to insert into. Defaults to *database name*."));
 		
@@ -318,11 +332,13 @@ public class Controller implements Initializable{
 			//Optional output
 			if(dmdb.isSelected()) {
 				cliargs.add("-dmdb");
-				if(muri.getText() != null && !muri.getText().trim().isEmpty())
+				if(muri.getText() != null && !muri.getText().trim().isEmpty() && !muri.isDisabled())
 					addCLIargs("-muri", muri.getText().trim());
-				if(mdb.getText() != null && !mdb.getText().trim().isEmpty())
+				if(mpw.getText() != null && !mpw.getText().trim().isEmpty() && !mpw.isDisabled())
+					addCLIargs("-mpw", mpw.getText().trim());
+				if(mdb.getText() != null && !mdb.getText().trim().isEmpty() && !mdb.isDisabled())
 					addCLIargs("-mdb", mdb.getText().trim());
-				if(mcol.getText() != null && !mcol.getText().trim().isEmpty())
+				if(mcol.getText() != null && !mcol.getText().trim().isEmpty() && !mcol.isDisabled())
 					addCLIargs("-mcol", mcol.getText().trim());
 			}
 			
@@ -332,13 +348,21 @@ public class Controller implements Initializable{
 			backApp.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
 				@Override
 				public void handle(WorkerStateEvent event) {
-					System.out.println(backApp.getValue());
+					hideOverlay();
+					System.out.println("Success!");
+				}
+			});
+			backApp.setOnRunning(new EventHandler<WorkerStateEvent>() {
+				@Override
+				public void handle(WorkerStateEvent event) {
+					showOverlay();
+					System.out.println("Running...");
 				}
 			});
 			backApp.setOnFailed(new EventHandler<WorkerStateEvent>() {
 				@Override
 				public void handle(WorkerStateEvent event) {
-					
+					System.out.println("Failed!");
 				}
 			});
 			backApp.start();

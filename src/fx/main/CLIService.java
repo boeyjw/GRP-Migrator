@@ -1,20 +1,20 @@
 package fx.main;
 
+import javafx.application.Application;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import sql.tojson.RunApp;
 
-public class CLIService extends Service<String> {
+public class CLIService extends Service<Void> {
 	private String[] params;
 	
 	@Override
-	protected Task<String> createTask() {
-		return new Task<String>() {
+	protected Task<Void> createTask() {
+		return new Task<Void>() {
 			@Override
-			protected String call() throws Exception {
+			protected Void call() throws Exception {
 				RunApp.main(params);
-				updateProgress(getWorkDone(), getTotalWork());
-				return "Completed!";
+				return null;
 			}
 			
 		};
