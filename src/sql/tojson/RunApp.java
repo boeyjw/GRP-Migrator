@@ -2,7 +2,6 @@ package sql.tojson;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.sql.SQLException;
 import java.util.Comparator;
 
@@ -17,12 +16,10 @@ import org.apache.commons.cli.ParseException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
-import com.mongodb.DBObject;
+import com.mongodb.MongoConfigurationException;
+import com.mongodb.MongoSecurityException;
 import com.mongodb.MongoSocketOpenException;
-import com.mongodb.util.JSON;
-
 import sql.merger.MergeLinker;
-import sql.merger.SemiMerge;
 import sql.queries.DbConnection;
 import sql.queries.MongoConnection;
 import sql.schema.Taxonable;
@@ -48,7 +45,8 @@ public class RunApp {
 							.longOpt("batchsize")
 							.hasArg()
 							.argName("NUMROWS")
-							.desc("Batch size to process per instance. High batch size consumes more memory. Low batch size reduces performance. Defaults to 200000.")
+							.desc("Batch size to process per instance. High batch size consumes more memory. "
+									+ "Low batch size reduces performance. Defaults to 200000.")
 							.build());
 		opt.addOption(Option.builder("fn")
 							.longOpt("filename")
@@ -74,19 +72,27 @@ public class RunApp {
 							.longOpt("mongodburi")
 							.hasArg()
 							.argName("MONGODB URI")
-							.desc("If dmdb selected and import to server outside localhost. If using cloud database, just paste the host. URI string format: mongodb:\\\\host:port")
+							.desc("If dmdb selected and import to server outside localhost. If using cloud database, just paste the host. "
+									+ "URI string format: mongodb:\\\\host:port")
 							.build());
 		opt.addOption(Option.builder("mdb")
-							.longOpt("mongodbdatabase")
+							.longOpt("mongodbdb")
 							.hasArg()
 							.argName("MONGODB DATABASE")
-							.desc("The direct MongoDB database to import into. Only applicable with dmdb switch.")
+							.desc("The direct MongoDB database to import into. Defaults to SQL database name. Only applicable with dmdb switch.")
 							.build());
 		opt.addOption(Option.builder("mcol")
-							.longOpt("mongodbcollection")
+							.longOpt("mongodbcol")
 							.hasArg()
 							.argName("MONGODB COLLECTION")
-							.desc("The direct MongoDB collection to import into. WARNING: DROPS COLLECTION OF THE SAME NAME! Only applicable with dmdb switch.")
+							.desc("The direct MongoDB collection to import into. Defaults to SQL database type. "
+									+ "WARNING: DROPS COLLECTION OF THE SAME NAME! Only applicable with dmdb switch.")
+							.build());
+		opt.addOption(Option.builder("mpw")
+							.longOpt("mongodbpassword")
+							.hasArg()
+							.argName("MONGODB PASSWORD")
+							.desc("If using URI, you can enter your password here or on URI. This option is to elevate the issue of returning to type password in URI.")
 							.build());
 	}
 	
@@ -132,10 +138,9 @@ public class RunApp {
 					return o1.isRequired() ? -1 : 1;
 				}
 			});
+			formatter.setWidth(100);
 			cmd = parser.parse(opt, args);
-			if(!cmd.hasOption("us") || !cmd.hasOption("pw") || 
-					!cmd.hasOption("db") || !cmd.hasOption("dt") ||
-					cmd.hasOption("h")) {
+			if(!cmd.hasOption("us") || !cmd.hasOption("pw") || !cmd.hasOption("db") || !cmd.hasOption("dt") || cmd.hasOption("h")) {
 				formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
 				System.exit(0);
 			}
@@ -166,8 +171,7 @@ public class RunApp {
 			else if(dtnaming.matches("1"))
 				dtnaming = "ncbi";
 		}
-		String fn = (!cmd.hasOption("fn") || cmd.getOptionValue("fn").equals("")) ? 
-				dtnaming.concat("-out.json")
+		String fn = !cmd.hasOption("fn") || cmd.getOptionValue("fn").equals("") ? dtnaming.concat("-out.json")
 						: cmd.getOptionValue("fn").replaceAll("\\s+", "-").concat(".json");
 				
 		//Get JSON document limit
@@ -176,12 +180,7 @@ public class RunApp {
 		Taxonable cv = null;
 		
 		//Initialise Gson object parameters
-		if(cmd.hasOption("sernull")) {
-			gson = new GsonBuilder().serializeNulls().create();
-		}
-		else {
-			gson = new Gson();
-		}
+		gson = cmd.hasOption("sernull") ? new GsonBuilder().serializeNulls().create() : new Gson();
 		
 		gc.open();
 		cv = getTaxonableInit(cmd.getOptionValue("dt"), gc, gson, lim, breakat);
@@ -196,10 +195,20 @@ public class RunApp {
 			JsonWriter arrWriter = null;
 			MongoConnection mongodb = null;
 			if(cmd.hasOption("dmdb")) {
-				mongodb = cmd.hasOption("muri") ? new MongoConnection(cmd.getOptionValue("muri"), cmd.hasOption("mdb") ? 
-						cmd.getOptionValue("mdb") : cmd.getOptionValue("db"), cmd.hasOption("mcol") ? cmd.getOptionValue("mcol") : dtnaming)
-						: new MongoConnection(cmd.hasOption("mdb") ? cmd.getOptionValue("mdb") : cmd.getOptionValue("db"), 
-								cmd.hasOption("mcol") ? cmd.getOptionValue("mcol") : dtnaming);
+				try {
+					mongodb = cmd.hasOption("muri") ? new MongoConnection(cmd.getOptionValue("muri"), 
+							cmd.hasOption("mdb") ? cmd.getOptionValue("mdb") : cmd.getOptionValue("db"), 
+									cmd.hasOption("mcol") ? cmd.getOptionValue("mcol") : dtnaming, cmd.hasOption("mpw") ? cmd.getOptionValue("mpw") : "")
+							: new MongoConnection(cmd.hasOption("mdb") ? cmd.getOptionValue("mdb") : cmd.getOptionValue("db"), 
+									cmd.hasOption("mcol") ? cmd.getOptionValue("mcol") : dtnaming);
+				} catch(MongoConfigurationException mce) {
+					System.err.println(mce.getMessage());
+					System.exit(4);
+				} catch(MongoSecurityException mse) {
+					System.err.println("Incorrect username or password in URI!");
+					System.err.println(mse.getMessage());
+					System.exit(4);
+				}
 				cv.setMongoCollection(mongodb.getMcol());
 			}
 			else {
