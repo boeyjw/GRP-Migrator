@@ -4,6 +4,8 @@ import org.bson.Document;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.MongoConfigurationException;
+import com.mongodb.MongoSecurityException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
@@ -32,10 +34,14 @@ public class MongoConnection {
 	 * @param mdb MongoDB database
 	 * @param mcol MongoDB collection
 	 */
-	public MongoConnection(String uri, String mdb, String mcol) {
+	public MongoConnection(String uri, String mdb, String mcol, String mpw) {
+		uri = uri.contains("<PASSWORD>") && !mpw.isEmpty() && !uri.matches(":.@") ? uri.replace("<PASSWORD>", mpw) : uri;
+		uri = uri.contains("<DATABASE>") ? uri.replace("<DATABASE>", "")
+				: uri.matches("/.?") ? uri.replaceFirst("/.?", "/?") : uri;
+		if(!uri.contains("/?") || uri.matches(":.@"))
+			throw new MongoConfigurationException("URI string invalid!");
 		mconn = new MongoClient(new MongoClientURI(uri));
 		initDatabaseSettings(mdb, mcol);
-		
 	}
 	
 	/**

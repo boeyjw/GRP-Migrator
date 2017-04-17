@@ -13,6 +13,7 @@ public class CLIService extends Service<String> {
 			@Override
 			protected String call() throws Exception {
 				RunApp.main(params);
+				updateProgress(getWorkDone(), getTotalWork());
 				return "Completed!";
 			}
 			
