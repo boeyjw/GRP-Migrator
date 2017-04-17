@@ -1,11 +1,13 @@
 package sql.queries;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.bson.Document;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoConfigurationException;
-import com.mongodb.MongoSecurityException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
@@ -35,12 +37,17 @@ public class MongoConnection {
 	 * @param mcol MongoDB collection
 	 */
 	public MongoConnection(String uri, String mdb, String mcol, String mpw) {
-		uri = uri.contains("<PASSWORD>") && !mpw.isEmpty() && !uri.matches(":.@") ? uri.replace("<PASSWORD>", mpw) : uri;
-		uri = uri.contains("<DATABASE>") ? uri.replace("<DATABASE>", "")
-				: uri.matches("/.?") ? uri.replaceFirst("/.?", "/?") : uri;
-		if(!uri.contains("/?") || uri.matches(":.@"))
+		Pattern uripat = Pattern.compile("^(mongodb://.+)(:.*@)(.*)$");
+		Matcher urimat = uripat.matcher(uri);
+		String seturi = urimat.matches() && !mpw.isEmpty() ? urimat.group(1).concat(":" + mpw + "@").concat(urimat.group(3)) : uri;
+
+		uripat = Pattern.compile("^(mongodb://.*)(/.+\\?)(.*)$");
+		urimat = uripat.matcher(seturi);
+		seturi = urimat.matches() ? urimat.group(1).concat("/?").concat(urimat.group(3)) : seturi;
+		
+		if(!seturi.matches("^mongodb://.+:.*@.*/?.*$"))
 			throw new MongoConfigurationException("URI string invalid!");
-		mconn = new MongoClient(new MongoClientURI(uri));
+		mconn = new MongoClient(new MongoClientURI(seturi));
 		initDatabaseSettings(mdb, mcol);
 	}
 	
