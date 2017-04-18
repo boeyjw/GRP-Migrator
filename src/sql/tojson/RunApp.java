@@ -3,6 +3,7 @@ package sql.tojson;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.cli.CommandLine;
@@ -140,18 +141,18 @@ public class RunApp {
 			});
 			formatter.setWidth(100);
 			cmd = parser.parse(opt, args);
-			if(!cmd.hasOption("us") || !cmd.hasOption("pw") || !cmd.hasOption("db") || !cmd.hasOption("dt") || cmd.hasOption("h")) {
+			if(!cmd.hasOption("us") || !cmd.hasOption("db") || !cmd.hasOption("dt") || cmd.hasOption("h")) {
 				formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
-				System.exit(0);
+				System.exit(1);
 			}
 		} catch (ParseException pee) {
 			System.err.println(pee.getMessage());
 			formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
-			System.exit(1);
+			System.exit(2);
 		} catch (NullPointerException npe) {
 			System.err.println(npe.getMessage());
 			formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
-			System.exit(2);
+			System.exit(3);
 		}
 
 		//Init
@@ -186,7 +187,7 @@ public class RunApp {
 		cv = getTaxonableInit(cmd.getOptionValue("dt"), gc, gson, lim, breakat);
 		if(cv == null) {
 			formatter.printHelp("java -jar runapp.jar", "Transform SQL rows into JSON\n\n", opt, "Source code repository: https://github.com/boeyjw/gncv2Json", true);
-			System.exit(3);
+			System.exit(4);
 		}
 
 		//Working set
@@ -203,11 +204,11 @@ public class RunApp {
 									cmd.hasOption("mcol") ? cmd.getOptionValue("mcol") : dtnaming);
 				} catch(MongoConfigurationException mce) {
 					System.err.println(mce.getMessage());
-					System.exit(4);
+					System.exit(5);
 				} catch(MongoSecurityException mse) {
 					System.err.println("Incorrect username or password in URI!");
 					System.err.println(mse.getMessage());
-					System.exit(4);
+					System.exit(5);
 				}
 				cv.setMongoCollection(mongodb.getMcol());
 			}
