@@ -24,9 +24,8 @@ public class CLIConfigurations {
 		opt.addOption(Option.builder("pw")
 							.longOpt("password")
 							.hasArg()
-							.required()
 							.argName("PASSWORD")
-							.desc("SQL server password. Enter \"\" if no password.")
+							.desc("SQL server password.")
 							.build());
 		opt.addOption(Option.builder("db")
 							.longOpt("databasename")
@@ -55,13 +54,13 @@ public class CLIConfigurations {
 	
 	public static DbConnection getConnectionInstance(CommandLine cmd) {
 		if(cmd.getOptionValue("db") == null) {
-			return new DbConnection(cmd.getOptionValue("sn"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
+			return new DbConnection(cmd.getOptionValue("sn"), cmd.getOptionValue("us"), cmd.hasOption("pw") ? cmd.getOptionValue("pw") : "");
 		}
 		else if(cmd.getOptionValue("pr") == null) {
-			return new DbConnection(cmd.getOptionValue("sn"), cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
+			return new DbConnection(cmd.getOptionValue("sn"), cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.hasOption("pw") ? cmd.getOptionValue("pw") : "");
 		}
 		else {
-			return new DbConnection(cmd.getOptionValue("sn"), Integer.parseInt(cmd.getOptionValue("pr")), cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.getOptionValue("pw"));
+			return new DbConnection(cmd.getOptionValue("sn"), Integer.parseInt(cmd.getOptionValue("pr")), cmd.getOptionValue("db"), cmd.getOptionValue("us"), cmd.hasOption("pw") ? cmd.getOptionValue("pw") : "");
 		}
 	}
 }
