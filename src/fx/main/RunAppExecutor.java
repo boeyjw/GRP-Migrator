@@ -1,8 +1,6 @@
 package fx.main;
 
 import java.io.IOException;
-import java.util.Arrays;
-
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;

@@ -154,12 +154,14 @@ public class Controller implements Initializable{
 			rae.setOnReady(new EventHandler<WorkerStateEvent>() {
 				@Override
 				public void handle(WorkerStateEvent event) {
+					indicator.setText("Processing...");
 					hideOverlay();
 				}
 			});
 			rae.setOnRunning(new EventHandler<WorkerStateEvent>() {
 				@Override
 				public void handle(WorkerStateEvent event) {
+					indicator.setText("Processing...");
 					showOverlay();
 				}
 			});
