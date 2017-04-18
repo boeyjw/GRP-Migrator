@@ -1,6 +1,5 @@
 package fx.main;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +14,7 @@ import javafx.collections.FXCollections;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -27,7 +23,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
@@ -35,12 +30,12 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 import sql.tojson.RunApp;
 
 public class Controller implements Initializable{
 	
 	private List<String> cliargs;
+	private RunAppExecutor rae;
 	
 	//Main anchor to entire application
     @FXML
@@ -112,11 +107,7 @@ public class Controller implements Initializable{
     @FXML
     private StackPane execStack;
     @FXML
-    private ProgressIndicator execpi;
-    @FXML
-    private Label batchval;
-    
-    private CLIService backApp;
+    private Label indicator;
     
     //Integer only validation regex
     private Pattern digitPat;
@@ -137,8 +128,8 @@ public class Controller implements Initializable{
 			executeRunApp(Main.param.toArray(new String[0]));
 		else {
 			cliargs = new ArrayList<String>();
-			backApp = new CLIService();
-			
+			rae = new RunAppExecutor();
+
 			digitPat = Pattern.compile("\\d+");
 			digitmat = digitPat.matcher("");
 			
@@ -152,7 +143,72 @@ public class Controller implements Initializable{
 			initOptArgsProcessing();
 			initOptArgsOutput();
 			execute.setOnAction((event) -> {
-				execApp();
+				try {
+					cliargs.clear();
+					execApp();
+				} catch (InterruptedException ie) {
+					ie.printStackTrace();
+				}
+			});
+			
+			rae.setOnReady(new EventHandler<WorkerStateEvent>() {
+				@Override
+				public void handle(WorkerStateEvent event) {
+					hideOverlay();
+				}
+			});
+			rae.setOnRunning(new EventHandler<WorkerStateEvent>() {
+				@Override
+				public void handle(WorkerStateEvent event) {
+					showOverlay();
+				}
+			});
+			rae.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+				@Override
+				public void handle(WorkerStateEvent event) {
+					int exitval = (int) event.getSource().getValue();
+					Alert alert = new Alert(exitval > 0 ? AlertType.ERROR : AlertType.CONFIRMATION);
+					if(exitval > 0) {
+						alert.setHeaderText("Something went wrong...");
+						if(exitval == 1)
+							alert.setContentText("Required argument not present!\nExit code: 1");
+						else if(exitval == 2)
+							alert.setContentText("[INTERNAL ERROR] Command line parsing failed!\nExit code: 2");
+						else if(exitval == 3)
+							alert.setContentText("[INTERNAL ERROR] NullPointerException. Command line is not present!\nExit code: 3");
+						else if(exitval == 4)
+							alert.setContentText("[INTERNAL ERROR] Fatal error in creating processing object!\nExit code: 4");
+						else if(exitval == 5)
+							alert.setContentText("MongoDB credentials incorrect or MongoDB server is unreachable!\nExit code: 5");
+						alert.showAndWait();
+					}
+					else {
+						indicator.setText("Completed!");
+						alert.setHeaderText("Processing completed!");
+						alert.setContentText("Application completed successfully!");
+						alert.showAndWait();
+						hideOverlay();
+					}
+					cliargs.clear();
+				}
+			});
+			rae.setOnCancelled(new EventHandler<WorkerStateEvent>() {
+				@Override
+				public void handle(WorkerStateEvent event) {
+					hideOverlay();
+					cliargs.clear();
+				}
+			});
+			rae.setOnFailed(new EventHandler<WorkerStateEvent>() {
+				@Override
+				public void handle(WorkerStateEvent event) {
+					hideOverlay();
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setHeaderText("Something went wrong...");
+					alert.setContentText("Application failed to execute job.");
+					alert.showAndWait();
+					cliargs.clear();
+				}
 			});
 		}
 	}
@@ -303,21 +359,25 @@ public class Controller implements Initializable{
 	}
 	
 	private void executeRunApp(String[] args) {
-		if(args.length >= 4)
+		if(args.length >= 1)
 			RunApp.main(args);
 		else
-			System.err.println("Insufficient arguments.");
+			System.out.println("Insufficient commands");
+		System.exit(0);
 	}
     
-    private void execApp() {
+    private void execApp() throws InterruptedException {
 		if(validdocbr && validparsedt && validsqlba && validsqldb && validsqlpr) {
+			if(!cliargs.isEmpty())
+				cliargs.clear();
 			//Required
 			addCLIargs("-us", sqlus.getText() == null || sqlus.getText().trim().isEmpty() ? sqlus.getPromptText() : sqlus.getText().trim());
-			addCLIargs("-pw", sqlpw.getText() == null || sqlpw.getText().trim().isEmpty() ? "" : sqlpw.getText().trim());
 			addCLIargs("-db", sqldb.getText().trim());
 			addCLIargs("-dt", parsedt.getValue());
 			
 			//Optional processing
+			if(sqlpw.getText() != null && !sqlpw.getText().trim().isEmpty())
+				addCLIargs("-pw", sqlpw.getText().trim());
 			if(sqlpr.getText() != null && !sqlpr.getText().trim().isEmpty())
 				addCLIargs("-pr", sqlpr.getText().trim());
 			if(sqlsn.getText() != null && !sqlsn.getText().trim().isEmpty())
@@ -342,30 +402,8 @@ public class Controller implements Initializable{
 					addCLIargs("-mcol", mcol.getText().trim());
 			}
 			
-			showOverlay();
-			launchConsole();
-			backApp.setParams(cliargs.toArray(new String[0]));
-			backApp.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-				@Override
-				public void handle(WorkerStateEvent event) {
-					hideOverlay();
-					System.out.println("Success!");
-				}
-			});
-			backApp.setOnRunning(new EventHandler<WorkerStateEvent>() {
-				@Override
-				public void handle(WorkerStateEvent event) {
-					showOverlay();
-					System.out.println("Running...");
-				}
-			});
-			backApp.setOnFailed(new EventHandler<WorkerStateEvent>() {
-				@Override
-				public void handle(WorkerStateEvent event) {
-					System.out.println("Failed!");
-				}
-			});
-			backApp.start();
+			rae.setCLIargs(cliargs.toArray(new String[0]));
+			rae.restart();
 		}
 		else {
 			Alert alert = new Alert(AlertType.ERROR);
@@ -378,20 +416,6 @@ public class Controller implements Initializable{
 					.concat(validsqlpr ? "" : "\nInvalid *SQL port* input! Only accepts numbers."));
 			alert.showAndWait();
 		}
-    }
-    
-    private void launchConsole() {
-    	Parent root;
-        try {
-            root = FXMLLoader.load(getClass().getResource("gncv2Json_console.fxml"));
-            Stage stage = new Stage();
-            stage.setTitle("gncv2Json Console Log");
-            stage.setScene(new Scene(root));
-            stage.show();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 	
 	private void addCLIargs(String flag, String value) {
