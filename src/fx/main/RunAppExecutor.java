@@ -8,6 +8,11 @@ import org.apache.commons.exec.ExecuteException;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
+/**
+ * Runs the CLI application in another process using a worker thread.
+ * Overcomes the GUI memory and CPU utilisation overhead.
+ *
+ */
 public class RunAppExecutor extends Service<Integer> {
 	private String[] cliargs;
 	

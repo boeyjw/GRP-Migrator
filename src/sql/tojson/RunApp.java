@@ -3,7 +3,6 @@ package sql.tojson;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Comparator;
 
 import org.apache.commons.cli.CommandLine;
@@ -30,9 +29,13 @@ import sql.schema.ncbi.Ncbi;
 
 /**
  * The main CLI strategy class to choose output.
- *
+ * Complete abstraction to the scripts sub-classing {@link sql.schema.Taxonable}.
  */
-public class RunApp {	
+public class RunApp {
+	/**
+	 * Initialises all optional configuration required by this CLI application
+	 * @param opt Option object to add options
+	 */
 	private static void optionalConfigurations(Options opt) {
 		opt.addOption(Option.builder("dt")
 							.longOpt("databasetype")
@@ -97,6 +100,15 @@ public class RunApp {
 							.build());
 	}
 	
+	/**
+	 * Strategic method to instantiate only needed object that is associated with the SQL dataset
+	 * @param optionValue Database type
+	 * @param gc SQL connection
+	 * @param gson JSON parser
+	 * @param lim Batch size
+	 * @param breakat Stop processing at x document
+	 * @return The database to be transformed to JSON
+	 */
 	private static Taxonable getTaxonableInit(String optionValue, DbConnection gc, Gson gson, int lim, int breakat) {
 		if(optionValue.equalsIgnoreCase("ncbi") || optionValue.equals("1")) {
 			return new Ncbi(gc, gson, lim, breakat);
@@ -106,6 +118,7 @@ public class RunApp {
 		}
 		else if(optionValue.equalsIgnoreCase("acc") || optionValue.equals("3")) {
 			//Runnable but deprecated output.
+			//>16mb output
 			return new Accession(gc, gson, lim, breakat);
 		}
 		/*else if(optionValue.equalsIgnoreCase("semimerge")) {
@@ -123,7 +136,7 @@ public class RunApp {
 	}
 	
 	public static void main(String[] args) {
-		//CLI
+		//CLI init
 		Options opt = new Options();
 		CLIConfigurations.serverConfiguration(opt);
 		optionalConfigurations(opt);
@@ -133,6 +146,7 @@ public class RunApp {
 		CommandLine cmd = null;
 		
 		try {
+			//Arrange help messages based on required status
 			formatter.setOptionComparator(new Comparator<Option>() {
 				@Override
 				public int compare(Option o1, Option o2) {
@@ -183,6 +197,7 @@ public class RunApp {
 		//Initialise Gson object parameters
 		gson = cmd.hasOption("sernull") ? new GsonBuilder().serializeNulls().create() : new Gson();
 		
+		//Establish connection with given credentials with SQL server
 		gc.open();
 		cv = getTaxonableInit(cmd.getOptionValue("dt"), gc, gson, lim, breakat);
 		if(cv == null) {
@@ -195,6 +210,7 @@ public class RunApp {
 			int offset = 0;
 			JsonWriter arrWriter = null;
 			MongoConnection mongodb = null;
+			//Establish MongoDB connection
 			if(cmd.hasOption("dmdb")) {
 				try {
 					mongodb = cmd.hasOption("muri") ? new MongoConnection(cmd.getOptionValue("muri"), 
@@ -212,6 +228,7 @@ public class RunApp {
 				}
 				cv.setMongoCollection(mongodb.getMcol());
 			}
+			//Create file stream
 			else {
 				arrWriter = new JsonWriter(new FileWriter(fn));
 				cv.setJsonWriter(arrWriter);
@@ -225,15 +242,17 @@ public class RunApp {
 				}
 				offset += lim;
 			}
+			//Close MongoDB connection
 			if(cmd.hasOption("dmdb")) {
 				System.out.println();
 				mongodb.closeconn();
 			}
+			//Close file stream
 			else {
 				arrWriter.endArray();
 				arrWriter.close();
 			}
-			System.out.println("Successfully processed ".concat(cmd.hasOption("br") ? cmd.getOptionValue("br") : "all") + " documents.");
+			System.out.println("\nSuccessfully processed ".concat(cmd.hasOption("br") ? cmd.getOptionValue("br") : "all") + " documents.");
 		} catch (IOException ioe){
 			System.err.println(ioe.getMessage());
 		} catch (MongoSocketOpenException msoe) {

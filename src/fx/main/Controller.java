@@ -120,6 +120,10 @@ public class Controller implements Initializable{
 	private boolean validsqlba;
 	private boolean validdocbr;
 	
+	/**
+	 * Initialises all GUI components if GUI is launched.
+	 * Simply launches the CLI application if its launched from Command Line.
+	 */
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		execStack.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
@@ -129,28 +133,29 @@ public class Controller implements Initializable{
 		else {
 			cliargs = new ArrayList<String>();
 			rae = new RunAppExecutor();
-
+			
+			//Regex to detect non-integer values
 			digitPat = Pattern.compile("\\d+");
 			digitmat = digitPat.matcher("");
 			
+			//Basic validation
 			validsqldb = false;
 			validparsedt = false;
 			validdocbr = true;
 			validsqlba = true;
 			validsqlpr = true;
 			
+			//Initialises all GUI components
 			initReqArgs();
 			initOptArgsProcessing();
 			initOptArgsOutput();
+			
 			execute.setOnAction((event) -> {
-				try {
-					cliargs.clear();
-					execApp();
-				} catch (InterruptedException ie) {
-					ie.printStackTrace();
-				}
+				cliargs.clear();
+				execApp();
 			});
 			
+			//Hooks service actions on load
 			rae.setOnReady(new EventHandler<WorkerStateEvent>() {
 				@Override
 				public void handle(WorkerStateEvent event) {
@@ -219,16 +224,27 @@ public class Controller implements Initializable{
 		}
 	}
 	
+	/**
+	 * Hides the processing... and completed state overlay.
+	 */
 	private void hideOverlay() {
 		execStack.setDisable(true);
 		execStack.setVisible(false);
 	}
 	
+	/**
+	 * Shows the processing... and completed state overlay.
+	 * Blocks user input.
+	 */
 	private void showOverlay() {
 		execStack.setDisable(false);
 		execStack.setVisible(true);
 	}
 	
+	/**
+	 * Initialises required argument inputs.
+	 * However, to the user, only database name and type are required.
+	 */
 	private void initReqArgs() {
 		sqlus.setPromptText("root");
 		sqlus.setTooltip(new Tooltip("Enter SQL username. Defaults to root."));
@@ -261,6 +277,9 @@ public class Controller implements Initializable{
 		});
 	}
 	
+	/**
+	 * Initialises optional arguments for processing inputs.
+	 */
 	private void initOptArgsProcessing() {
 		sqlpr.setTooltip(new Tooltip("Enter SQL port. Defaults to 3306."));
 		sqlpr.setPromptText("3306");
@@ -319,6 +338,9 @@ public class Controller implements Initializable{
 		sernull.setSelected(false);
 	}
 	
+	/**
+	 * Initialises optional arguments for output inputs
+	 */
 	private void initOptArgsOutput() {
 		dmdb.setSelected(false);
 		muri.setDisable(true);
@@ -364,6 +386,10 @@ public class Controller implements Initializable{
 		mcol.setTooltip(new Tooltip("Enter MongoDB collection to insert into. Defaults to *database type*."));
 	}
 	
+	/**
+	 * Runs the CLI application directly if jar file is executed from Command Line
+	 * @param args The parameters passed in Command Line
+	 */
 	private void executeRunApp(String[] args) {
 		if(args.length >= 1)
 			RunApp.main(args);
@@ -372,7 +398,12 @@ public class Controller implements Initializable{
 		System.exit(0);
 	}
     
-    private void execApp() throws InterruptedException {
+	/**
+	 * Execute the basic validation and passes parameters to CLI application.
+	 * Aggregates parameters to be passed and appends it to the worker thread parameter.
+	 * This executes a separate process and blocks user input to the GUI.
+	 */
+    private void execApp() {
 		if(validdocbr && validparsedt && validsqlba && validsqldb && validsqlpr) {
 			if(!cliargs.isEmpty())
 				cliargs.clear();
@@ -408,10 +439,12 @@ public class Controller implements Initializable{
 					addCLIargs("-mcol", mcol.getText().trim());
 			}
 			
+			//Create worker thread and begin new process
 			rae.setCLIargs(cliargs.toArray(new String[0]));
 			rae.restart();
 		}
 		else {
+			//Required arguments not present
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Argument mismatch!");
 			alert.setContentText("Please check your inputs for red boxes!"
@@ -424,16 +457,28 @@ public class Controller implements Initializable{
 		}
     }
 	
+    /**
+     * Convenient method to add option and option value to the list.
+     * @param flag Option
+     * @param value Option value
+     */
 	private void addCLIargs(String flag, String value) {
 		cliargs.add(flag);
 		cliargs.add(value);
 	}
-
+	
+	/**
+	 * Exits the application.
+	 * Additionally, kills the daemon process associated with it.
+	 */
     @FXML
     private void quitApp() {
     	System.exit(0);
     }
-
+    
+    /**
+     * Resets all field parameters and flush list.
+     */
     @FXML
     private void resetFields() {
     	sqlus.clear();
