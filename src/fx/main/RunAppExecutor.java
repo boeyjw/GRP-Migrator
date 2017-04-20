@@ -26,7 +26,7 @@ public class RunAppExecutor extends Service<Integer> {
 			@Override
 			protected Integer call() throws ExecuteException, IOException {
 				CommandLine cmdline = new CommandLine("java");
-				cmdline.addArguments(new String[] {"-jar", "\"" + System.getProperty("user.dir") + "\\gncv2json.jar" + "\""});
+				cmdline.addArguments(new String[] {"-jar", "\"" + System.getProperty("user.dir") + "/gncv2json.jar" + "\""});
 				cmdline.addArguments(cliargs);
 				DefaultExecutor exec = new DefaultExecutor();
 				exec.setExitValue(0);
