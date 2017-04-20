@@ -1,4 +1,6 @@
 /bin/
+/lib/
+/target/
 /py/*.comm
 /*.json
 /*.csv

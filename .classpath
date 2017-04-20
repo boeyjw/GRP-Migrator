@@ -1,29 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="D:/My Documents Placement/Eclipse Java workspace/GBIF-sql-to-json/lib/mysql-connector-java-5.1.40-bin.jar"/>
-	<classpathentry kind="lib" path="lib/mongo-java-driver-3.4.2.jar" sourcepath="lib/mongo-java-driver-3.4.2-sources.jar">
+	<classpathentry including="**/*.java" kind="src" output="target/classes" path="src">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/GBIF-sql-to-json/lib/mongo-java-driver-3.4.2-javadoc.jar!/"/>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="lib/gson-2.8.0.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/GBIF-sql-to-json/lib/gson-2.8.0-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="D:/My Documents Placement/Eclipse Java workspace/GBIF-sql-to-json/lib/commons-cli-1.3.1.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/GBIF-sql-to-json/lib/commons-cli-1.3.1-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/commons-exec-1.3.jar" sourcepath="lib/commons-exec-1.3-sources.jar">
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/GBIF-sql-to-json/lib/commons-exec-1.3-javadoc.jar!/"/>
+			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>

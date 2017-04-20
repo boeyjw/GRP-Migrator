@@ -24,6 +24,7 @@ import sql.queries.DbConnection;
 import sql.queries.MongoConnection;
 import sql.schema.Taxonable;
 import sql.schema.gbif.Gbif;
+import sql.schema.music.MusicArtist;
 import sql.schema.ncbi.Accession;
 import sql.schema.ncbi.Ncbi;
 
@@ -129,10 +130,35 @@ public class RunApp {
 			return new MergeLinker(gc, gson, lim, breakat);
 			//return new Merger(gc, gson, lim); //Deprecated completely
 		}
+		else if(optionValue.equalsIgnoreCase("music") || optionValue.equals("5")) {
+			return new MusicArtist(gc, gson, lim, breakat);
+		}
 		else {
 			System.err.println("Invalid switch for -dt");
 			return null;
 		}
+	}
+	
+	/**
+	 * Initialises the file name from user input if user uses numbering instead.
+	 * @param dtnaming Number associated with database type
+	 * @return Database type in full name
+	 */
+	private static String initFilenameString(String dtnaming) {
+		if(dtnaming.matches("\\d+")) {
+			if(dtnaming.matches("4"))
+				dtnaming = "merge";
+			else if(dtnaming.matches("3"))
+				dtnaming = "accession";
+			else if(dtnaming.matches("2"))
+				dtnaming = "gbif";
+			else if(dtnaming.matches("1"))
+				dtnaming = "ncbi";
+			else if(dtnaming.matches("5"))
+				dtnaming = "music";
+		}
+		
+		return dtnaming;
 	}
 	
 	public static void main(String[] args) {
@@ -175,17 +201,8 @@ public class RunApp {
 		int lim = (!cmd.hasOption("ba") || cmd.getOptionValue("ba").equals("")) ? 200000 : Integer.parseInt(cmd.getOptionValue("ba"));
 		
 		//Initialise file name
-		String dtnaming = cmd.getOptionValue("dt");
-		if(dtnaming.matches("\\d+")) {
-			if(dtnaming.matches("4"))
-				dtnaming = "merge";
-			else if(dtnaming.matches("3"))
-				dtnaming = "accession";
-			else if(dtnaming.matches("2"))
-				dtnaming = "gbif";
-			else if(dtnaming.matches("1"))
-				dtnaming = "ncbi";
-		}
+		String dtnaming = initFilenameString(cmd.getOptionValue("dt"));
+		
 		String fn = !cmd.hasOption("fn") || cmd.getOptionValue("fn").equals("") ? dtnaming.concat("-out.json")
 						: cmd.getOptionValue("fn").replaceAll("\\s+", "-").concat(".json");
 				

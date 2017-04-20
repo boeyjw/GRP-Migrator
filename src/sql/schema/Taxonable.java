@@ -43,7 +43,9 @@ public abstract class Taxonable implements Jsonable {
 	/**
 	 * Initialises all prepared statement for the specified database.
 	 * @param gc The connection for query purposes
-	 * @param breakat TODO
+	 * @param gson Gson object to parse SQL to JSON
+	 * @param lim Batch size
+	 * @param breakat Stop at breakat number of rows processed
 	 */
 	public Taxonable(DbConnection gc, Gson gson, int lim, int breakat) {
 		bar = new ProgressBar();
