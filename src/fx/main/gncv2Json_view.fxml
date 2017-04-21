@@ -19,6 +19,19 @@
 
 <AnchorPane fx:id="mainAnchor" prefHeight="600.0" prefWidth="291.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fx.main.Controller">
    <children>
+      <StackPane fx:id="execStack" prefHeight="600.0" prefWidth="292.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <Label fx:id="indicator" layoutX="60.0" layoutY="277.0" text="Processing..." textFill="WHITE">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+         </children>
+      </StackPane>
     <AnchorPane fx:id="argsSplit" layoutX="14.0" layoutY="14.0" minHeight="0.0" minWidth="0.0" prefHeight="537.0" prefWidth="265.0">
          <children>
             <SplitPane fx:id="argsInputSplit" dividerPositions="0.39285714285714285" layoutX="8.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -119,10 +132,10 @@
                                                             <Label text="Database:" GridPane.rowIndex="2" />
                                                             <Label text="Collection:" GridPane.rowIndex="3" />
                                                             <TextField fx:id="muri" prefHeight="25.0" prefWidth="136.0" GridPane.columnIndex="1" />
-                                                            <TextField fx:id="mpw" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                             <TextField fx:id="mdb" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                             <Label text="Password:" GridPane.rowIndex="1" />
                                                             <TextField fx:id="mcol" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                                            <PasswordField fx:id="mpw" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                          </children>
                                                       </GridPane>
                                                    </children>
@@ -148,18 +161,5 @@
             <Button fx:id="execute" mnemonicParsing="false" text="Execute" />
         </buttons>
       </ButtonBar>
-      <StackPane fx:id="execStack" prefHeight="600.0" prefWidth="292.0">
-         <children>
-            <AnchorPane prefHeight="200.0" prefWidth="200.0">
-               <children>
-                  <Label fx:id="indicator" layoutX="60.0" layoutY="277.0" text="Processing..." textFill="WHITE">
-                     <font>
-                        <Font size="32.0" />
-                     </font>
-                  </Label>
-               </children>
-            </AnchorPane>
-         </children>
-      </StackPane>
    </children>
 </AnchorPane>

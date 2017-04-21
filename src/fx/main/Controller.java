@@ -8,9 +8,11 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -89,7 +91,7 @@ public class Controller implements Initializable{
     @FXML
     private TextField muri;
     @FXML
-    private TextField mpw;
+    private PasswordField mpw;
     @FXML
     private TextField mdb;
     @FXML
@@ -144,6 +146,17 @@ public class Controller implements Initializable{
 			validdocbr = true;
 			validsqlba = true;
 			validsqlpr = true;
+			
+			//Splitpane hacks
+			optAccordion.setOnMouseEntered((event) -> {
+				optargsSplit.setDividerPositions(0.25);
+			});
+			optargsAnchor.setOnMouseEntered((event) -> {
+				optargsSplit.setDividerPositions(0.25);
+			});
+			mainAnchor.setOnMouseEntered((event) -> {
+				optargsSplit.setDividerPositions(0.25);
+			});
 			
 			//Initialises all GUI components
 			initReqArgs();
@@ -355,12 +368,14 @@ public class Controller implements Initializable{
 					muri.setDisable(false);
 					mdb.setDisable(false);
 					mcol.setDisable(false);
+					optargsSplit.setDividerPositions(0.0);
 				}
 				else {
 					outputfn.setDisable(false);
 					muri.setDisable(true);
 					mdb.setDisable(true);
 					mcol.setDisable(true);
+					optargsSplit.setDividerPositions(1.0);
 				}
 			}
 		});
