@@ -19,19 +19,6 @@
 
 <AnchorPane fx:id="mainAnchor" prefHeight="600.0" prefWidth="291.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="fx.main.Controller">
    <children>
-      <StackPane fx:id="execStack" prefHeight="600.0" prefWidth="292.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <children>
-            <AnchorPane prefHeight="200.0" prefWidth="200.0">
-               <children>
-                  <Label fx:id="indicator" layoutX="60.0" layoutY="277.0" text="Processing..." textFill="WHITE">
-                     <font>
-                        <Font size="32.0" />
-                     </font>
-                  </Label>
-               </children>
-            </AnchorPane>
-         </children>
-      </StackPane>
     <AnchorPane fx:id="argsSplit" layoutX="14.0" layoutY="14.0" minHeight="0.0" minWidth="0.0" prefHeight="537.0" prefWidth="265.0">
          <children>
             <SplitPane fx:id="argsInputSplit" dividerPositions="0.39285714285714285" layoutX="8.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -85,12 +72,12 @@
                                                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                             </rowConstraints>
                                              <children>
-                                                <Label text="SQL Port:" />
-                                                <Label text="SQL Host:" GridPane.rowIndex="1" />
+                                                <Label text="SQL Host:" />
+                                                <Label text="SQL Port:" GridPane.rowIndex="1" />
                                                 <Label text="Batch size:" GridPane.rowIndex="2" />
                                                 <Label text="Break at:" GridPane.rowIndex="3" />
-                                                <TextField fx:id="sqlpr" GridPane.columnIndex="1" />
-                                                <TextField fx:id="sqlsn" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <TextField fx:id="sqlsn" GridPane.columnIndex="1" />
+                                                <TextField fx:id="sqlpr" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                 <TextField fx:id="sqlba" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                 <TextField fx:id="docbr" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                                 <CheckBox fx:id="sernull" mnemonicParsing="false" text="Serialise NULLs" GridPane.columnIndex="1" GridPane.rowIndex="4" />
@@ -161,5 +148,18 @@
             <Button fx:id="execute" mnemonicParsing="false" text="Execute" />
         </buttons>
       </ButtonBar>
+      <StackPane fx:id="execStack" prefHeight="600.0" prefWidth="292.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <Label fx:id="indicator" layoutX="60.0" layoutY="277.0" text="Processing..." textFill="WHITE">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+         </children>
+      </StackPane>
    </children>
 </AnchorPane>

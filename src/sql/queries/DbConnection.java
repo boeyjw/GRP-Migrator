@@ -29,7 +29,7 @@ public class DbConnection {
 	/**
 	 * Initialise database credentials with localhost
 	 * @param servername The server in which its at
-	 * @param dbName The GBIF and NCBI database name in the server
+	 * @param dbName The database name in the server
 	 * @param user Username associated with the server
 	 * @param password Password associated with the username of the server
 	 */

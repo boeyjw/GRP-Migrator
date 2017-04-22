@@ -173,6 +173,10 @@ public class RunApp {
 		DbConnection gc = CLIConfigurations.getConnectionInstance(cmd);
 		//Get batch size
 		int lim = (!cmd.hasOption("ba") || cmd.getOptionValue("ba").equals("")) ? 200000 : Integer.parseInt(cmd.getOptionValue("ba"));
+		//Get JSON document limit
+		int breakat = cmd.hasOption("br") ? Integer.parseInt(cmd.getOptionValue("br")) : Integer.MIN_VALUE;
+		//Do not retrieve more than break at if break at is less than limit
+		lim = breakat > lim ? breakat : lim;
 		
 		//Initialise file name
 		String dtnaming = cmd.getOptionValue("dt");
@@ -189,8 +193,6 @@ public class RunApp {
 		String fn = !cmd.hasOption("fn") || cmd.getOptionValue("fn").equals("") ? dtnaming.concat("-out.json")
 						: cmd.getOptionValue("fn").replaceAll("\\s+", "-").concat(".json");
 				
-		//Get JSON document limit
-		int breakat = cmd.hasOption("br") ? Integer.parseInt(cmd.getOptionValue("br")) : Integer.MIN_VALUE;
 		Gson gson = null;
 		Taxonable cv = null;
 		

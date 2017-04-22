@@ -8,11 +8,9 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -147,17 +145,6 @@ public class Controller implements Initializable{
 			validsqlba = true;
 			validsqlpr = true;
 			
-			//Splitpane hacks
-			optAccordion.setOnMouseEntered((event) -> {
-				optargsSplit.setDividerPositions(0.25);
-			});
-			optargsAnchor.setOnMouseEntered((event) -> {
-				optargsSplit.setDividerPositions(0.25);
-			});
-			mainAnchor.setOnMouseEntered((event) -> {
-				optargsSplit.setDividerPositions(0.25);
-			});
-			
 			//Initialises all GUI components
 			initReqArgs();
 			initOptArgsProcessing();
@@ -226,7 +213,7 @@ public class Controller implements Initializable{
 					Alert alert = new Alert(AlertType.ERROR);
 					alert.setHeaderText("Something went wrong...");
 					alert.setContentText("Application failed to execute job."
-							+ "\nCheck if \"" + sqldb.getText() + "\" SQL database exist"
+							+ "\nCheck if \"" + sqldb.getText() + "\" SQL database exist\nCheck if SQL username, password, host and/or port are correct"
 							.concat(dmdb.isSelected() ? "\nCheck if your MongoDB server is running"
 									.concat(muri.getText() != null && !muri.getText().trim().isEmpty() ? "\nCheck if your MongoDB URI \"" + muri.getText().trim() + "\" is correct" : "")
 									: ""));
@@ -452,6 +439,10 @@ public class Controller implements Initializable{
 					addCLIargs("-mdb", mdb.getText().trim());
 				if(mcol.getText() != null && !mcol.getText().trim().isEmpty() && !mcol.isDisabled())
 					addCLIargs("-mcol", mcol.getText().trim());
+			}
+			else {
+				if(outputfn.getText() != null && !outputfn.getText().trim().isEmpty() && !outputfn.isDisabled())
+					addCLIargs("-fn", outputfn.getText().trim());
 			}
 			
 			//Create worker thread and begin new process
