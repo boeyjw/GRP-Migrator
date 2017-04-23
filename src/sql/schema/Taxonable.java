@@ -1,10 +1,13 @@
 package sql.schema;
 
 import java.sql.ResultSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.bson.Document;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 import com.mongodb.MongoWriteException;
@@ -97,5 +100,21 @@ public abstract class Taxonable implements Jsonable {
 		} catch(MongoWriteException mwe) {
 			System.out.println(mwe.getMessage());
 		}
+	}
+	
+	/**
+	 * Checks if any property of the JSON object is all JSON null
+	 * @param obj JSON object to check
+	 * @return True if all property of JSON object is null. False otherwise.
+	 */
+	protected boolean isEmptyObject(JsonObject obj) {
+		Set<Map.Entry<String, JsonElement>> setty = obj.entrySet();
+		
+		for(Map.Entry<String, JsonElement> kv : setty) {
+			if(!kv.getValue().isJsonNull())
+				return false;
+		}
+		
+		return true;
 	}
 }

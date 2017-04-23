@@ -176,7 +176,7 @@ public class RunApp {
 		//Get JSON document limit
 		int breakat = cmd.hasOption("br") ? Integer.parseInt(cmd.getOptionValue("br")) : Integer.MIN_VALUE;
 		//Do not retrieve more than break at if break at is less than limit
-		lim = breakat > lim ? breakat : lim;
+		lim = breakat < lim && breakat > 0 ? breakat : lim;
 		
 		//Initialise file name
 		String dtnaming = cmd.getOptionValue("dt");

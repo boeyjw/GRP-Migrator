@@ -39,6 +39,7 @@ public class MergeLinker extends Taxonable {
 
 	@Override
 	public boolean taxonToJson(DbConnection gc, int offset, boolean toMongoDB) throws SQLException {
+		JsonObject suboo = new JsonObject();
 		rs = gc.selStmt("gnjunction", new int[] {limit, offset});
 		if(!rs.isBeforeFirst() || stopPoint(br)) {
 			return false;
@@ -63,17 +64,25 @@ public class MergeLinker extends Taxonable {
 				
 				gm_obj.addProperty("gbif_" + grsmeta.getColumnLabel(i++), taxonID); //taxonID
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //datasetID
-				gm_obj.add("usageID", objectify(grs, grsmeta, true, true, 3)); //Usage IDs
+				suboo = objectify(grs, grsmeta, true, true, 3);
+				if(!isEmptyObject(suboo))
+					gm_obj.add("usageID", suboo); //Usage IDs
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //scientificName
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //scientificNameAuthorship
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //canonicalName
-				gm_obj.add("epithet", objectify(grs, grsmeta, false, true, 3)); //Taxon epithets
+				suboo = objectify(grs, grsmeta, false, true, 3);
+				if(!isEmptyObject(suboo))
+					gm_obj.add("epithet", suboo); //Taxon epithets
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //Taxon rank
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //Taxon status
-				gm_obj.add("taxontree", objectify(grs, grsmeta, false, true, 6)); //Taxon tree rank
+				suboo = objectify(grs, grsmeta, false, true, 6);
+				if(!isEmptyObject(suboo))
+					gm_obj.add("taxontree", suboo); //Taxon tree rank
 				gm_obj.addProperty(nrsmeta.getColumnLabel(j), nrs.getString(j++)); //rank
 				gm_obj.addProperty(nrsmeta.getColumnLabel(j), nrs.getString(j++)); //embl_code
-				gm_obj.add("flags", objectify(nrs, nrsmeta, true, false, 6)); //All flags
+				suboo = objectify(nrs, nrsmeta, true, false, 6);
+				if(!isEmptyObject(suboo))
+					gm_obj.add("flags", suboo); //All flags
 				gm_obj.addProperty(grsmeta.getColumnLabel(i), grs.getString(i++)); //taxonRemarks
 				gm_obj.addProperty(nrsmeta.getColumnLabel(j), nrs.getString(j)); //comments
 				

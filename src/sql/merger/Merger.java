@@ -43,6 +43,7 @@ public class Merger extends Taxonable {
 	@Override
 	public boolean taxonToJson(DbConnection gc, int offset, boolean toMongoDB) {
 		try {
+			JsonObject suboo = new JsonObject();
 			rs = gc.selStmt("merge", new int[] {limit, offset});
 			if(!rs.isBeforeFirst() || stopPoint(br)) {
 				return false;
@@ -72,17 +73,25 @@ public class Merger extends Taxonable {
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getInt(j++)); //parent_tax_id
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getString(j++)); //rank
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getString(j++)); //embl_code
-					gm_obj.add("flags", objectify(rsn, rsnmeta, true, false, 6)); //NCBI flagging
-
-					gm_obj.add("usageID", objectify(rsg, rsgmeta, true, true, 3)); //usageIDs
+					suboo = objectify(rsn, rsnmeta, true, false, 6);
+					if(!isEmptyObject(suboo))
+						gm_obj.add("flags", suboo); //NCBI flagging
+					
+					suboo = objectify(rsg, rsgmeta, true, true, 3);
+					if(!isEmptyObject(suboo))
+						gm_obj.add("usageID", suboo); //usageIDs
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //scientificName
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //scientificNameAuthorship
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //canonicalName
-					gm_obj.add("epithet", objectify(rsg, rsgmeta, false, true, 3)); //Epithet tokens
+					suboo = objectify(rsg, rsgmeta, false, true, 3);
+					if(!isEmptyObject(suboo))
+						gm_obj.add("epithet", suboo); //Epithet tokens
 					for(int z = 0; z < 5; z++) {
 						gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++));
 					}
-					gm_obj.add("fullTaxonRank", objectify(rsg, rsgmeta, false, true, 6));
+					suboo = objectify(rsg, rsgmeta, false, true, 6);
+					if(!isEmptyObject(suboo))
+						gm_obj.add("fullTaxonRank", suboo);
 					gm_obj.addProperty(rsgmeta.getColumnLabel(i), rsg.getString(i++)); //taxonRemarks
 					gm_obj.addProperty(rsnmeta.getColumnLabel(j), rsn.getString(j++)); //comment
 

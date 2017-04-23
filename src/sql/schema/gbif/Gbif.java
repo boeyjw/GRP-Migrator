@@ -31,6 +31,7 @@ public class Gbif extends Taxonable {
 
 	@Override
 	public boolean taxonToJson(DbConnection gc, int offset, boolean toMongoDB) throws SQLException {
+		JsonObject suboo = new JsonObject();
 		rs = gc.selStmt("taxon", new int[] {limit, offset});
 		if(!rs.isBeforeFirst() || stopPoint(br)) {
 			return false;
@@ -45,14 +46,20 @@ public class Gbif extends Taxonable {
 			
 			gm_obj.addProperty("gbif_" + rsmeta.getColumnLabel(i++), taxonID); //taxonID
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //datasetID
-			gm_obj.add("usageID", objectify(rs, rsmeta, true, true, 3)); //Usage IDs
+			suboo = objectify(rs, rsmeta, true, true, 3);
+			if(!isEmptyObject(suboo))
+				gm_obj.add("usageID", suboo); //Usage IDs
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //scientificName
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //scientificNameAuthorship
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //canonicalName
-			gm_obj.add("epithet", objectify(rs, rsmeta, false, true, 3)); //Taxon epithets
+			suboo = objectify(rs, rsmeta, false, true, 3);
+			if(!isEmptyObject(suboo))
+				gm_obj.add("epithet", suboo); //Taxon epithets
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //Taxon rank
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //Taxon status
-			gm_obj.add("taxontree", objectify(rs, rsmeta, false, true, 6)); //Taxon tree rank
+			suboo = objectify(rs, rsmeta, false, true, 6);
+			if(!isEmptyObject(suboo))
+				gm_obj.add("taxontree", suboo); //Taxon tree rank
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //taxonRemarks
 
 			subqueryOM = new Distribution();

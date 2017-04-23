@@ -26,6 +26,7 @@ public class Ncbi extends Taxonable {
 
 	@Override
 	public boolean taxonToJson(DbConnection gc, int offset, boolean toMongoDB) throws SQLException {
+		JsonObject suboo = new JsonObject();
 		rs = gc.selStmt("nodes", new int[] {limit, offset});
 		if(!rs.isBeforeFirst() || stopPoint(br)) {
 			return false;
@@ -44,7 +45,9 @@ public class Ncbi extends Taxonable {
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getInt(i++)); //parent_tax_id
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //rank
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i++)); //embl_code
-			gm_obj.add("flags", objectify(rs, rsmeta, true, true, 6)); //All flags
+			suboo = objectify(rs, rsmeta, true, true, 6);
+			if(!isEmptyObject(suboo))
+				gm_obj.add("flags", suboo); //All flags
 			gm_obj.addProperty(rsmeta.getColumnLabel(i), rs.getString(i)); //comments
 
 			subqueryOM = new Names();

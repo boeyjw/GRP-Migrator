@@ -412,7 +412,7 @@ public class Controller implements Initializable{
 			//Required
 			addCLIargs("-us", sqlus.getText() == null || sqlus.getText().trim().isEmpty() ? sqlus.getPromptText() : sqlus.getText().trim());
 			addCLIargs("-db", sqldb.getText().trim());
-			addCLIargs("-dt", parsedt.getValue());
+			addCLIargs("-dt", parsedt.getValue().contains("acc") ? "acc" : parsedt.getValue());
 			
 			//Optional processing
 			if(sqlpw.getText() != null && !sqlpw.getText().trim().isEmpty())
