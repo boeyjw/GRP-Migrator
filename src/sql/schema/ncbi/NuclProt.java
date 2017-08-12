@@ -12,7 +12,7 @@ import sql.queries.DbConnection;
 /**
  * NCBI nucleotide and protein accession IDs processing.
  * Composed by {@link sql.schema.ncbi.Accession}.
- *
+ * @deprecated {@link sql.schema.ncbi.Accession} is deprecated, this class serves no purpose
  */
 public class NuclProt {
 	public static String querySet;

@@ -127,7 +127,7 @@ public class RunApp {
 		}*/
 		else if(optionValue.equalsIgnoreCase("merge") || optionValue.equals("4")) {
 			return new MergeLinker(gc, gson, lim, breakat);
-			//return new Merger(gc, gson, lim); //Deprecated completely
+//			return new Merger(gc, gson, lim); //Deprecated completely
 		}
 		else {
 			System.err.println("Invalid switch for -dt");

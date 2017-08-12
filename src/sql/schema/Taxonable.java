@@ -85,10 +85,7 @@ public abstract class Taxonable implements Jsonable {
 	 * @return True if current row count is the breaking point. False otherwise.
 	 */
 	protected boolean stopPoint(int br) {
-		if(this.breakat == Integer.MIN_VALUE) {
-			return false;
-		}
-		return br > this.breakat ? true : false;
+		return this.breakat != Integer.MIN_VALUE && (br > this.breakat);
 	}
 	
 	/**
